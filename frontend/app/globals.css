@@ -153,6 +153,11 @@ body {
   to { transform: rotate(360deg); }
 }
 
+@keyframes shrinkProgress {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
 .animate-spin-slow {
   animation: spin-slow 6s linear infinite;
 }
@@ -171,11 +176,6 @@ body > main:first-of-type,
   min-height: 100vh !important;
 }
 
-/* Fix for Next.js app wrapper */
-body > div {
-  background-color: #0a0a0c !important;
-}
-
 /* Ensure headers/nav don't introduce a lighter strip */
 header,
 nav {
@@ -184,8 +184,7 @@ nav {
 
 /* Fix for any wrapper divs that might have padding/margins */
 .page-wrapper,
-.app-wrapper,
-main {
+.app-wrapper {
   background-color: #0a0a0c !important;
   padding: 0 !important;
   margin: 0 !important;
