@@ -13,8 +13,8 @@ export default function TermsPage() {
           <section>
             <h2>1. Introduction</h2>
             <p>
-              Welcome to Mutiny. These Terms &amp; Conditions ("Terms") govern your access to and use of
-              our website, services, and software (collectively, the "Service"). By creating an account,
+              Welcome to Something. These Terms &amp; Conditions {`("Terms")`} govern your access to and use of
+              our website, services, and software (collectively, the {`("Service")`}). By creating an account,
               accessing, or using the Service, you agree to be bound by these Terms. If you do not agree,
               please do not use the Service.
             </p>
@@ -23,8 +23,8 @@ export default function TermsPage() {
           <section>
             <h2>2. Definitions</h2>
             <p>
-              "User", "you" or "your" means an individual or entity accessing the Service. "We",
-              "us" or "Mutiny" means the operator of the Service. "User Content" means any content
+              {`"User"`}, {`"you"`} or {`"your"`} means an individual or entity accessing the Service. {`"We"`},
+              {`"us"`} or {`"Something"`} means the operator of the Service. {`"User Content"`} means any content
               or information you provide to the Service, including profile information, posts,
               messages, and other data.
             </p>
@@ -43,7 +43,7 @@ export default function TermsPage() {
           <section>
             <h2>4. Use of Your Data and Model Training</h2>
             <p>
-              By using the Service you acknowledge and agree that User Content may be used by Mutiny for
+              By using the Service you acknowledge and agree that User Content may be used by Something for
               the purpose of improving our products and services, which may include training machine
               learning models, analytics, and feature development. We will handle data in accordance
               with any applicable privacy policy and will take commercially reasonable measures to
@@ -52,7 +52,7 @@ export default function TermsPage() {
             </p>
             <p>
               You retain ownership of your User Content. However, by posting content to the Service you
-              grant Mutiny a non-exclusive, worldwide, royalty-free license to use, reproduce,
+              grant Something a non-exclusive, worldwide, royalty-free license to use, reproduce,
               distribute, and create derivative works from that content for the purpose of operating and
               improving the Service, including training models and anonymized datasets.
             </p>
@@ -81,8 +81,8 @@ export default function TermsPage() {
             <h2>7. Intellectual Property</h2>
             <p>
               The Service and its original content, features, and functionality are the exclusive
-              property of Mutiny and its licensors. You may not copy, modify, or create derivative
-              works based on the Service except as expressly permitted by Mutiny.
+              property of Something and its licensors. You may not copy, modify, or create derivative
+              works based on the Service except as expressly permitted by Something.
             </p>
           </section>
 
@@ -98,9 +98,9 @@ export default function TermsPage() {
           <section>
             <h2>9. Disclaimers</h2>
             <p>
-              THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE". MUTINY DISCLAIMS ALL WARRANTIES,
+              THE SERVICE IS PROVIDED {`"AS IS"`} AND {`"AS AVAILABLE"`}. SOMETHING DISCLAIMS ALL WARRANTIES,
               EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-              NON-INFRINGEMENT. MUTINY DOES NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, ERROR‑FREE,
+              NON-INFRINGEMENT. SOMETHING DOES NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, ERROR-FREE,
               OR COMPLETELY SECURE.
             </p>
           </section>
@@ -108,10 +108,10 @@ export default function TermsPage() {
           <section>
             <h2>10. Limitation of Liability</h2>
             <p>
-              TO THE MAXIMUM EXTENT PERMITTED BY LAW, MUTINY SHALL NOT BE LIABLE FOR ANY INDIRECT,
+              TO THE MAXIMUM EXTENT PERMITTED BY LAW, SOMETHING SHALL NOT BE LIABLE FOR ANY INDIRECT,
               INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES ARISING OUT OF OR IN CONNECTION
               WITH THE SERVICE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. OUR AGGREGATE
-              LIABILITY FOR DIRECT DAMAGES SHALL NOT EXCEED THE AMOUNTS PAID BY YOU TO MUTINY IN THE
+              LIABILITY FOR DIRECT DAMAGES SHALL NOT EXCEED THE AMOUNTS PAID BY YOU TO SOMETHING IN THE
               SIX (6) MONTHS PRECEDING THE CLAIM.
             </p>
           </section>
@@ -119,7 +119,7 @@ export default function TermsPage() {
           <section>
             <h2>11. Indemnification</h2>
             <p>
-              You agree to indemnify, defend, and hold harmless Mutiny and its officers, directors,
+              You agree to indemnify, defend, and hold harmless Something and its officers, directors,
               employees, and agents from and against any claims, liabilities, damages, losses, and
               expenses arising from your violation of these Terms or your breach of any representation
               or warranty.
@@ -140,7 +140,7 @@ export default function TermsPage() {
             <h2>13. Governing Law</h2>
             <p>
               These Terms are governed by and construed in accordance with the laws of the jurisdiction
-              where Mutiny is incorporated, without regard to its conflict of law provisions.
+              where Something is incorporated, without regard to its conflict of law provisions.
             </p>
           </section>
 
@@ -156,7 +156,7 @@ export default function TermsPage() {
           <section>
             <h2>15. Contact</h2>
             <p>
-              For questions about these Terms, please contact us at <Link href="/">support@mutiny.example</Link> or via the contact form on our site.
+              For questions about these Terms, please contact us at <Link href="/">support@something.example</Link> or via the contact form on our site.
             </p>
           </section>
 
