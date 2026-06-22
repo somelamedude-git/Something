@@ -1,13 +1,14 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, Send, ChevronLeft, MoreHorizontal, Users, Clock, CheckCheck } from "lucide-react"
+import { Search, Send, ChevronLeft, MoreHorizontal, Users, Clock, CheckCheck, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import axios from "axios"
+
+import { PageHeader } from "@/components/page-header"
 
 type Category = "all" | "co" | "requests" | "general"
 
@@ -22,7 +23,7 @@ type Thread = {
   isOnline?: boolean
 }
 
-type Message = { 
+type Message = {
   id: string
   from: "you" | "them"
   text: string
@@ -30,6 +31,144 @@ type Message = {
   timestamp: number
   delivered?: boolean
   seen?: boolean
+}
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || ""
+
+// ---------- Mock Initial Database ----------
+const DEFAULT_THREADS: Thread[] = [
+  {
+    id: "th-1",
+    name: "Sarah Chen • Horizon Ventures",
+    preview: "Milestone 2 payout is pending review, I've asked Liam for eyes too.",
+    unread: 1,
+    category: "requests",
+    participants: ["Sarah Chen", "You"],
+    lastActive: "10m",
+    isOnline: true,
+  },
+  {
+    id: "th-2",
+    name: "Liam Vance • Vance Capital",
+    preview: "Checked your alpha build. Impressive work on peer-to-peer sync.",
+    unread: 0,
+    category: "requests",
+    participants: ["Liam Vance", "You"],
+    lastActive: "1h",
+    isOnline: false,
+  },
+  {
+    id: "th-3",
+    name: "Alex Rivera",
+    preview: "Just pushed the local-first SQLite migrations. Ready to merge?",
+    unread: 0,
+    category: "co",
+    participants: ["Alex Rivera", "You"],
+    lastActive: "2m",
+    isOnline: true,
+  },
+  {
+    id: "th-4",
+    name: "Cohort Support",
+    preview: "Welcome to the cohort! Let us know if you need pitch decks reviewed.",
+    unread: 0,
+    category: "general",
+    participants: ["Support Admin", "You"],
+    lastActive: "1d",
+    isOnline: false,
+  },
+]
+
+const DEFAULT_MESSAGES: Record<string, Message[]> = {
+  "th-1": [
+    {
+      id: "m-1-1",
+      from: "them",
+      text: "Hi! I saw you submitted Milestone 2 details for the sync engine.",
+      when: "1h ago",
+      timestamp: Date.now() - 3600000,
+      seen: true,
+      delivered: true,
+    },
+    {
+      id: "m-1-2",
+      from: "you",
+      text: "Yes, the prototype is live and synchronizing local nodes successfully.",
+      when: "45m ago",
+      timestamp: Date.now() - 2700000,
+      seen: true,
+      delivered: true,
+    },
+    {
+      id: "m-1-3",
+      from: "them",
+      text: "Milestone 2 payout is pending review, I've asked Liam for eyes too.",
+      when: "10m ago",
+      timestamp: Date.now() - 600000,
+      seen: false,
+      delivered: true,
+    },
+  ],
+  "th-2": [
+    {
+      id: "m-2-1",
+      from: "them",
+      text: "Do you have the link to your test suite repository?",
+      when: "3h ago",
+      timestamp: Date.now() - 10800000,
+      seen: true,
+      delivered: true,
+    },
+    {
+      id: "m-2-2",
+      from: "you",
+      text: "Sure, check https://github.com/something/tests",
+      when: "2h ago",
+      timestamp: Date.now() - 7200000,
+      seen: true,
+      delivered: true,
+    },
+    {
+      id: "m-2-3",
+      from: "them",
+      text: "Checked your alpha build. Impressive work on peer-to-peer sync.",
+      when: "1h ago",
+      timestamp: Date.now() - 3600000,
+      seen: true,
+      delivered: true,
+    },
+  ],
+  "th-3": [
+    {
+      id: "m-3-1",
+      from: "you",
+      text: "Hey Alex, are we good with the CRDT merge?",
+      when: "15m ago",
+      timestamp: Date.now() - 900000,
+      seen: true,
+      delivered: true,
+    },
+    {
+      id: "m-3-2",
+      from: "them",
+      text: "Just pushed the local-first SQLite migrations. Ready to merge?",
+      when: "2m ago",
+      timestamp: Date.now() - 120000,
+      seen: true,
+      delivered: true,
+    },
+  ],
+  "th-4": [
+    {
+      id: "m-4-1",
+      from: "them",
+      text: "Welcome to the cohort! Let us know if you need pitch decks reviewed.",
+      when: "1d ago",
+      timestamp: Date.now() - 86400000,
+      seen: true,
+      delivered: true,
+    },
+  ],
 }
 
 function initials(label: string) {
@@ -43,19 +182,49 @@ function formatTime(when: string): string {
   if (when === "now") return "now"
   const match = when.match(/(\d+)([hdm])/)
   if (!match) return when
-  
+
   const [, num, unit] = match
   const number = parseInt(num)
-  
+
   switch (unit) {
-    case 'm': return number === 1 ? '1 min' : `${number} mins`
-    case 'h': return number === 1 ? '1 hour' : `${number} hours`
-    case 'd': return number === 1 ? 'yesterday' : `${number} days ago`
-    default: return when
+    case "m":
+      return number === 1 ? "1 min" : `${number} mins`
+    case "h":
+      return number === 1 ? "1 hour" : `${number} hours`
+    case "d":
+      return number === 1 ? "yesterday" : `${number} days ago`
+    default:
+      return when
   }
 }
 
-export default function InvestorChatsPage() {
+// Stored Database Helpers
+function getStoredThreads(): Thread[] {
+  if (typeof window === "undefined") return DEFAULT_THREADS
+  const saved = localStorage.getItem("founder_chat_threads")
+  return saved ? JSON.parse(saved) : DEFAULT_THREADS
+}
+
+// Stored Messages Helper
+function getStoredMessages(): Record<string, Message[]> {
+  if (typeof window === "undefined") return DEFAULT_MESSAGES
+  const saved = localStorage.getItem("founder_chat_messages")
+  return saved ? JSON.parse(saved) : DEFAULT_MESSAGES
+}
+
+function setStoredThreads(threads: Thread[]) {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("founder_chat_threads", JSON.stringify(threads))
+  }
+}
+
+function setStoredMessages(messages: Record<string, Message[]>) {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("founder_chat_messages", JSON.stringify(messages))
+  }
+}
+
+export default function FounderChatsPage() {
   const [category, setCategory] = useState<Category>("all")
   const [query, setQuery] = useState("")
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -67,73 +236,182 @@ export default function InvestorChatsPage() {
   const [isLoadingThreads, setIsLoadingThreads] = useState(true)
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
 
-  // Fetch all threads on component mount
+  // Fetch threads on load
   useEffect(() => {
     fetchThreads()
   }, [])
 
-  // API: Fetch all threads
-  // Backend should return: Thread[]
+  // API Fetch Threads with Local Fallback
   const fetchThreads = async () => {
     try {
       setIsLoadingThreads(true)
-      const response = await axios.get("#") // GET /api/threads
+      const response = await axios.get(`${API_BASE_URL}/founder/threads`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      })
       setThreads(response.data)
+      setStoredThreads(response.data)
     } catch (error) {
-      console.error("Failed to fetch threads:", error)
-      // Handle error appropriately
+      console.warn("fetchThreads failed, loading local cached threads", error)
+      const cached = getStoredThreads()
+      setThreads(cached)
     } finally {
       setIsLoadingThreads(false)
     }
   }
 
-  // API: Fetch messages for a specific thread
-  // Backend should return: Message[]
+  // API Fetch Messages with Local Fallback
   const fetchMessages = async (threadId: string) => {
     try {
       setIsLoadingMessages(true)
-      const response = await axios.get("#", { // GET /api/threads/:threadId/messages
-        params: { threadId }
+      const response = await axios.get(`${API_BASE_URL}/founder/threads/${threadId}/messages`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       })
-      setMessagesByThread(prev => ({
+      setMessagesByThread((prev) => ({
         ...prev,
-        [threadId]: response.data
+        [threadId]: response.data,
       }))
-      setLoadedThreads(prev => new Set([...prev, threadId]))
+      setLoadedThreads((prev) => new Set([...prev, threadId]))
     } catch (error) {
-      console.error("Failed to fetch messages:", error)
-      // Handle error appropriately
+      console.warn("fetchMessages failed, loading local cached messages for", threadId, error)
+      const cachedAll = getStoredMessages()
+      const cachedMsgs = cachedAll[threadId] ?? []
+      setMessagesByThread((prev) => ({
+        ...prev,
+        [threadId]: cachedMsgs,
+      }))
+      setLoadedThreads((prev) => new Set([...prev, threadId]))
     } finally {
       setIsLoadingMessages(false)
     }
   }
 
-  // API: Send a new message
-  // Backend should return: Message (the created message with server-generated data)
+  // API Send Message with Local Mock Simulation
   const sendMessage = async (threadId: string, messageText: string) => {
-    const response = await axios.post("#", { // POST /api/threads/:threadId/messages
-      threadId,
-      text: messageText,
-      timestamp: Date.now()
-    })
-    return response.data
-  }
-
-  // API: Mark messages as read
-  // Backend should return: success status
-  const markMessagesAsRead = async (threadId: string, messageIds: string[]) => {
     try {
-      await axios.patch("#", { // PATCH /api/threads/:threadId/messages/read
-        threadId,
-        messageIds
-      })
+      const response = await axios.post(
+        `${API_BASE_URL}/founder/threads/${threadId}/messages`,
+        { text: messageText },
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+      )
+      return response.data
     } catch (error) {
-      console.error("Failed to mark messages as read:", error)
+      console.warn("sendMessage failed, simulating locally in mock DB", error)
+      const newMsg: Message = {
+        id: `m-mock-${Date.now()}`,
+        from: "you",
+        text: messageText,
+        when: "now",
+        timestamp: Date.now(),
+        seen: true,
+        delivered: true,
+      }
+
+      // Save to local storage
+      const cachedAll = getStoredMessages()
+      const cachedMsgs = cachedAll[threadId] ?? []
+      const updatedMsgs = [...cachedMsgs, newMsg]
+      cachedAll[threadId] = updatedMsgs
+      setStoredMessages(cachedAll)
+
+      // Update thread preview
+      const threadsList = getStoredThreads()
+      const updatedThreads = threadsList.map((t) => {
+        if (t.id === threadId) {
+          return {
+            ...t,
+            preview: messageText,
+            lastActive: "now",
+          }
+        }
+        return t
+      })
+      setStoredThreads(updatedThreads)
+
+      // Trigger mock reply response simulator after 1 second of typing
+      setTimeout(() => {
+        setIsTyping(true)
+      }, 800)
+
+      setTimeout(() => {
+        setIsTyping(false)
+        let replyText = "Got it! Let me review the spec details."
+        if (threadId === "th-1") {
+          replyText = "Excellent. I will review the alpha sync build and update the milestone status to 'Released' once Liam signs off."
+        } else if (threadId === "th-2") {
+          replyText = "Great. Let's schedule a call this Friday to walk through the escrow disbursements."
+        } else if (threadId === "th-3") {
+          replyText = "Awesome! Pushed migrations are merged. Let's test the UI sync integration."
+        } else if (threadId === "th-4") {
+          replyText = "Got it. We will forward this request to the cohort program advisors."
+        }
+
+        const replyMsg: Message = {
+          id: `m-reply-${Date.now()}`,
+          from: "them",
+          text: replyText,
+          when: "now",
+          timestamp: Date.now(),
+          seen: false,
+          delivered: true,
+        }
+
+        const currentAll = getStoredMessages()
+        currentAll[threadId] = [...(currentAll[threadId] ?? []), replyMsg]
+        setStoredMessages(currentAll)
+
+        const currentThreadsList = getStoredThreads()
+        const currentUpdatedThreads = currentThreadsList.map((t) => {
+          if (t.id === threadId) {
+            return {
+              ...t,
+              preview: replyText,
+              unread: t.unread + 1,
+              lastActive: "now",
+            }
+          }
+          return t
+        })
+        setStoredThreads(currentUpdatedThreads)
+
+        // Sync view state
+        setMessagesByThread((prev) => ({
+          ...prev,
+          [threadId]: currentAll[threadId],
+        }))
+        setThreads(currentUpdatedThreads)
+      }, 2500)
+
+      return newMsg
     }
   }
 
+  // API Mark Messages Read with Local Mock fallback
+  const markMessagesAsRead = async (threadId: string, messageIds: string[]) => {
+    try {
+      await axios.patch(
+        `${API_BASE_URL}/founder/threads/${threadId}/messages/read`,
+        { messageIds },
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+      )
+    } catch (error) {
+      console.warn("markMessagesAsRead failed, marking locally", error)
+      const cachedAll = getStoredMessages()
+      if (cachedAll[threadId]) {
+        cachedAll[threadId] = cachedAll[threadId].map((m) => {
+          if (messageIds.includes(m.id)) {
+            return { ...m, seen: true }
+          }
+          return m
+        })
+        setStoredMessages(cachedAll)
+      }
 
+      const threadsList = getStoredThreads()
+      setStoredThreads(threadsList.map((t) => (t.id === threadId ? { ...t, unread: 0 } : t)))
+    }
+  }
 
+  // Computed conversations
   const filtered = useMemo(() => {
     let pool = threads
     if (category !== "all") {
@@ -151,19 +429,19 @@ export default function InvestorChatsPage() {
     })
   }, [filtered])
 
-  // Load messages when thread is selected
+  // Load messages on active selection
   useEffect(() => {
     if (activeId && !loadedThreads.has(activeId)) {
       fetchMessages(activeId)
     }
   }, [activeId, loadedThreads])
 
-  const activeThread = useMemo(() => 
-    filtered.find((t) => t.id === activeId) ?? threads.find((t) => t.id === activeId) ?? null,
+  const activeThread = useMemo(
+    () => filtered.find((t) => t.id === activeId) ?? threads.find((t) => t.id === activeId) ?? null,
     [filtered, threads, activeId]
   )
-  const msgs = useMemo(() => 
-    activeThread ? (messagesByThread[activeThread.id] ?? []) : [],
+  const msgs = useMemo(
+    () => (activeThread ? messagesByThread[activeThread.id] ?? [] : []),
     [activeThread, messagesByThread]
   )
 
@@ -176,32 +454,30 @@ export default function InvestorChatsPage() {
     }
   }, [activeId, msgs.length])
 
-  // Auto-focus input when thread changes
   useEffect(() => {
     if (activeThread && inputRef.current) {
       inputRef.current.focus()
     }
   }, [activeThread])
 
-  // Mark messages as read when viewing a thread
+  // Clear unreads
   useEffect(() => {
     if (activeThread && msgs.length > 0) {
-      const unreadMessages = msgs
-        .filter(m => m.from === "them" && !m.seen)
-        .map(m => m.id)
-      
+      const unreadMessages = msgs.filter((m) => m.from === "them" && !m.seen).map((m) => m.id)
+
       if (unreadMessages.length > 0) {
         markMessagesAsRead(activeThread.id, unreadMessages)
-        
-        // Update local state
-        setMessagesByThread(prev => {
+
+        setMessagesByThread((prev) => {
           const next = { ...prev }
           const messages = next[activeThread.id] || []
-          next[activeThread.id] = messages.map(msg => 
+          next[activeThread.id] = messages.map((msg) =>
             unreadMessages.includes(msg.id) ? { ...msg, seen: true } : msg
           )
           return next
         })
+
+        setThreads((prev) => prev.map((t) => (t.id === activeThread.id ? { ...t, unread: 0 } : t)))
       }
     }
   }, [activeThread, msgs])
@@ -212,21 +488,20 @@ export default function InvestorChatsPage() {
   async function onSend(e: React.FormEvent) {
     e.preventDefault()
     if (!activeThread || text.trim().length === 0) return
-    
+
     const messageText = text.trim()
     const tempId = `temp_${Date.now()}`
-    
-    // Optimistic update
-    const optimisticMsg: Message = { 
+
+    const optimisticMsg: Message = {
       id: tempId,
-      from: "you", 
-      text: messageText, 
-      when: "now", 
+      from: "you",
+      text: messageText,
+      when: "now",
       timestamp: Date.now(),
       delivered: false,
-      seen: false
+      seen: false,
     }
-    
+
     setMessagesByThread((prev) => {
       const next = { ...prev }
       next[activeThread.id] = [...(next[activeThread.id] ?? []), optimisticMsg]
@@ -235,339 +510,317 @@ export default function InvestorChatsPage() {
     setText("")
 
     try {
-      // Send message to backend
       const serverMessage = await sendMessage(activeThread.id, messageText)
-      
-      // Replace optimistic message with server response
+
       setMessagesByThread((prev) => {
         const next = { ...prev }
         const messages = next[activeThread.id] || []
-        next[activeThread.id] = messages.map(msg => 
-          msg.id === tempId ? serverMessage : msg
-        )
+        next[activeThread.id] = messages.map((msg) => (msg.id === tempId ? serverMessage : msg))
         return next
       })
 
-      // Update thread list to reflect new preview
       fetchThreads()
-      
     } catch {
-      // Remove optimistic message on error
       setMessagesByThread((prev) => {
         const next = { ...prev }
-        next[activeThread.id] = (next[activeThread.id] ?? []).filter(m => m.id !== tempId)
+        next[activeThread.id] = (next[activeThread.id] ?? []).filter((m) => m.id !== tempId)
         return next
       })
       console.error("Failed to send message")
     }
   }
 
-  // Handle typing indicator
-  useEffect(() => {
-    let timeout: NodeJS.Timeout
-    if (text.length > 0) {
-      timeout = setTimeout(() => setIsTyping(false), 1000)
-    }
-    return () => clearTimeout(timeout)
-  }, [text])
-
-  // API: Listen for real-time typing indicators
-  // Backend can use WebSocket or SSE for this
-  // Example with polling (replace with WebSocket):
-  useEffect(() => {
-    if (!activeThread) return
-    
-    const checkTypingStatus = async () => {
-      try {
-        const response = await axios.get("#", { // GET /api/threads/:threadId/typing
-          params: { threadId: activeThread.id }
-        })
-        setIsTyping(response.data.isTyping)
-      } catch (error) {
-        console.error("Failed to check typing status:", error)
-      }
-    }
-
-    const interval = setInterval(checkTypingStatus, 2000)
-    return () => clearInterval(interval)
-  }, [activeThread])
-
   return (
-    <div className="mx-auto w-full max-w-[1200px]">
-      <div className="grid lg:grid-cols-[320px_minmax(0,1fr)] gap-4 lg:gap-6">
-        {/* Enhanced Threads list */}
+    <div className="mx-auto w-full max-w-6xl space-y-6">
+      {/* Sleek inline header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold tracking-tight text-white font-outfit">Chats & Syncs</h2>
+          <p className="text-white/45 text-xs font-sans font-medium">Coordinate in real-time with team co-founders, advisory boards, and review committee investors.</p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (confirm("Reset chat history to initial cohort defaults?")) {
+                localStorage.removeItem("founder_chat_threads")
+                localStorage.removeItem("founder_chat_messages")
+                fetchThreads()
+                setActiveId(null)
+                setMessagesByThread({})
+                setLoadedThreads(new Set())
+              }
+            }}
+            className="border border-white/10 text-white/80 hover:bg-white/5 rounded-xl text-xs h-9 px-4 bg-transparent cursor-pointer"
+          >
+            Reset Chat Data
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-[340px_minmax(0,1fr)] gap-4 lg:gap-6">
+        {/* Left Side: Threads panel */}
         <section className={cn("lg:block", showOnlyChatOnMobile ? "hidden" : "block")}>
-          <div className="rounded-xl bg-[#101113] p-3 sm:p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="relative flex-1">
-                <Search className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+          <div className="rounded-xl border border-white/5 bg-white/[0.01] backdrop-blur-xl p-4 flex flex-col h-[600px] lg:h-[700px]">
+            <div className="flex flex-col gap-2 mb-4">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/30" />
                 <Input
-                  placeholder="Search conversations..."
+                  placeholder="Search chats..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="h-9 w-full pl-8 bg-[#0f1012] border-transparent text-white placeholder:text-white/40 focus:ring-1 focus:ring-white/20"
+                  className="h-9 w-full pl-9 bg-black/40 border-white/5 text-white placeholder:text-white/30 rounded-lg focus-visible:ring-[#34D399] focus-visible:border-[#34D399]/20"
                 />
               </div>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as Category)}
-                className="h-9 rounded-md bg-[#0f1012] px-3 text-sm text-white border-transparent focus:ring-1 focus:ring-white/20 cursor-pointer"
+                className="h-9 rounded-lg bg-black/40 border border-white/5 px-3 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[#34D399] cursor-pointer"
                 aria-label="Filter conversations"
               >
-                <option value="all">All</option>
-                <option value="co">Co‑investors</option>
-                <option value="requests">Requests</option>
-                <option value="general">General</option>
+                <option value="all" className="bg-[#0c0d0f]">All Conversations</option>
+                <option value="co" className="bg-[#0c0d0f]">Co‑founders</option>
+                <option value="requests" className="bg-[#0c0d0f]">Review Requests</option>
+                <option value="general" className="bg-[#0c0d0f]">Cohort General</option>
               </select>
             </div>
 
-            <div className="space-y-0.5">
+            <div className="flex-1 overflow-y-auto space-y-1 pr-1" style={{ scrollbarWidth: "thin" }}>
               {isLoadingThreads && (
-                <div className="p-4 text-center">
-                  <div className="flex items-center justify-center gap-2 text-sm text-white/60">
-                    <div className="animate-spin size-4 border-2 border-white/20 border-t-white/60 rounded-full" />
-                    Loading conversations...
-                  </div>
+                <div className="p-8 text-center flex flex-col items-center justify-center gap-2">
+                  <Loader2 className="h-6 w-6 animate-spin text-[#34D399]" />
+                  <span className="text-xs text-white/40">Loading workspace threads...</span>
                 </div>
               )}
               {!isLoadingThreads && filtered.length === 0 && (
-                <div className="p-4 text-center">
-                  <div className="text-sm text-white/60">No conversations found</div>
-                  <div className="text-xs text-white/40 mt-1">Try adjusting your search or filter</div>
+                <div className="p-8 text-center">
+                  <div className="text-xs text-white/40">No conversations found</div>
                 </div>
               )}
-              {!isLoadingThreads && filtered.map((t) => {
-                const active = t.id === activeId
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => setActiveId(t.id)}
-                    className={cn(
-                      "w-full rounded-lg px-3 py-3 text-left transition-all duration-200 group",
-                      active 
-                        ? "bg-white/[0.08] shadow-sm" 
-                        : "hover:bg-white/[0.04] active:bg-white/[0.06]",
-                    )}
-                    aria-pressed={active}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
+              {!isLoadingThreads &&
+                filtered.map((t) => {
+                  const active = t.id === activeId
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => setActiveId(t.id)}
+                      className={cn(
+                        "w-full rounded-lg px-3 py-3 text-left transition-all duration-300 relative group flex gap-3 items-start border border-transparent",
+                        active
+                          ? "bg-white/[0.05] border-white/10 shadow-lg"
+                          : "hover:bg-white/[0.01] hover:border-white/[0.02]"
+                      )}
+                      aria-pressed={active}
+                    >
+                      {active && (
+                        <div className="absolute left-0 top-3 bottom-3 w-1 bg-violet-500 rounded-r-full shadow-[0_0_8px_rgba(167,139,250,0.6)]" />
+                      )}
+                      <div className="relative shrink-0">
                         <div
                           className={cn(
-                            "grid size-10 place-items-center rounded-full text-xs font-medium transition-colors",
-                            active ? "bg-white/10" : "bg-[#0f1012] group-hover:bg-white/[0.08]"
+                            "grid size-10 place-items-center rounded-full text-xs font-semibold tracking-wider font-mono",
+                            active
+                              ? "bg-violet-500/20 text-violet-300"
+                              : "bg-white/5 text-white/70 group-hover:bg-white/10"
                           )}
                         >
                           {initials(t.name)}
                         </div>
                         {t.isOnline && (
-                          <div className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full bg-green-400 border-2 border-[#101113]" />
+                          <div className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-[#34D399] border border-black shadow-[0_0_6px_#34D399]" />
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className={cn(
-                            "truncate text-sm font-medium transition-colors",
-                            active ? "text-white" : "text-white/90"
-                          )}>
-                            {t.name}
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="truncate text-sm font-semibold text-white">{t.name}</span>
+                          <span className="text-[10px] text-white/30 font-mono shrink-0">
+                            {formatTime(t.lastActive)}
                           </span>
-                          <div className="flex items-center gap-1.5 ml-2">
-                            {t.unread > 0 && (
-                              <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-white/90 text-[#101113] rounded-full">
-                                {t.unread > 9 ? '9+' : t.unread}
-                              </span>
-                            )}
-                            <span className="text-[10px] text-white/50 whitespace-nowrap">
-                              {formatTime(t.lastActive)}
+                        </div>
+                        <div className="truncate text-xs text-white/40 mb-1 group-hover:text-white/60">
+                          {t.preview}
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-white/35 uppercase tracking-widest font-mono">
+                            #{t.category}
+                          </span>
+                          {t.unread > 0 && (
+                            <span className="flex items-center justify-center h-4.5 min-w-[18px] px-1.5 text-[9px] font-bold bg-violet-600 text-white rounded-full shadow-[0_0_8px_rgba(139,92,246,0.4)]">
+                              {t.unread}
                             </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="truncate text-xs text-white/60 flex-1">
-                            {t.preview}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 mt-1.5">
-                          <Users className="h-3 w-3 text-white/40" />
-                          <span className="text-[10px] text-white/40">
-                            {t.participants.length} participant{t.participants.length !== 1 ? 's' : ''}
-                          </span>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  </button>
-                )
-              })}
+                    </button>
+                  )
+                })}
             </div>
           </div>
         </section>
 
-        {/* Enhanced Chat view */}
+        {/* Right Side: Message pane */}
         <section className={cn("lg:block", showOnlyListOnMobile ? "hidden" : "block")}>
-          <div className="rounded-xl bg-[#101113] overflow-hidden flex flex-col h-[600px] lg:h-[700px]">
-            {/* Enhanced header */}
-            <div className="flex h-14 items-center gap-3 px-3 sm:px-4 border-b border-white/[0.06]">
+          <div className="rounded-xl border border-white/5 bg-white/[0.01] backdrop-blur-xl overflow-hidden flex flex-col h-[600px] lg:h-[700px]">
+            {/* Thread Header */}
+            <div className="flex h-14 items-center gap-3 px-4 border-b border-white/5 bg-black/25">
               <button
-                className="lg:hidden inline-flex size-8 items-center justify-center rounded-md hover:bg-white/[0.06] transition-colors"
+                className="lg:hidden inline-flex size-8 items-center justify-center rounded-full hover:bg-white/5 transition-colors text-white/70"
                 onClick={() => setActiveId(null)}
                 aria-label="Back to conversations"
               >
-                <ChevronLeft className="h-5 w-5" />
+                <ChevronLeft className="h-4 w-4" />
               </button>
               {activeThread ? (
                 <>
                   <div className="relative">
-                    <div className="grid size-9 place-items-center rounded-full bg-[#0f1012] text-xs font-medium">
+                    <div className="grid size-9 place-items-center rounded-full bg-violet-500/15 text-violet-300 text-xs font-semibold tracking-wider font-mono">
                       {initials(activeThread.name)}
                     </div>
                     {activeThread.isOnline && (
-                      <div className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-green-400 border border-[#101113]" />
+                      <div className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-[#34D399] border border-black shadow-[0_0_6px_#34D399]" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium leading-tight">{activeThread.name}</div>
-                    <div className="flex items-center gap-1 text-[11px] text-white/50 leading-tight">
+                    <div className="truncate text-base font-semibold text-white leading-tight">
+                      {activeThread.name}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] text-white/40 mt-0.5">
                       {activeThread.isOnline ? (
                         <>
-                          <div className="size-1.5 rounded-full bg-green-400" />
-                          <span>Active now</span>
+                          <span className="size-1.5 rounded-full bg-[#34D399] shadow-[0_0_4px_#34D399]" />
+                          <span>Connected</span>
                         </>
                       ) : (
                         <>
                           <Clock className="h-3 w-3" />
-                          <span>Last seen {formatTime(activeThread.lastActive)}</span>
+                          <span>Seen {formatTime(activeThread.lastActive)}</span>
                         </>
                       )}
                     </div>
                   </div>
                   <button
-                    className="inline-flex size-8 items-center justify-center rounded-md hover:bg-white/[0.06] transition-colors"
+                    className="inline-flex size-8 items-center justify-center rounded-full hover:bg-white/5 text-white/40 hover:text-white transition-colors"
                     aria-label="More options"
                   >
-                    <MoreHorizontal className="h-5 w-5" />
+                    <MoreHorizontal className="h-4 w-4" />
                   </button>
                 </>
               ) : (
-                <div className="px-2 text-sm text-white/70">Select a conversation</div>
+                <div className="text-xs text-white/40 uppercase tracking-widest font-mono">Select Thread</div>
               )}
             </div>
 
-            {/* Enhanced messages area */}
-            <div 
-              ref={listRef} 
-              className="flex-1 overflow-y-auto px-3 py-4 sm:px-4 space-y-4 scroll-smooth"
-              style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.2) transparent' }}
+            {/* Message Thread Scroll view */}
+            <div
+              ref={listRef}
+              className="flex-1 overflow-y-auto px-4 py-6 space-y-4.5 scroll-smooth bg-[#0a0a0c]/60"
+              style={{ scrollbarWidth: "thin" }}
             >
               {!activeThread && (
                 <div className="grid h-full place-items-center text-center">
-                  <div>
-                    <div className="text-sm text-white/60 mb-2">Choose a conversation to start</div>
-                    <div className="text-xs text-white/40">Select from {threads.length} available conversations</div>
+                  <div className="space-y-2">
+                    <div className="text-sm text-white/50 font-medium">Select a thread to sync</div>
+                    <div className="text-xs text-white/30 max-w-xs mx-auto">
+                      Choose from co-founders or reviewing investment firms to start writing messages.
+                    </div>
                   </div>
                 </div>
               )}
               {activeThread && isLoadingMessages && (
                 <div className="grid h-full place-items-center">
-                  <div className="flex items-center gap-2 text-sm text-white/60">
-                    <div className="animate-spin size-4 border-2 border-white/20 border-t-white/60 rounded-full" />
-                    Loading messages...
+                  <div className="flex flex-col items-center gap-2 text-xs text-white/40">
+                    <Loader2 className="h-5 w-5 animate-spin text-violet-400" />
+                    <span>Loading message log...</span>
                   </div>
                 </div>
               )}
-              {activeThread && !isLoadingMessages && msgs.map((m, i) => {
-                const isYou = m.from === "you"
-                const showDeliveryStatus = isYou && i === msgs.length - 1
-                return (
-                  <div key={m.id} className={cn("flex w-full", isYou ? "justify-end" : "justify-start")}>
-                    <div className="max-w-[85%] sm:max-w-[78%]">
-                      <div
-                        className={cn(
-                          "rounded-2xl px-3 py-2.5 text-sm shadow-sm",
-                          isYou 
-                            ? "bg-white text-[#0b0b0c] rounded-br-md" 
-                            : "bg-[#1a1b1e] text-white rounded-bl-md",
-                        )}
-                      >
-                        <div className="whitespace-pre-wrap break-words">{m.text}</div>
-                      </div>
-                      <div className={cn(
-                        "flex items-center gap-1 mt-1 text-[10px]",
-                        isYou ? "justify-end text-white/50" : "text-white/50"
-                      )}>
-                        <span>{formatTime(m.when)}</span>
-                        {showDeliveryStatus && (
-                          <div className="flex items-center gap-0.5">
-                            {m.seen ? (
-                              <CheckCheck className="h-3 w-3 text-blue-400" />
-                            ) : m.delivered ? (
-                              <CheckCheck className="h-3 w-3 text-white/40" />
-                            ) : (
-                              <Clock className="h-3 w-3 text-white/30" />
-                            )}
-                          </div>
-                        )}
+              {activeThread &&
+                !isLoadingMessages &&
+                msgs.map((m, i) => {
+                  const isYou = m.from === "you"
+                  const showDeliveryStatus = isYou && i === msgs.length - 1
+                  return (
+                    <div key={m.id} className={cn("flex w-full", isYou ? "justify-end" : "justify-start")}>
+                      <div className="max-w-[85%] sm:max-w-[70%] space-y-1.5">
+                        <div
+                          className={cn(
+                            "rounded-2xl px-4 py-3 text-[13px] sm:text-sm leading-relaxed shadow-md border",
+                            isYou
+                              ? "bg-violet-950/45 text-white border-violet-500/25 rounded-br-none"
+                              : "bg-zinc-900/90 text-zinc-100 border-white/10 rounded-bl-none"
+                          )}
+                        >
+                          <div className="whitespace-pre-wrap break-words">{m.text}</div>
+                        </div>
+                        <div
+                          className={cn(
+                            "flex items-center gap-1.5 text-[10px] font-mono text-white/40",
+                            isYou ? "justify-end" : "justify-start"
+                          )}
+                        >
+                          <span>{formatTime(m.when)}</span>
+                          {showDeliveryStatus && (
+                            <span className="flex items-center">
+                              {m.seen ? (
+                                <CheckCheck className="h-3.5 w-3.5 text-violet-400" />
+                              ) : (
+                                <CheckCheck className="h-3.5 w-3.5 text-white/30" />
+                              )}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )
-              })}
-              
-              {/* Typing indicator */}
+                  )
+                })}
+
+              {/* Simulated typing bubble */}
               {isTyping && activeThread && (
                 <div className="flex justify-start">
-                  <div className="bg-[#1a1b1e] rounded-2xl rounded-bl-md px-4 py-3">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                      <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                      <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce"></div>
+                  <div className="bg-zinc-900/90 border border-white/10 rounded-2xl rounded-bl-none px-4 py-3">
+                    <div className="flex space-x-1.5 items-center h-3">
+                      <div className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                      <div className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                      <div className="w-1.5 h-1.5 bg-violet-400 rounded-full animate-bounce"></div>
                     </div>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Enhanced input area */}
-            <div className="flex items-end gap-2 p-3 border-t border-white/[0.06]">
-              <div className="flex-1 relative">
+            {/* Input Form area */}
+            <div className="p-3 border-t border-white/5 bg-black/25">
+              <form onSubmit={onSend} className="flex items-end gap-2">
                 <textarea
                   ref={inputRef}
-                  placeholder={activeThread ? "Type a message..." : "Select a conversation to start messaging"}
+                  placeholder={activeThread ? "Write message..." : "Select a thread to message"}
                   disabled={!activeThread}
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  className="w-full min-h-[40px] max-h-[120px] h-[40px] py-2.5 px-3 pr-12 rounded-2xl bg-[#0f1012] border border-transparent text-white placeholder:text-white/40 focus:ring-1 focus:ring-white/20 focus:outline-none resize-none overflow-y-auto text-sm leading-5"
+                  className="w-full min-h-[42px] max-h-[120px] h-[42px] py-3 px-4 pr-4 rounded-xl bg-black/50 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-violet-500 focus:border-violet-500/40 resize-none overflow-y-auto text-sm leading-relaxed"
                   rows={1}
-                  style={{
-                    height: Math.min(120, Math.max(40, (text.split('\n').length * 20) + 20))
-                  }}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
+                    if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault()
                       onSend(e)
                     }
                   }}
                 />
-                {text.length > 0 && (
-                  <div className="absolute right-3 bottom-2 text-[10px] text-white/40">
-                    {text.length}/1000
-                  </div>
-                )}
-              </div>
-              <Button
-                onClick={onSend}
-                size="icon"
-                disabled={!activeThread || text.trim().length === 0}
-                className={cn(
-                  "size-10 rounded-full transition-all duration-200 flex-shrink-0",
-                  text.trim().length > 0
-                    ? "bg-white text-[#0b0b0c] hover:bg-white/90 shadow-lg"
-                    : "bg-white/20 text-white/60 cursor-not-allowed"
-                )}
-                aria-label="Send message"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
+                <Button
+                  type="submit"
+                  size="icon"
+                  disabled={!activeThread || text.trim().length === 0}
+                  className={cn(
+                    "size-10 rounded-full transition-all duration-300 flex-shrink-0 cursor-pointer",
+                    text.trim().length > 0
+                      ? "bg-violet-600 text-white hover:bg-violet-500 hover:scale-[1.02] shadow-lg shadow-violet-600/15"
+                      : "bg-white/5 text-white/30 cursor-not-allowed border border-white/5"
+                  )}
+                  aria-label="Send message"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </form>
             </div>
           </div>
         </section>
