@@ -5,31 +5,40 @@ import Link from "next/link"
 import { Suspense, useState } from "react"
 import { usePathname } from "next/navigation"
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppFounderSidebar } from "@/components/app-founder-sidebar"
+import { AppInvestorSidebar } from "@/components/app-investor-sidebar"
 import { NotificationsDropdown } from "@/components/notifications-dropdown"
 import { PostIdeaModal } from "@/components/post-idea-modal"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { Search, Plus } from "lucide-react"
+import { Search, Plus, LogOut, UserRound, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useAuth } from "@/components/auth-provider"
 
 // Define the shape of an idea
 export type IdeaData = {
   title: string
   description: string
-  // Add any additional fields your idea has here
 }
 
-export default function FounderLayout({ children }: { children: React.ReactNode }) {
+export default function InvestorLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const { user, logout } = useAuth()
   const seg = pathname?.split("/").filter(Boolean)[1]
   const section =
     {
       ideas: "Ideas",
       funding: "Community funding",
       chats: "Chats",
-      mutiny: "Mutiny",
       profile: "Profile",
       settings: "Settings",
     }[seg ?? ""] ?? "Overview"
@@ -39,30 +48,29 @@ export default function FounderLayout({ children }: { children: React.ReactNode 
   // Properly typed idea submit handler
   const handleIdeaSubmit = (ideaData: IdeaData) => {
     console.log("New idea submitted:", ideaData)
-    // Trigger API call, page refresh, or success toast here
   }
 
   return (
     <SidebarProvider>
-      <AppFounderSidebar />
+      <AppInvestorSidebar />
       <SidebarInset className="bg-[#0b0b0c] text-white">
         <Suspense fallback={<div className="p-4">Loading...</div>}>
-          <header className="flex h-14 shrink-0 items-center gap-2 border-b border-[#1a1b1e] px-4 py-10">
+          <header className="flex h-16 shrink-0 items-center gap-4 border-b border-white/5 bg-black/40 px-6 backdrop-blur-md">
             <SidebarTrigger className="-ml-1 text-white/80 hover:text-white" />
-            <Separator orientation="vertical" className="mr-2 h-5 bg-[#1a1b1e]" />
+            <Separator orientation="vertical" className="mr-2 h-5 bg-white/5" />
             <nav className="flex items-center gap-2 sm:gap-3">
-              <Link href="/founder" className="text-sm sm:text-base font-semibold tracking-tight">
-                Founder
+              <Link href="/investor" className="text-sm sm:text-base font-semibold tracking-tight text-white/90 hover:text-white transition-colors" style={{ fontFamily: "var(--font-outfit)" }}>
+                Investor
               </Link>
-              <span className="text-white/40">/</span>
-              <span className="text-white/70 text-sm">{section}</span>
+              <span className="text-white/30">/</span>
+              <span className="text-white/60 text-xs sm:text-sm font-mono uppercase tracking-wide">{section}</span>
             </nav>
             <div className="ml-auto flex items-center gap-2 sm:gap-3">
               <div className="relative hidden md:block">
-                <Search className="pointer-events-none absolute left-2 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-white/40" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 z-10 h-3.5 w-3.5 -translate-y-1/2 text-white/30" />
                 <Input
                   placeholder="Search ideas, investors, team…"
-                  className="h-8 w-[260px] pl-8 bg-[#101113] border-[#1a1b1e] text-white placeholder:text-white/40"
+                  className="h-8 w-[260px] pl-9 bg-black/40 border-white/5 text-white placeholder:text-white/30 rounded-lg focus-visible:ring-[#34D399] focus-visible:border-[#34D399]/20"
                 />
               </div>
               <Button
@@ -77,7 +85,6 @@ export default function FounderLayout({ children }: { children: React.ReactNode 
                 New idea
               </Button>
               <NotificationsDropdown />
-              <div className="h-8 w-8 rounded-md ring-1 ring-[#1a1b1e] bg-[#101113]" />
             </div>
           </header>
         </Suspense>
