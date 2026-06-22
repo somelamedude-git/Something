@@ -230,7 +230,7 @@ export default function ProjectBriefPage({ params }: { params: { id: string } })
       <Separator className="bg-white/10" />
 
       <div className="text-xs text-white/50">
-        Verified projects show an additional badge provided by Mutiny after review.
+        Verified projects show an additional badge provided by Something after review.
       </div>
     </div>
   )
