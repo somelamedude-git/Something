@@ -24,9 +24,9 @@ export function FundingOrbit() {
 
   return (
     <section id="funding">
-      <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">Transparent community funding</h2>
-      <p className="text-white/70 text-sm sm:text-base mt-2 max-w-2xl">
-        Funds live in escrow and release on objective milestones. Every spend is visible. Radically simple.
+      <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight" style={{ fontFamily: "var(--font-outfit, sans-serif)" }}>Transparent community funding</h2>
+      <p className="text-white/50 text-sm sm:text-base mt-2 max-w-2xl">
+        Funds live in escrow and release on verified milestones. Every spend is visible. Radically simple.
       </p>
 
       <div className="mt-6 grid lg:grid-cols-2 gap-6">
