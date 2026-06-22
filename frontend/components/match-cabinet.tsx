@@ -21,7 +21,7 @@ const matchTypes = [
   {
     label: "Co-founder",
     title: "Perfect founder complement",
-    description: "Mut looks for viability overlap, Iny for people‐fit. Your active tags bias the match."
+    description: "Nothing looks for viability overlap, Something for people‐fit. Your active tags bias the match."
   },
   {
     label: "Team",
