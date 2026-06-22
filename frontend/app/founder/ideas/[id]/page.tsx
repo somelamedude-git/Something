@@ -131,115 +131,133 @@ export default function IdeaDetailsPage() {
 
   if (!idea) return null
 
+  const stageInfo = {
+    launched: { text: "text-[#34D399]", bg: "bg-[#34D399]/10", border: "border-[#34D399]/20" },
+    mvp: { text: "text-[#F472B6]", bg: "bg-[#F472B6]/10", border: "border-[#F472B6]/20" },
+    prototype: { text: "text-[#E3C27A]", bg: "bg-[#E3C27A]/10", border: "border-[#E3C27A]/20" },
+    concept: { text: "text-white/60", bg: "bg-white/5", border: "border-white/10" }
+  }[idea.stage] ?? { text: "text-white/60", bg: "bg-white/5", border: "border-white/10" }
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-8 pt-4 pb-20">
       {/* Back Button */}
       <div>
-        <Button onClick={() => router.back()} variant="ghost" className="mb-4 text-white/80 hover:text-white">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to ideas
+        <Button onClick={() => router.back()} variant="ghost" className="text-white/60 hover:text-white hover:bg-white/5 rounded-full px-4 h-8 text-xs font-semibold">
+          <ArrowLeft className="mr-2 h-3.5 w-3.5" /> Back to workspace
         </Button>
       </div>
 
       {/* Idea Card */}
-      <div className="rounded-xl bg-[#101113] border border-[#1a1b1e]">
-        <div className="p-6">
-          <div className="flex justify-between items-start mb-4">
-            <h1 className="text-2xl font-semibold">{idea.title}</h1>
+      <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.01] shadow-2xl">
+        {/* Glow backdrop */}
+        <div className="absolute -top-32 -right-32 w-64 h-64 rounded-full bg-[#34D399]/5 blur-3xl pointer-events-none" />
+        
+        <div className="p-8">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
+            <h1 className="text-3xl font-bold tracking-tight text-white" style={{ fontFamily: "var(--font-outfit)" }}>
+              {idea.title}
+            </h1>
             <Badge
-              variant="secondary"
-              className="bg-emerald-500/10 text-emerald-300 border-emerald-500/20 text-xs"
+              className={cn(
+                "text-[10px] font-semibold tracking-widest uppercase px-3 py-1 rounded-full border",
+                stageInfo.text, stageInfo.bg, stageInfo.border
+              )}
             >
               {idea.stage.toUpperCase()}
             </Badge>
           </div>
 
-          <div className="flex flex-wrap gap-2 mb-6">
+          <div className="flex flex-wrap gap-2 mb-8">
             {idea.tags.map((tag) => (
               <Badge
                 key={tag}
-                variant="secondary"
-                className="bg-white/[0.04] text-white border-white/10 text-xs"
+                className="bg-white/[0.02] text-white/50 border-white/5 text-[10px] font-mono rounded px-2.5 py-0.5"
               >
-                {tag}
+                #{tag}
               </Badge>
             ))}
           </div>
 
-          <p className="text-white/80 whitespace-pre-line">{idea.description}</p>
+          <p className="text-white/70 whitespace-pre-line text-sm leading-relaxed font-sans">{idea.description}</p>
         </div>
 
-        <div className="border-t border-[#1a1b1e] p-6">
-          <h3 className="font-semibold mb-3">Looking For</h3>
-          <div className="flex flex-wrap gap-2">
-            {idea.lookingFor.map((item) => (
-              <Badge key={item} variant="outline" className="text-sm border-white/20">
-                {item}
-              </Badge>
-            ))}
+        {/* Looking For block */}
+        {idea.lookingFor && idea.lookingFor.length > 0 && (
+          <div className="border-t border-white/5 bg-white/[0.005] p-8">
+            <h3 className="text-[10px] font-mono uppercase tracking-widest text-white/40 mb-4">Looking For</h3>
+            <div className="flex flex-wrap gap-2">
+              {idea.lookingFor.map((item) => (
+                <Badge key={item} className="text-xs font-medium border-white/10 text-white bg-white/[0.02] rounded px-3 py-1">
+                  {item}
+                </Badge>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Author & Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="md:col-span-1 bg-[#101113] border-[#1a1b1e]">
-          <CardContent className="p-4">
-            <h3 className="font-semibold mb-3">Author</h3>
+        <Card className="md:col-span-1 bg-white/[0.01] border-white/5 rounded-2xl shadow-xl hover:border-white/10 transition-all duration-300">
+          <CardContent className="p-6">
+            <h3 className="text-[9px] font-mono uppercase tracking-widest text-white/40 mb-4">Author</h3>
             <div className="flex items-center gap-3">
-              <Avatar>
+              <Avatar className="h-10 w-10 border border-white/10 shadow">
                 <AvatarImage src={idea.authorAvatar} />
-                <AvatarFallback>{idea.author.charAt(0)}</AvatarFallback>
+                <AvatarFallback className="bg-white/5 text-white font-bold">{idea.author.charAt(0)}</AvatarFallback>
               </Avatar>
-              <div>
-                <p className="font-medium">{idea.author}</p>
-                <p className="text-xs text-white/60">{idea.authorHeadline}</p>
+              <div className="min-w-0">
+                <p className="font-semibold text-sm text-white truncate">{idea.author}</p>
+                <p className="text-[10px] text-white/40 truncate mt-0.5">{idea.authorHeadline}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-2 bg-[#101113] border-[#1a1b1e]">
-          <CardContent className="p-4 flex items-center justify-around">
-            <div className="flex items-center gap-4">
+        <Card className="md:col-span-2 bg-white/[0.01] border-white/5 rounded-2xl shadow-xl hover:border-white/10 transition-all duration-300">
+          <CardContent className="p-6 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
               <Button
                 onClick={handleLike}
                 variant="outline"
-                className="border-white/20"
+                className="h-9 rounded-lg border-white/10 text-white/80 hover:bg-white/5 hover:text-white text-xs font-semibold px-4"
                 disabled={isLiking}
               >
-                <Heart className="mr-2 h-4 w-4" /> Like ({idea.likes})
+                <Heart className="mr-2 h-4 w-4 text-white/40 group-hover:text-[#F472B6]" /> Like ({idea.likes})
               </Button>
-              <Button variant="outline" className="border-white/20">
-                <MessageSquare className="mr-2 h-4 w-4" /> Comment ({idea.commentsCount})
+              <Button variant="outline" className="h-9 rounded-lg border-white/10 text-white/80 hover:bg-white/5 hover:text-white text-xs font-semibold px-4">
+                <MessageSquare className="mr-2 h-4 w-4 text-white/40" /> Comment ({idea.commentsCount})
               </Button>
             </div>
-            <Button className="bg-white text-black hover:bg-white/90">Collaborate</Button>
+            <Button className="h-9 rounded-full bg-white text-[#0a0a0c] hover:bg-[#34D399] hover:text-[#0a0a0c] text-xs font-semibold px-5 transition-all duration-300">Collaborate</Button>
           </CardContent>
         </Card>
       </div>
 
       {/* Comments Section */}
-      <div className="rounded-xl bg-[#101113] border border-[#1a1b1e] p-6">
-        <h2 className="text-xl font-semibold mb-4">Comments ({comments.length})</h2>
+      <div className="rounded-2xl border border-white/5 bg-white/[0.01] p-6 shadow-xl hover:border-white/10 transition-all duration-300">
+        <h2 className="text-base font-bold tracking-tight text-white mb-6" style={{ fontFamily: "var(--font-outfit)" }}>
+          Comments ({comments.length})
+        </h2>
         <div className="space-y-4">
           {comments.length > 0 ? (
             comments.map((comment) => (
-              <div key={comment.id} className="flex items-start gap-3">
-                <Avatar className="h-8 w-8">
+              <div key={comment.id} className="flex items-start gap-3.5">
+                <Avatar className="h-8 w-8 border border-white/5 shrink-0">
                   <AvatarImage src={comment.authorAvatar} />
-                  <AvatarFallback>{comment.author.charAt(0)}</AvatarFallback>
+                  <AvatarFallback className="bg-white/5 text-white/70 text-xs font-semibold">{comment.author.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <div className="bg-[#0a0b0c] border border-[#1a1b1e] rounded-lg px-3 py-2 w-full">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="font-semibold text-sm">{comment.author}</p>
-                    <p className="text-xs text-white/50">{comment.timestamp}</p>
+                <div className="bg-black/30 border border-white/5 rounded-xl px-4 py-3 w-full">
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <p className="font-semibold text-xs text-white/80">{comment.author}</p>
+                    <p className="text-[10px] font-mono text-white/35 uppercase tracking-wide">{comment.timestamp}</p>
                   </div>
-                  <p className="text-sm text-white/80">{comment.text}</p>
+                  <p className="text-xs text-white/60 leading-relaxed font-sans">{comment.text}</p>
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-sm text-white/60 text-center py-4">No comments yet.</p>
+            <p className="text-xs text-white/30 text-center py-6 font-mono uppercase tracking-widest">No comments yet</p>
           )}
         </div>
       </div>
