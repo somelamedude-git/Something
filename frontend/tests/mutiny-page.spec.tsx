@@ -1,5 +1,5 @@
 /**
- * Test skeleton for the Mutiny page UI.
+ * Test skeleton for the Nothing & Something page UI.
  *
  * Note: This is a scaffolded test file. The repository does not include a test runner config
  * by default. To run these tests, install and configure a test runner (Jest, React Testing Library
@@ -8,7 +8,7 @@
 
 import React from 'react'
 
-describe('Mutiny page (UI scaffold)', () => {
+describe('Nothing & Something page (UI scaffold)', () => {
   it('renders composer and results placeholder', () => {
     // Example: render the page and assert composer textarea exists
     // This is a placeholder; add actual tests once a test runner is configured.
