@@ -1,85 +1,188 @@
 "use client"
 
-import React from "react"
-import { MutinyResponse } from "@/lib/mock-mutiny"
-import { Button } from "@/components/ui/button"
+import React, { useState, useEffect } from "react"
+import { MutinyResponse, Person, Investor, Idea, Patent } from "@/lib/mock-mutiny"
 import { logFeedback } from "@/lib/mutiny-feedback"
 import { toast } from "@/components/ui/use-toast"
+import { Sparkles, User, Building, FileText, Award } from "lucide-react"
 
-export default function MutinyResults({ data }: { data: MutinyResponse | null }) {
-  if (!data) return <div className="p-6 text-center text-white/60">Run the composer to see matches.</div>
+const ACCENTS = {
+  emerald: { color: "#34D399", text: "text-emerald-400", hoverText: "hover:text-emerald-300" },
+  indigo: { color: "#6366F1", text: "text-indigo-400", hoverText: "hover:text-indigo-300" },
+  violet: { color: "#8B5CF6", text: "text-violet-400", hoverText: "hover:text-violet-300" },
+  amber: { color: "#F59E0B", text: "text-amber-400", hoverText: "hover:text-amber-300" },
+}
+
+export default function MutinyResults({
+  data,
+  accentKey = "emerald",
+}: {
+  data: MutinyResponse | null
+  accentKey?: string
+}) {
+  const [activeAccentKey, setActiveAccentKey] = useState<keyof typeof ACCENTS>("emerald")
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedAccent = localStorage.getItem("founder_settings_accent") as keyof typeof ACCENTS
+      if (storedAccent && ACCENTS[storedAccent]) {
+        setActiveAccentKey(storedAccent)
+      } else if (accentKey && ACCENTS[accentKey as keyof typeof ACCENTS]) {
+        setActiveAccentKey(accentKey as keyof typeof ACCENTS)
+      }
+    }
+  }, [accentKey])
+
+  const activeAccent = ACCENTS[activeAccentKey]
+
+  if (!data) return null
+
+  const hasPeople = !!data.people && data.people.length > 0
+  const hasInvestors = !!data.investors && data.investors.length > 0
+  const hasIdeas = !!data.ideas && data.ideas.length > 0
+  const hasPatents = !!data.patents && data.patents.length > 0
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div className="bg-white/3 border border-white/6 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-semibold">People</h4>
-          <div className="text-xs text-white/60">Top matches</div>
-        </div>
+    <div className="space-y-6 pt-4 border-t border-white/5 select-text font-sans">
+      
+      {/* 1. Builders Match List */}
+      {hasPeople && (
         <div className="space-y-3">
-          {data.people.map((p) => (
-            <div key={p.id} className="p-3 bg-white/4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/30 transition-shadow hover:shadow-lg" tabIndex={0} role="article" aria-label={p.name} onKeyDown={(e) => { if (e.key === 'Enter') logFeedback({ id: Date.now().toString(), type: 'introduce', targetType: 'person', targetId: p.id, timestamp: new Date().toISOString() }) }}>
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="font-medium">{p.name}</div>
-                  <div className="text-xs text-white/60">{p.role} • {p.headline}</div>
+          <div className="text-[11px] font-bold font-mono uppercase tracking-widest text-white/30 flex items-center gap-1.5">
+            <User className="h-3 w-3" /> Conviction Overlap (Co-Founders)
+          </div>
+          <div className="space-y-3 pl-4 border-l border-white/5">
+            {data.people!.map((p) => (
+              <div key={p.id} className="text-xs space-y-1">
+                <div className="flex items-center flex-wrap gap-2">
+                  <span className="font-semibold text-white/90">{p.name}</span>
+                  <span className="text-white/30 font-mono text-[10px]">{p.role}</span>
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/5 px-1.5 py-0.2 rounded border border-emerald-500/10">
+                    {Math.round(p.similarityScore * 100)}% match
+                  </span>
                 </div>
-                <div className="text-sm font-semibold">
-                  <span className={`inline-block rounded-md px-2 py-0.5 text-xs ${p.similarityScore > 0.8 ? 'bg-emerald-500 text-black' : p.similarityScore > 0.65 ? 'bg-amber-400 text-black' : 'bg-white/6 text-white'}`}>{Math.round(p.similarityScore * 100)}%</span>
+                {p.headline && (
+                  <p className="text-white/40 italic text-[11px] font-light leading-normal">{p.headline}</p>
+                )}
+                <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-[10.5px]">
+                  <span className="text-white/30">Overlap:</span>
+                  {p.reasons.map((r, idx) => (
+                    <span key={idx} className="text-white/50 font-mono text-[10px] bg-white/[0.02] border border-white/5 px-1.5 py-0.2 rounded">
+                      {r}
+                    </span>
+                  ))}
+                  <span className="text-white/20">|</span>
+                  <button
+                    onClick={() => {
+                      logFeedback({ id: Date.now().toString(), type: 'introduce', targetType: 'person', targetId: p.id, timestamp: new Date().toISOString() })
+                      toast({ title: 'Feedback saved', description: `Requested intro to ${p.name}` })
+                    }}
+                    className={cn("underline cursor-pointer bg-transparent border-0 p-0 text-[10.5px] font-medium transition", activeAccent.text, activeAccent.hoverText)}
+                  >
+                    Connect
+                  </button>
+                  <button
+                    onClick={() => {
+                      logFeedback({ id: Date.now().toString(), type: 'accept', targetType: 'person', targetId: p.id, timestamp: new Date().toISOString() })
+                      toast({ title: 'Accepted', description: `Accepted ${p.name}` })
+                    }}
+                    className="underline text-white/40 hover:text-white/60 cursor-pointer bg-transparent border-0 p-0 text-[10.5px] transition"
+                  >
+                    Accept
+                  </button>
                 </div>
               </div>
-              <div className="text-xs text-white/70 mt-2">{p.reasons.join(' • ')}</div>
-              <div className="mt-3 flex gap-2">
-                <Button aria-label={`Connect ${p.name}`} size="sm" onClick={() => { logFeedback({ id: Date.now().toString(), type: 'introduce', targetType: 'person', targetId: p.id, timestamp: new Date().toISOString() }); toast({ title: 'Feedback saved', description: `Requested intro to ${p.name}` }) }}>Connect</Button>
-                <Button aria-label={`Accept ${p.name}`} size="sm" variant="ghost" onClick={() => { logFeedback({ id: Date.now().toString(), type: 'accept', targetType: 'person', targetId: p.id, timestamp: new Date().toISOString() }); toast({ title: 'Accepted', description: `Accepted ${p.name}` }) }}>Accept</Button>
-                <Button aria-label={`Flag ${p.name}`} size="sm" variant="destructive" onClick={() => { logFeedback({ id: Date.now().toString(), type: 'flag', targetType: 'person', targetId: p.id, timestamp: new Date().toISOString() }); toast({ title: 'Flagged', description: `Flagged ${p.name}` }) }}>Flag</Button>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="bg-white/3 border border-white/6 rounded-lg p-4">
-        <h4 className="text-sm font-semibold mb-3">Investors</h4>
+      {/* 2. Investor Fit */}
+      {hasInvestors && (
         <div className="space-y-3">
-          {data.investors.map((i) => (
-            <div key={i.id} className="p-3 bg-white/4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/30 transition-shadow hover:shadow-lg" tabIndex={0} role="article" aria-label={i.name} onKeyDown={(e) => { if (e.key === 'Enter') logFeedback({ id: Date.now().toString(), type: 'introduce', targetType: 'investor', targetId: i.id, timestamp: new Date().toISOString() }) }}>
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="font-medium">{i.name}</div>
-                  <div className="text-xs text-white/60">{i.stage} • {i.sectors.join(', ')}</div>
+          <div className="text-[11px] font-bold font-mono uppercase tracking-widest text-white/30 flex items-center gap-1.5">
+            <Building className="h-3 w-3" /> Investment Fit (VC & Angels)
+          </div>
+          <div className="space-y-3 pl-4 border-l border-white/5">
+            {data.investors!.map((i) => (
+              <div key={i.id} className="text-xs space-y-1">
+                <div className="flex items-center flex-wrap gap-2">
+                  <span className="font-semibold text-white/90">{i.name}</span>
+                  <span className="text-white/30 font-mono text-[10px]">{i.stage} Stage</span>
+                  <span className="text-[10px] font-mono text-indigo-400 bg-indigo-500/5 px-1.5 py-0.2 rounded border border-indigo-500/10">
+                    {Math.round(i.matchScore * 100)}% fit
+                  </span>
                 </div>
-                <div className="text-sm font-semibold">{Math.round(i.matchScore * 100)}%</div>
+                <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-[10.5px]">
+                  <span className="text-white/30">Focus:</span>
+                  {i.sectors.map((sec, idx) => (
+                    <span key={idx} className="text-white/50 font-mono text-[10px] bg-white/[0.02] border border-white/5 px-1.5 py-0.2 rounded">
+                      {sec}
+                    </span>
+                  ))}
+                  <span className="text-white/20">|</span>
+                  <button
+                    onClick={() => {
+                      logFeedback({ id: Date.now().toString(), type: 'introduce', targetType: 'investor', targetId: i.id, timestamp: new Date().toISOString() })
+                      toast({ title: 'Intro requested', description: `Requested intro to ${i.name}` })
+                    }}
+                    className={cn("underline cursor-pointer bg-transparent border-0 p-0 text-[10.5px] font-medium transition", activeAccent.text, activeAccent.hoverText)}
+                  >
+                    Request Intro
+                  </button>
+                </div>
               </div>
-              <div className="mt-3 flex gap-2">
-                <Button aria-label={`Introduce ${i.name}`} size="sm" onClick={() => { logFeedback({ id: Date.now().toString(), type: 'introduce', targetType: 'investor', targetId: i.id, timestamp: new Date().toISOString() }); toast({ title: 'Intro requested', description: `Requested intro to ${i.name}` }) }}>Introduce</Button>
-                <Button aria-label={`Accept ${i.name}`} size="sm" variant="ghost" onClick={() => { logFeedback({ id: Date.now().toString(), type: 'accept', targetType: 'investor', targetId: i.id, timestamp: new Date().toISOString() }); toast({ title: 'Accepted', description: `Accepted ${i.name}` }) }}>Accept</Button>
-                <Button aria-label={`Flag ${i.name}`} size="sm" variant="destructive" onClick={() => { logFeedback({ id: Date.now().toString(), type: 'flag', targetType: 'investor', targetId: i.id, timestamp: new Date().toISOString() }); toast({ title: 'Flagged', description: `Flagged ${i.name}` }) }}>Flag</Button>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="bg-white/3 border border-white/6 rounded-lg p-4">
-        <h4 className="text-sm font-semibold mb-3">Similar Ideas</h4>
+      {/* 3. Similar Ideas */}
+      {hasIdeas && (
         <div className="space-y-3">
-          {data.ideas.map((it) => (
-            <div key={it.id} className="p-3 bg-white/4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-300/30 transition-shadow hover:shadow-lg" tabIndex={0} role="article" aria-label={it.title} onKeyDown={(e) => { if (e.key === 'Enter') logFeedback({ id: Date.now().toString(), type: 'accept', targetType: 'idea', targetId: it.id, timestamp: new Date().toISOString() }) }}>
-              <div className="font-medium">{it.title}</div>
-              <div className="text-xs text-white/60">by {it.ownerName} — {Math.round(it.similarityScore * 100)}%</div>
-              <div className="text-sm text-white/70 mt-2">{it.summary}</div>
-            </div>
-          ))}
+          <div className="text-[11px] font-bold font-mono uppercase tracking-widest text-white/30 flex items-center gap-1.5">
+            <FileText className="h-3 w-3" /> Overlap Concepts (Cohort)
+          </div>
+          <div className="space-y-3 pl-4 border-l border-white/5">
+            {data.ideas!.map((it) => (
+              <div key={it.id} className="text-xs space-y-1">
+                <div className="flex items-center flex-wrap gap-2">
+                  <span className="font-semibold text-white/90">{it.title}</span>
+                  <span className="text-white/30 font-mono text-[10px]">by {it.ownerName}</span>
+                  <span className="text-[10px] font-mono text-white/40 bg-white/5 px-1.5 py-0.2 rounded border border-white/10">
+                    {Math.round(it.similarityScore * 100)}% overlap
+                  </span>
+                </div>
+                <p className="text-white/50 text-[11px] font-light leading-relaxed">{it.summary}</p>
+              </div>
+            ))}
+          </div>
         </div>
+      )}
 
-        <div className="mt-4 text-xs text-white/60">Rationale</div>
-        <div className="mt-1 text-sm text-white/70 p-3 bg-white/2 rounded-md">{data.rationale}</div>
-        <div className="mt-3 flex items-center gap-2">
-          <Button size="sm" variant="ghost" onClick={() => logFeedback({ id: Date.now().toString(), type: 'accept', targetType: 'idea', targetId: data.ideas[0]?.id || 'n/a', timestamp: new Date().toISOString() })}>Accept selection</Button>
-          <Button size="sm" variant="destructive" onClick={() => logFeedback({ id: Date.now().toString(), type: 'flag', targetType: 'idea', targetId: data.ideas[0]?.id || 'n/a', timestamp: new Date().toISOString() })}>Flag results</Button>
+      {/* 4. Patents */}
+      {hasPatents && (
+        <div className="space-y-3">
+          <div className="text-[11px] font-bold font-mono uppercase tracking-widest text-white/30 flex items-center gap-1.5">
+            <Award className="h-3 w-3" /> Intellectual Property & Patents
+          </div>
+          <div className="space-y-3 pl-4 border-l border-white/5">
+            {data.patents!.map((pat) => (
+              <div key={pat.id} className="text-xs space-y-1">
+                <div className="flex items-center flex-wrap gap-2">
+                  <span className="font-semibold text-white/90">{pat.title}</span>
+                  <span className="text-white/30 font-mono text-[10px]">{pat.number} · {pat.assignee}</span>
+                  <span className="text-[10px] font-mono text-pink-400 bg-pink-500/5 px-1.5 py-0.2 rounded border border-pink-500/10">
+                    {Math.round(pat.similarityScore * 100)}% overlap
+                  </span>
+                </div>
+                <p className="text-white/50 text-[11px] font-light leading-relaxed">{pat.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
     </div>
   )
 }
