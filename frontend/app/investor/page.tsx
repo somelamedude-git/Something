@@ -161,7 +161,7 @@ export default function InvestorOverviewPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px]">
+    <div className="mx-auto max-w-[1400px] pt-6 sm:pt-10 pb-16">
       <div className="flex gap-6">
         {/* Main column */}
         <div className="min-w-0 flex-1 space-y-6">
