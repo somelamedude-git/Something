@@ -2,6 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useState, useEffect } from "react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Sidebar,
   SidebarContent,
@@ -13,7 +15,6 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import Image from "next/image"
 import {
   LayoutDashboard,
   Zap,
@@ -41,6 +42,39 @@ const NAV = [
 export function AppFounderSidebar() {
   const pathname = usePathname()
 
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [userName, setUserName] = useState("Alex Rivera")
+
+  useEffect(() => {
+    const fetchProfileData = () => {
+      if (typeof window !== "undefined") {
+        const storedProfile = localStorage.getItem("founder_profile_data")
+        if (storedProfile) {
+          try {
+            const parsed = JSON.parse(storedProfile)
+            if (parsed.avatarUrl !== undefined) setAvatarUrl(parsed.avatarUrl)
+            if (parsed.name !== undefined) setUserName(parsed.name)
+          } catch (e) {
+            console.error("Error reading profile data", e)
+          }
+        }
+      }
+    }
+    fetchProfileData()
+    const handleStorageChange = () => fetchProfileData()
+    window.addEventListener("storage", handleStorageChange)
+    window.addEventListener("founder-profile-update", handleStorageChange)
+    return () => {
+      window.removeEventListener("storage", handleStorageChange)
+      window.removeEventListener("founder-profile-update", handleStorageChange)
+    }
+  }, [])
+
+  const getInitials = (n: string) => {
+    if (!n) return "A"
+    return n.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
+  }
+
   return (
     <Sidebar variant="inset" collapsible="icon" className="bg-[#0b0b0c] text-white">
       <SidebarHeader className="border-b border-white/5">
@@ -50,14 +84,25 @@ export function AppFounderSidebar() {
               <DropdownMenuTrigger asChild>
                 <button className="flex w-full items-center justify-between rounded-lg p-1.5 text-sm font-medium text-white/90 hover:bg-white/5 transition-colors">
                   <div className="flex items-center gap-2.5">
-                    <Image
-                      src="/TheThing.png"
-                      alt="Something Logo"
-                      width={32}
-                      height={32}
-                      className="object-contain invert opacity-90 shrink-0"
-                    />
-                    <span className="text-[13px] font-semibold tracking-tight group-data-[collapsible=icon]:hidden">Founder of Something</span>
+                    <Avatar className="h-8 w-8 border border-white/5 shrink-0">
+                      {avatarUrl ? (
+                        avatarUrl.startsWith("linear-gradient") ? (
+                          <AvatarImage src="" alt="" className="hidden" />
+                        ) : (
+                          <AvatarImage src={avatarUrl} alt={userName} className="object-cover" />
+                        )
+                      ) : null}
+                      <AvatarFallback
+                        className="text-white text-[9px] font-bold font-mono uppercase"
+                        style={{ background: avatarUrl && avatarUrl.startsWith("linear-gradient") ? avatarUrl : "rgba(255,255,255,0.05)" }}
+                      >
+                        {getInitials(userName)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col items-start justify-center group-data-[collapsible=icon]:hidden truncate">
+                      <span className="text-[13px] font-semibold tracking-tight text-white leading-tight truncate max-w-[130px]">{userName}</span>
+                      <span className="text-[10px] font-mono text-white/50 tracking-wider uppercase leading-tight mt-0.5">Founder Node</span>
+                    </div>
                   </div>
                   <ChevronDown className="h-3.5 w-3.5 opacity-40 group-data-[collapsible=icon]:hidden" />
                 </button>

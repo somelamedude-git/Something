@@ -37,7 +37,8 @@ import {
   CheckCircle2,
   X,
   ChevronRight,
-  Check
+  Check,
+  Camera
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -216,8 +217,24 @@ export default function FounderProfilePage() {
   const [newInterestText, setNewInterestText] = useState("")
 
   const [saving, setSaving] = useState(false)
+  
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const activeAccent = ACCENTS[accentKey]
+
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const resultStr = reader.result as string
+      const updated = { ...profile, avatarUrl: resultStr }
+      saveProfileData(updated)
+      addToast("Avatar Updated", "New profile photo saved.", "success")
+    }
+    reader.readAsDataURL(file)
+  }
 
   // Add Toast Notification helper
   const addToast = (title: string, description?: string, type: ToastItem["type"] = "success") => {
@@ -622,7 +639,7 @@ export default function FounderProfilePage() {
             <div className="flex items-start justify-between gap-4">
               <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
                 {/* Glowing Avatar representation */}
-                <div className="size-20 rounded-full overflow-hidden border-2 border-white/10 shrink-0 bg-white/5 flex items-center justify-center relative shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
+                <div className="size-20 rounded-full overflow-hidden border-2 border-white/10 shrink-0 bg-white/5 flex items-center justify-center relative shadow-[0_4px_12px_rgba(0,0,0,0.3)] group">
                   {profile.avatarUrl ? (
                     profile.avatarUrl.startsWith("linear-gradient") ? (
                       <div className="size-full animate-pulse" style={{ background: profile.avatarUrl }} />
@@ -633,7 +650,23 @@ export default function FounderProfilePage() {
                   ) : (
                     <span className="text-2xl font-bold font-mono text-white/60">{getInitials(profile.name)}</span>
                   )}
+                  
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                    aria-label="Upload custom image"
+                  >
+                    <Camera className="h-5 w-5 text-white" />
+                  </button>
                 </div>
+                
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                />
 
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
