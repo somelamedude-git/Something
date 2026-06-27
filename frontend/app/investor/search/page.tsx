@@ -182,15 +182,15 @@ export default function InvestorSearchPage() {
         {/* Main column */}
         <div className="min-w-0 flex-1 space-y-6">
           {/* Top bar */}
-          <div className="rounded-xl bg-[#101113] p-3 sm:p-4">
+          <div className="rounded-xl border border-border bg-background p-3 sm:p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="relative flex-1">
-                <SearchIcon className="pointer-events-none absolute left-2 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-white/40" />
+                <SearchIcon className="pointer-events-none absolute left-3 top-1/2 z-10 h-3.5 w-3.5 -translate-y-1/2 text-foreground/30" />
                 <Input
                   placeholder="Domains, founders, keywords…"
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  className="h-9 w-full pl-8 bg-[#0f1012] border-transparent text-white placeholder:text-white/40"
+                  className="h-9 w-full pl-9 bg-accent/30 border-border/60 text-foreground placeholder:text-foreground/30 rounded-lg"
                 />
               </div>
 
@@ -199,8 +199,8 @@ export default function InvestorSearchPage() {
                   <Button
                     variant="outline"
                     className={cn(
-                      "h-9 rounded-md border-white/10 text-white hover:bg-white/[0.06] bg-transparent",
-                      activeCount > 0 && "border-white/30",
+                      "h-9 rounded-md border-border/40 text-foreground/60 hover:bg-accent hover:text-foreground bg-transparent transition-all",
+                      activeCount > 0 && "border-border text-foreground",
                     )}
                   >
                     <SlidersHorizontal className="mr-2 h-4 w-4" />
@@ -229,45 +229,51 @@ export default function InvestorSearchPage() {
           </div>
 
           {/* Minimal results list */}
-          <div className="rounded-xl bg-[#101113]">
+          <div className="rounded-xl border border-border overflow-hidden">
             {results.length === 0 && (
-              <div className="p-4 text-sm text-white/70">No projects match your filters. Try broadening.</div>
+              <div className="p-6 text-sm text-muted-foreground font-mono text-center">No projects match your filters. Try broadening.</div>
             )}
 
             {results.map((r, idx) => (
               <div
                 key={r.id}
                 className={cn(
-                  "px-4 py-4 hover:bg-white/[0.03] transition-colors",
-                  idx !== 0 && "border-t border-white/5",
+                  "px-5 py-4 hover:bg-accent/20 transition-colors",
+                  idx !== 0 && "border-t border-border/60",
                 )}
               >
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                  <div className="text-base font-semibold">{r.name}</div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="secondary" className="bg-white/[0.04] text-white border-white/10">
-                      {r.stage}
-                    </Badge>
-                    {r.domains.map((d) => (
-                      <Badge key={d} variant="secondary" className="bg-white/[0.04] text-white border-white/10">
-                        {d}
+                <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+                  <div className="flex-1 space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-base font-semibold text-foreground">{r.name}</span>
+                      <Badge variant="secondary" className="bg-accent text-foreground/70 border-border text-[10px] font-mono">
+                        {r.stage}
                       </Badge>
-                    ))}
-                    <span className="text-xs text-white/60">• {r.location}</span>
+                      {r.domains.map((d) => (
+                        <Badge key={d} variant="secondary" className="bg-accent/60 text-foreground/60 border-border/60 text-[10px]">
+                          {d}
+                        </Badge>
+                      ))}
+                      <span className="text-xs text-muted-foreground">· {r.location}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground font-sans leading-snug">{r.desc}</p>
+                    <div className="text-xs text-muted-foreground">
+                      {launchedLabel(r.launchedAt)} · Needs{" "}
+                      <span className="text-foreground font-medium">{formatUSD(r.investmentNeeded)}</span>
+                    </div>
                   </div>
-                  <div className="sm:ml-auto flex items-center gap-3">
+                  <div className="sm:ml-4 flex items-center gap-3 shrink-0">
                     {(() => {
-                      const baseline = 75
                       const tp = clamp(r.trustPoints, 1, 100)
-                      const delta = tp - baseline
+                      const delta = tp - 75
                       const deltaStr = delta === 0 ? "0" : delta > 0 ? `+${delta}` : `${delta}`
                       return (
-                        <span className="text-sm">
-                          Trust <span className="font-semibold">{tp}</span>
+                        <span className="text-sm text-foreground/70">
+                          Trust <span className="font-semibold text-foreground">{tp}</span>
                           <span
                             className={cn(
                               "ml-1 text-xs",
-                              delta > 0 ? "text-emerald-300" : delta < 0 ? "text-rose-300" : "text-white/70",
+                              delta > 0 ? "text-emerald-500" : delta < 0 ? "text-rose-500" : "text-muted-foreground",
                             )}
                           >
                             ({deltaStr})
@@ -275,15 +281,10 @@ export default function InvestorSearchPage() {
                         </span>
                       )
                     })()}
-                    <Button asChild className="h-8 rounded-md bg-white text-[#0b0b0c] hover:bg-white/90">
+                    <Button asChild size="sm" className="h-8 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs">
                       <Link href={`/investor/search/${r.id}`}>View brief</Link>
                     </Button>
                   </div>
-                </div>
-                <p className="text-sm text-white/70 mt-2">{r.desc}</p>
-                <div className="mt-2 text-xs text-white/60">
-                  {launchedLabel(r.launchedAt)} • Needs{" "}
-                  <span className="text-white">{formatUSD(r.investmentNeeded)}</span>
                 </div>
               </div>
             ))}
@@ -334,13 +335,13 @@ function FiltersSheet({
   } = state
 
   return (
-    <SheetContent side="right" className="w-full sm:max-w-md bg-[#101113] text-white border-l-white/10">
+    <SheetContent side="right" className="w-full sm:max-w-md bg-popover border-l border-border text-popover-foreground">
       <SheetHeader>
-        <SheetTitle>Filters</SheetTitle>
-        <SheetDescription className="text-white/60">Keep it light, only what’s needed.</SheetDescription>
+        <SheetTitle className="font-serif font-light text-xl">Filters</SheetTitle>
+        <SheetDescription className="text-muted-foreground text-xs font-mono">Narrow your search to the right opportunities.</SheetDescription>
       </SheetHeader>
 
-      <div className="mt-4 grid gap-6">
+      <div className="mt-6 grid gap-7">
         <FacetBlock title="Domain(s)">
           <div className="flex flex-wrap gap-2">
             {ALL_DOMAINS.map((d) => {
@@ -352,8 +353,10 @@ function FiltersSheet({
                     setSelectedDomains(on ? selectedDomains.filter((x) => x !== d) : [...selectedDomains, d])
                   }
                   className={cn(
-                    "text-xs rounded-md px-3 py-1.5 border transition",
-                    on ? "border-white/30 bg-white/[0.06]" : "border-white/10 text-white/80 hover:bg-white/[0.03]",
+                    "text-xs rounded-full px-3 py-1.5 border transition-all",
+                    on
+                      ? "border-[var(--brand-accent)] bg-[var(--brand-accent)]/10 text-foreground"
+                      : "border-border/60 text-foreground/60 hover:bg-accent",
                   )}
                   aria-pressed={on}
                 >
@@ -372,13 +375,13 @@ function FiltersSheet({
                 <label
                   key={loc}
                   className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-md border px-2 py-1.5 text-xs",
-                    on ? "border-white/30 bg-white/[0.06]" : "border-white/10 hover:bg-white/[0.03]",
+                    "flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-xs transition-all",
+                    on ? "border-[var(--brand-accent)]/40 bg-accent text-foreground" : "border-border/60 text-foreground/60 hover:bg-accent",
                   )}
                 >
                   <input
                     type="checkbox"
-                    className="accent-white"
+                    className="accent-[var(--brand-accent)]"
                     checked={on}
                     onChange={() =>
                       setSelectedLocations(
@@ -399,15 +402,17 @@ function FiltersSheet({
               { k: "any", label: "Any" },
               { k: "30d", label: "Last 30d" },
               { k: "90d", label: "Last 90d" },
-              { k: "1y", label: "Older than 1y" },
+              { k: "1y",  label: "Older than 1y" },
               { k: "pre", label: "Pre‑launch" },
             ].map((o) => (
               <button
                 key={o.k}
                 onClick={() => setLaunchedWhen(o.k as WhenKey)}
                 className={cn(
-                  "text-xs rounded-md px-3 py-1.5 border transition",
-                  launchedWhen === o.k ? "border-white/30 bg-white/[0.06]" : "border-white/10 hover:bg-white/[0.03]",
+                  "text-xs rounded-full px-3 py-1.5 border transition-all",
+                  launchedWhen === o.k
+                    ? "border-[var(--brand-accent)] bg-[var(--brand-accent)]/10 text-foreground"
+                    : "border-border/60 text-foreground/60 hover:bg-accent",
                 )}
                 aria-pressed={launchedWhen === o.k}
               >
@@ -428,79 +433,57 @@ function FiltersSheet({
                 value={minTrust}
                 onChange={(e) => setMinTrust(Number.parseInt(e.target.value))}
                 aria-label="Minimum trust points"
-                className="w-full"
+                className="w-full accent-[var(--brand-accent)]"
               />
-              <div className="w-16 text-right text-sm">{minTrust} / 100</div>
+              <div className="w-16 text-right text-sm text-foreground/70 font-mono">{minTrust} / 100</div>
             </div>
-            <div className="text-xs text-white/60">Baseline 75; signals raise or lower this.</div>
+            <div className="text-[10px] text-muted-foreground font-mono">Baseline 75 — signals raise or lower this.</div>
           </div>
         </FacetBlock>
 
         <FacetBlock title="Investment needed (USD)">
-          <div className="grid gap-2">
-            <div className="grid grid-cols-2 gap-2">
+          <div className="grid gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-white/60">Min</span>
+                <span className="text-[10px] text-muted-foreground font-mono w-6">Min</span>
                 <Input
                   type="number"
                   min={0}
                   step={1000}
                   value={investMin}
                   onChange={(e) => setInvestMin(safeInt(e.target.value, investMin))}
-                  className="h-8 bg-[#0f1012] border-white/10 text-white"
+                  className="h-8 bg-accent/30 border-border/60 text-foreground text-xs"
                 />
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-white/60">Max</span>
+                <span className="text-[10px] text-muted-foreground font-mono w-6">Max</span>
                 <Input
                   type="number"
                   min={0}
                   step={1000}
                   value={investMax}
                   onChange={(e) => setInvestMax(safeInt(e.target.value, investMax))}
-                  className="h-8 bg-[#0f1012] border-white/10 text-white"
+                  className="h-8 bg-accent/30 border-border/60 text-foreground text-xs"
                 />
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <input
-                type="range"
-                min={0}
-                max={100000}
-                step={1000}
-                value={investMin}
-                onChange={(e) => setInvestMin(Number.parseInt(e.target.value))}
-                className="w-full"
-                aria-label="Investment min"
-              />
-              <input
-                type="range"
-                min={0}
-                max={100000}
-                step={1000}
-                value={investMax}
-                onChange={(e) => setInvestMax(Number.parseInt(e.target.value))}
-                className="w-full -ml-2"
-                aria-label="Investment max"
-              />
-            </div>
-            <div className="text-xs text-white/60">
+            <div className="text-[10px] text-muted-foreground font-mono">
               Range: ${investMin.toLocaleString()} – ${investMax.toLocaleString()}
             </div>
           </div>
         </FacetBlock>
       </div>
 
-      <SheetFooter className="mt-6 flex items-center gap-2">
+      <SheetFooter className="mt-8 flex items-center gap-2">
         <Button
           variant="outline"
           onClick={onReset}
-          className="rounded-md border-white/10 text-white hover:bg-white/[0.06] bg-transparent"
+          className="rounded-lg border-border/60 text-foreground/60 hover:bg-accent bg-transparent"
         >
           Reset
         </Button>
         <SheetClose asChild>
-          <Button className="rounded-md bg-white text-[#0b0b0c] hover:bg-white/90">Apply</Button>
+          <Button className="rounded-lg bg-primary text-primary-foreground hover:opacity-90">Apply</Button>
         </SheetClose>
       </SheetFooter>
     </SheetContent>
@@ -549,7 +532,7 @@ function clamp(n: number, min: number, max: number) {
 function FacetBlock({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="grid gap-2">
-      <div className="text-xs text-white/60">{title}</div>
+      <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{title}</div>
       {children}
     </div>
   )
