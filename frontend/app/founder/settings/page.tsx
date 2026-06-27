@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -17,7 +16,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import {
-  Settings,
   Bell,
   Shield,
   Trash2,
@@ -37,7 +35,6 @@ import {
   Terminal,
   Camera,
   Palette,
-  RefreshCw,
   X,
   User
 } from "lucide-react"
@@ -77,10 +74,22 @@ const DEFAULT_PROFILE: ProfileData = {
 
 // Preset Glowing Avatars
 const PRESET_AVATARS = [
-  "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
-  "linear-gradient(135deg, #10b981 0%, #3b82f6 100%)",
-  "linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)",
-  "linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)",
+  // Deep Aurora — indigo → teal
+  "linear-gradient(145deg, #1a1a2e 0%, #16213e 30%, #0f3460 60%, #1a7a8a 100%)",
+  // Dusk Copper — warm clay → burnt sienna
+  "linear-gradient(150deg, #3d1c02 0%, #7c3a1e 35%, #c4622d 70%, #e8946a 100%)",
+  // Ocean Ink — deep navy → soft cyan
+  "linear-gradient(135deg, #0d1b2a 0%, #1b3a4b 40%, #1c6e8a 75%, #4eb3c8 100%)",
+  // Forest Ember — dark olive → sage
+  "linear-gradient(140deg, #0d1f0e 0%, #1e3d20 35%, #3a6b3e 65%, #7aad7e 100%)",
+  // Slate Rose — charcoal → dusty mauve
+  "linear-gradient(150deg, #1a1520 0%, #2e2040 40%, #5c3d6b 70%, #9c7aaa 100%)",
+  // Midnight Sand — black → warm stone
+  "linear-gradient(135deg, #0f0e0d 0%, #2a2520 40%, #5c5040 70%, #a08c72 100%)",
+  // Obsidian Steel — near-black → steel blue
+  "linear-gradient(145deg, #0a0c10 0%, #1a2030 40%, #2a3d5a 70%, #5878a0 100%)",
+  // Ash Crimson — charcoal → deep red
+  "linear-gradient(140deg, #140a0a 0%, #2e1010 35%, #6b2020 65%, #b04040 100%)",
 ]
 
 interface ToastItem {
@@ -100,7 +109,7 @@ const ACCENTS = {
     glow: "",
     borderHighlight: "border-[#8EA38E]",
     textHighlight: "text-[#8EA38E]",
-    btnBg: "bg-[#8EA38E] text-black hover:bg-[#8EA38E]/90",
+    btnBg: "bg-[#8EA38E] text-background hover:bg-[#8EA38E]/90",
     toggleBg: "data-[state=checked]:bg-[#8EA38E]",
     color: "#8EA38E",
   },
@@ -112,7 +121,7 @@ const ACCENTS = {
     glow: "",
     borderHighlight: "border-[#E2DFD5]",
     textHighlight: "text-[#E2DFD5]",
-    btnBg: "bg-[#E2DFD5] text-black hover:bg-[#E2DFD5]/90",
+    btnBg: "bg-[#E2DFD5] text-background hover:bg-[#E2DFD5]/90",
     toggleBg: "data-[state=checked]:bg-[#E2DFD5]",
     color: "#E2DFD5",
   },
@@ -124,7 +133,7 @@ const ACCENTS = {
     glow: "",
     borderHighlight: "border-[#8293A4]",
     textHighlight: "text-[#8293A4]",
-    btnBg: "bg-[#8293A4] text-black hover:bg-[#8293A4]/90",
+    btnBg: "bg-[#8293A4] text-background hover:bg-[#8293A4]/90",
     toggleBg: "data-[state=checked]:bg-[#8293A4]",
     color: "#8293A4",
   },
@@ -136,7 +145,7 @@ const ACCENTS = {
     glow: "",
     borderHighlight: "border-[#C88E72]",
     textHighlight: "text-[#C88E72]",
-    btnBg: "bg-[#C88E72] text-black hover:bg-[#C88E72]/90",
+    btnBg: "bg-[#C88E72] text-background hover:bg-[#C88E72]/90",
     toggleBg: "data-[state=checked]:bg-[#C88E72]",
     color: "#C88E72",
   },
@@ -222,14 +231,14 @@ export default function FounderSettingsPage() {
   }, [])
 
   // Sync profile edits with auto-saving simulation
-  const updateProfileField = (field: keyof ProfileData | string, value: any, nestedKey?: string) => {
+  const updateProfileField = (field: keyof ProfileData, value: string | string[], nestedKey?: string) => {
     let updatedProfile: ProfileData
     if (nestedKey) {
       updatedProfile = {
         ...profile,
         [field]: {
-          ...(profile[field as keyof ProfileData] as any),
-          [nestedKey]: value
+          ...(profile[field] as unknown as Record<string, string>),
+          [nestedKey]: value as string
         }
       }
     } else {
@@ -264,6 +273,9 @@ export default function FounderSettingsPage() {
   const handleAccentChange = (key: keyof typeof ACCENTS) => {
     setAccentKey(key)
     localStorage.setItem("founder_settings_accent", key)
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("founder-accent-update", { detail: { accent: key } }))
+    }
     addToast("Theme Accent Changed", `Interface colors set to ${ACCENTS[key].name}.`, "info")
   }
 
@@ -380,7 +392,7 @@ export default function FounderSettingsPage() {
 
   // Password strength validation helper
   const getPasswordStrength = () => {
-    if (!newPassword) return { score: 0, text: "Unentered", color: "bg-white/15", checks: { len: false, num: false, spec: false, case: false } }
+    if (!newPassword) return { score: 0, text: "Unentered", color: "bg-foreground/15", checks: { len: false, num: false, spec: false, case: false } }
     
     const checks = {
       len: newPassword.length >= 8,
@@ -431,7 +443,7 @@ export default function FounderSettingsPage() {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className="pointer-events-auto flex items-start gap-3 w-[330px] rounded-xl bg-zinc-950/85 border border-white/10 backdrop-blur-xl p-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] animate-in slide-in-from-right duration-300 relative overflow-hidden"
+            className="pointer-events-auto flex items-start gap-3 w-[330px] rounded-xl bg-background/85 border border-border/10 backdrop-blur-xl p-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] animate-in slide-in-from-right duration-300 relative overflow-hidden"
           >
             {/* Countdown progress line */}
             <div className={cn("absolute bottom-0 left-0 h-[2px] w-full animate-out fade-out fill-mode-forwards origin-left", 
@@ -445,12 +457,12 @@ export default function FounderSettingsPage() {
               {t.type === "info" && <CheckCircle2 className="h-4.5 w-4.5 text-blue-400" />}
             </div>
             <div className="flex-1 space-y-0.5">
-              <h5 className="text-xs font-bold text-white font-mono uppercase tracking-wider">{t.title}</h5>
-              {t.description && <p className="text-[10px] text-white/50 leading-relaxed font-sans">{t.description}</p>}
+              <h5 className="text-xs font-bold text-foreground font-mono uppercase tracking-wider">{t.title}</h5>
+              {t.description && <p className="text-[10px] text-foreground/50 leading-relaxed font-sans">{t.description}</p>}
             </div>
             <button
               onClick={() => setToasts((prev) => prev.filter((item) => item.id !== t.id))}
-              className="text-white/20 hover:text-white/50 cursor-pointer shrink-0 transition"
+              className="text-foreground/20 hover:text-foreground/50 cursor-pointer shrink-0 transition"
               aria-label="Close Notification"
             >
               <X className="h-3.5 w-3.5" />
@@ -459,9 +471,9 @@ export default function FounderSettingsPage() {
         ))}
       </div>
 
-      <div className="flex flex-col gap-1 pb-2">
-        <h2 className="text-2xl font-bold tracking-tight text-white font-outfit">Settings</h2>
-        <p className="text-white/40 text-xs font-sans font-medium">Personalize your identity aesthetic, configure visibility nodes, manage credentials, and set notification thresholds.</p>
+      <div className="flex flex-col gap-1 pb-2 border-b border-border/[0.03]">
+        <h2 className="text-2xl font-serif font-light text-foreground leading-tight">Settings</h2>
+        <p className="text-foreground/40 text-xs font-sans font-light leading-relaxed">Personalize your identity aesthetic, configure visibility nodes, manage credentials, and set notification thresholds.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -479,14 +491,14 @@ export default function FounderSettingsPage() {
                    className={cn(
                      "w-full rounded-xl px-4 py-3 text-left transition-all duration-300 relative flex items-center gap-3 border border-transparent text-xs font-semibold uppercase tracking-wider font-mono cursor-pointer",
                      isActive
-                       ? "bg-white/[0.06] border-white/10 text-white shadow"
-                       : "text-white/40 hover:text-white/80 hover:bg-white/[0.01]"
+                       ? "bg-foreground/[0.06] border-border/10 text-foreground shadow"
+                       : "text-foreground/40 hover:text-foreground/80 hover:bg-foreground/[0.01]"
                    )}
                 >
                   {isActive && (
                     <div className="absolute left-0 top-3 bottom-3 w-[2px] bg-[#34D399] rounded-r-full" />
                   )}
-                  <TabIcon className={cn("h-4 w-4 shrink-0 transition-colors", isActive ? "text-[#34D399]" : "text-white/30")} />
+                  <TabIcon className={cn("h-4 w-4 shrink-0 transition-colors", isActive ? "text-[#34D399]" : "text-foreground/30")} />
                   {t.label}
                 </button>
               )
@@ -494,10 +506,10 @@ export default function FounderSettingsPage() {
           </div>
 
           {/* System Accent Selection widget */}
-          <div className="border-t border-white/5 pt-6 space-y-4">
+          <div className="border-t border-border/5 pt-6 space-y-4">
             <div className="flex items-center gap-2">
-              <Palette className="h-4 w-4 text-white/40" />
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-white/50">Palette Accent</span>
+              <Palette className="h-4 w-4 text-foreground/40" />
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-foreground/50">Palette Accent</span>
             </div>
             
             <div className="grid grid-cols-4 gap-2">
@@ -511,27 +523,28 @@ export default function FounderSettingsPage() {
                     className={cn(
                       "size-8 rounded-full border grid place-items-center transition-all duration-300 relative cursor-pointer hover:scale-105 active:scale-95",
                       isSelected 
-                        ? "border-white bg-white/10" 
-                        : "border-white/5 bg-transparent"
+                        ? "border-border ring-2 ring-offset-2 ring-offset-background" 
+                        : "border-border/20 bg-transparent"
                     )}
+                    style={isSelected ? { ringColor: accent.color } : undefined}
                     title={accent.name}
                   >
                     <div className="size-4.5 rounded-full" style={{ backgroundColor: accent.color }} />
                     {isSelected && (
-                      <Check className="h-3 w-3 text-black absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 stroke-[3]" />
+                      <Check className="h-3 w-3 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 stroke-[3]" style={{ color: accent.color }} />
                     )}
                   </button>
                 )
               })}
             </div>
-            <p className="text-[9px] text-white/30 leading-normal font-mono uppercase tracking-wider">
-              Selected: <span className="text-white/70">{activeAccent.name}</span>
+            <p className="text-[9px] text-foreground/30 leading-normal font-mono uppercase tracking-wider">
+              Selected: <span className="text-foreground/70">{activeAccent.name}</span>
             </p>
           </div>
         </div>
 
         {/* Right Side: Tab Contents Panel */}
-        <div className="lg:col-span-9 lg:border-l lg:border-white/5 lg:pl-8 min-h-[500px]">
+        <div className="lg:col-span-9 lg:border-l lg:border-border/5 lg:pl-8 min-h-[500px]">
           
           {activeTab === "profile" && (
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 xl:divide-x xl:divide-white/5 items-start">
@@ -539,18 +552,18 @@ export default function FounderSettingsPage() {
               {/* Profile Config Inputs */}
               <div className="xl:col-span-7 space-y-12">
                 <div className="space-y-6">
-                  <div className="border-b border-white/5 pb-4">
-                    <h3 className="text-sm font-semibold tracking-tight text-white font-outfit flex items-center gap-2">
-                      <User className="h-4.5 w-4.5" style={{ color: activeAccent.color }} />
+                  <div className="border-b border-border/5 pb-4">
+                    <h3 className="text-sm font-serif font-light text-foreground flex items-center gap-2">
+                      <User className="h-4 w-4" style={{ color: activeAccent.color }} />
                       Developer Identity Attributes
                     </h3>
-                    <p className="text-white/40 text-[11px] mt-1 font-mono uppercase tracking-wider">Edit your public card profile parameters</p>
+                    <p className="text-foreground/40 text-[11px] mt-1 font-mono uppercase tracking-wider">Edit your public card profile parameters</p>
                   </div>
 
                   {/* Avatar Upload Selection Grid */}
                   <div className="space-y-3.5">
                     <div className="flex justify-between items-center">
-                      <label className="text-[10px] font-mono font-semibold uppercase tracking-wider text-white/50">Avatar Node Image</label>
+                      <label className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Avatar Node Image</label>
                       {savingKeys["avatarUrl"] && (
                         <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1">
                           {savingKeys["avatarUrl"] === "saving" ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Check className="h-2.5 w-2.5" />}
@@ -561,7 +574,7 @@ export default function FounderSettingsPage() {
                     
                     <div className="flex flex-wrap items-center gap-4">
                       {/* Current Avatar Circle */}
-                      <div className="size-16 rounded-full overflow-hidden border border-white/10 shrink-0 bg-white/5 flex items-center justify-center relative group">
+                      <div className="size-16 rounded-full overflow-hidden border border-border/10 shrink-0 bg-foreground/5 flex items-center justify-center relative group">
                         {profile.avatarUrl ? (
                           profile.avatarUrl.startsWith("linear-gradient") ? (
                             <div className="size-full" style={{ background: profile.avatarUrl }} />
@@ -570,40 +583,47 @@ export default function FounderSettingsPage() {
                             <img src={profile.avatarUrl} alt="Avatar" className="size-full object-cover" />
                           )
                         ) : (
-                          <span className="text-lg font-bold font-mono text-white/60">{getInitials(profile.name)}</span>
+                          <span className="text-lg font-bold font-mono text-foreground/60">{getInitials(profile.name)}</span>
                         )}
                         
                         <button
                           onClick={() => fileInputRef.current?.click()}
-                          className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                          className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
                           aria-label="Upload custom image"
                         >
-                          <Camera className="h-4 w-4 text-white" />
+                          <Camera className="h-4 w-4 text-foreground" />
                         </button>
                       </div>
 
                       {/* Presets List */}
                       <div className="space-y-1.5 flex-1 min-w-[180px]">
-                        <span className="text-[9px] font-mono text-white/35 uppercase tracking-wide">Pick Gradient Preset</span>
+                        <span className="text-[9px] font-mono text-foreground/35 uppercase tracking-wide">Pick Gradient Preset</span>
                         <div className="flex gap-2">
                           {PRESET_AVATARS.map((gradient, i) => (
                             <button
                               key={i}
                               onClick={() => updateProfileField("avatarUrl", gradient)}
                               className={cn(
-                                "size-8 rounded-full border cursor-pointer transition-all hover:scale-105 active:scale-95",
-                                profile.avatarUrl === gradient ? "border-white scale-105" : "border-white/5"
+                                "size-8 rounded-full cursor-pointer transition-all hover:scale-110 active:scale-95",
+                                profile.avatarUrl === gradient
+                                  ? "ring-2 ring-offset-2 ring-offset-background scale-110"
+                                  : "ring-1 ring-border/20"
                               )}
-                              style={{ background: gradient }}
+                              style={{
+                                background: gradient,
+                                ...(profile.avatarUrl === gradient
+                                  ? { boxShadow: "0 0 0 2px var(--brand-accent)" }
+                                  : {})
+                              }}
                               aria-label={`Gradient Preset ${i + 1}`}
                             />
                           ))}
                           <button
                             onClick={() => fileInputRef.current?.click()}
-                            className="size-8 rounded-full border border-white/10 hover:border-white/30 bg-white/5 flex items-center justify-center cursor-pointer transition"
+                            className="size-8 rounded-full border border-border/10 hover:border-border/30 bg-foreground/5 flex items-center justify-center cursor-pointer transition"
                             title="Upload custom image"
                           >
-                            <Camera className="h-3.5 w-3.5 text-white/50" />
+                            <Camera className="h-3.5 w-3.5 text-foreground/50" />
                           </button>
                         </div>
                       </div>
@@ -623,7 +643,7 @@ export default function FounderSettingsPage() {
                     {/* Display Name */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <label htmlFor="display-name" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-white/50">Display Name</label>
+                        <label htmlFor="display-name" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Display Name</label>
                         {savingKeys["name"] && (
                           <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1">
                             {savingKeys["name"] === "saving" ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Check className="h-2.5 w-2.5" />}
@@ -635,14 +655,15 @@ export default function FounderSettingsPage() {
                         id="display-name"
                         value={profile.name}
                         onChange={(e) => updateProfileField("name", e.target.value)}
-                        className={cn("bg-black/40 border-white/5 text-xs text-white rounded-lg h-9 focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
+                        className={cn("bg-background/40 border-border/5 text-xs text-foreground rounded-lg h-9 focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
                       />
+                      <p className="text-[10px] text-foreground/30 font-sans mt-1">Your display name as it appears on cohort directories.</p>
                     </div>
 
                     {/* Headline */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <label htmlFor="headline" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-white/50">Headline Role</label>
+                        <label htmlFor="headline" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Headline Role</label>
                         {savingKeys["headline"] && (
                           <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1">
                             {savingKeys["headline"] === "saving" ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Check className="h-2.5 w-2.5" />}
@@ -654,14 +675,15 @@ export default function FounderSettingsPage() {
                         id="headline"
                         value={profile.headline}
                         onChange={(e) => updateProfileField("headline", e.target.value)}
-                        className={cn("bg-black/40 border-white/5 text-xs text-white rounded-lg h-9 focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
+                        className={cn("bg-background/40 border-border/5 text-xs text-foreground rounded-lg h-9 focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
                       />
+                      <p className="text-[10px] text-foreground/30 font-sans mt-1">A one-line description of your project role (e.g. Lead Engineer, AI Architect).</p>
                     </div>
 
                     {/* Location */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <label htmlFor="location" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-white/50">Node Location</label>
+                        <label htmlFor="location" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Node Location</label>
                         {savingKeys["location"] && (
                           <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1">
                             {savingKeys["location"] === "saving" ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Check className="h-2.5 w-2.5" />}
@@ -673,14 +695,15 @@ export default function FounderSettingsPage() {
                         id="location"
                         value={profile.location}
                         onChange={(e) => updateProfileField("location", e.target.value)}
-                        className={cn("bg-black/40 border-white/5 text-xs text-white rounded-lg h-9 focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
+                        className={cn("bg-background/40 border-border/5 text-xs text-foreground rounded-lg h-9 focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
                       />
+                      <p className="text-[10px] text-foreground/30 font-sans mt-1">Your base city or remote status for connection searches.</p>
                     </div>
 
                     {/* Biography */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <label htmlFor="biography" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-white/50">Bio Synopsis</label>
+                        <label htmlFor="biography" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Bio Synopsis</label>
                         {savingKeys["about"] && (
                           <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1">
                             {savingKeys["about"] === "saving" ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Check className="h-2.5 w-2.5" />}
@@ -692,26 +715,27 @@ export default function FounderSettingsPage() {
                         id="biography"
                         value={profile.about}
                         onChange={(e) => updateProfileField("about", e.target.value)}
-                        className={cn("bg-black/40 border-white/5 text-xs text-white rounded-lg min-h-[90px] focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
+                        className={cn("bg-background/40 border-border/5 text-xs text-foreground rounded-lg min-h-[90px] focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
                       />
+                      <p className="text-[10px] text-foreground/30 font-sans mt-1">A brief background summary introducing yourself to cohort investors.</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Profile Privacy Rules */}
-                <div className="space-y-6 pt-6 border-t border-white/5">
-                  <div className="border-b border-white/5 pb-4">
-                    <h3 className="text-sm font-semibold tracking-tight text-white font-outfit flex items-center gap-2">
-                      <Shield className="h-4.5 w-4.5" style={{ color: activeAccent.color }} />
+                <div className="space-y-6 pt-6 border-t border-border/5">
+                  <div className="border-b border-border/5 pb-4">
+                    <h3 className="text-sm font-serif font-light text-foreground flex items-center gap-2">
+                      <Shield className="h-4 w-4" style={{ color: activeAccent.color }} />
                       Decentralized Privacy Rules
                     </h3>
-                    <p className="text-white/40 text-[11px] mt-1 font-mono uppercase tracking-wider">Configure search visibility and credential disclosures</p>
+                    <p className="text-foreground/40 text-[11px] mt-1 font-mono uppercase tracking-wider">Configure search visibility and credential disclosures</p>
                   </div>
 
                   <div className="space-y-4">
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <label className="text-[10px] font-mono font-semibold uppercase tracking-wider text-white/50">Index Visibility Rule</label>
+                        <label className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Index Visibility Rule</label>
                         {savingKeys["privacy"] && (
                           <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1">
                             {savingKeys["privacy"] === "saving" ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Check className="h-2.5 w-2.5" />}
@@ -736,22 +760,22 @@ export default function FounderSettingsPage() {
                               className={cn(
                                 "flex flex-col items-center justify-center p-3.5 rounded-xl border text-center transition-all w-full cursor-pointer relative",
                                 isSelected
-                                  ? "bg-white/[0.04] border-white/20 shadow-md scale-[1.01]"
-                                  : "bg-black/30 border-white/5 hover:border-white/10 hover:bg-white/[0.01]"
+                                  ? "bg-foreground/[0.04] border-border/20 shadow-md scale-[1.01]"
+                                  : "bg-background/30 border-border/5 hover:border-border/10 hover:bg-foreground/[0.01]"
                               )}
                             >
                               {isSelected && (
                                 <div className="absolute top-1.5 right-1.5 size-1.5 rounded-full" style={{ backgroundColor: activeAccent.color }} />
                               )}
                               <OptIcon className="h-4.5 w-4.5 mb-1.5 opacity-60" style={{ color: isSelected ? activeAccent.color : "white" }} />
-                              <span className="text-[10px] font-bold font-mono uppercase tracking-wider text-white/80">{opt.label}</span>
+                              <span className="text-[10px] font-bold font-mono uppercase tracking-wider text-foreground/80">{opt.label}</span>
                             </button>
                           )
                         })}
                       </div>
                     </div>
 
-                    <div className="border-t border-white/[0.04] pt-4.5 space-y-3.5">
+                    <div className="border-t border-border/[0.04] pt-4.5 space-y-3.5">
                       <AutoSaveRow
                         id="show-email"
                         label="Publish Email Address"
@@ -777,19 +801,19 @@ export default function FounderSettingsPage() {
 
               {/* Dynamic Reactive Live Preview Card (xl:col-span-5) */}
               <div className="xl:col-span-5 xl:sticky xl:top-6 space-y-4 xl:pl-8">
-                <div className="text-[10px] font-mono font-semibold uppercase tracking-widest text-white/40 flex items-center gap-1.5 px-1.5">
-                  <Eye className="h-3.5 w-3.5 text-white/40" />
+                <div className="text-[10px] font-mono font-semibold uppercase tracking-widest text-foreground/40 flex items-center gap-1.5 px-1.5">
+                  <Eye className="h-3.5 w-3.5 text-foreground/40" />
                   Live Preview Mockup
                 </div>
                 
                 <div 
-                  className="bg-[#0a0a0c] border border-white/5 text-white rounded-xl overflow-hidden relative"
+                  className="bg-background border border-border/5 text-foreground rounded-xl overflow-hidden relative"
                 >
                   <div className="p-6 space-y-5">
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                       <div className="flex gap-4 min-w-0">
                         {/* Avatar */}
-                        <div className="size-16 rounded-full overflow-hidden border border-white/10 shrink-0 bg-white/5 flex items-center justify-center relative shadow-md">
+                        <div className="size-16 rounded-full overflow-hidden border border-border/10 shrink-0 bg-foreground/5 flex items-center justify-center relative shadow-md">
                           {profile.avatarUrl ? (
                             profile.avatarUrl.startsWith("linear-gradient") ? (
                               <div className="size-full" style={{ background: profile.avatarUrl }} />
@@ -798,26 +822,26 @@ export default function FounderSettingsPage() {
                               <img src={profile.avatarUrl} alt="Preview Avatar" className="size-full object-cover" />
                             )
                           ) : (
-                            <span className="text-base font-bold font-mono text-white/50">{getInitials(profile.name)}</span>
+                            <span className="text-base font-bold font-mono text-foreground/50">{getInitials(profile.name)}</span>
                           )}
                         </div>
 
                         {/* Header details */}
                         <div className="space-y-1 min-w-0">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <h4 className="font-bold font-outfit text-sm truncate">{profile.name || "Unnamed Node"}</h4>
+                            <h4 className="font-serif font-light text-sm text-foreground truncate">{profile.name || "Unnamed Node"}</h4>
                             <Badge className="bg-brand-accent/10 text-brand-accent border-brand-accent/20 text-[8px] tracking-wide rounded-full scale-90 origin-left shrink-0">
                               Verified
                             </Badge>
                           </div>
-                          <p className="text-white/70 text-xs truncate leading-normal">{profile.headline || "No Headline Role"}</p>
-                          <p className="text-[9px] text-white/35 font-mono truncate">{profile.location || "No Location"}</p>
+                          <p className="text-foreground/70 text-xs truncate leading-normal">{profile.headline || "No Headline Role"}</p>
+                          <p className="text-[9px] text-foreground/35 font-mono truncate">{profile.location || "No Location"}</p>
                         </div>
                       </div>
 
                       {/* Status pill overlay container (aligned inline on top right) */}
                       <div className="shrink-0 sm:pt-1">
-                        <Badge className={cn("text-[9px] font-mono font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full border border-white/5",
+                        <Badge className={cn("text-[9px] font-mono font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full border border-border/5",
                           profileVisibility === "public" ? "bg-brand-accent/10 text-brand-accent" :
                           profileVisibility === "network" ? "bg-indigo-500/10 text-indigo-400" :
                           "bg-pink-500/10 text-pink-400"
@@ -831,18 +855,18 @@ export default function FounderSettingsPage() {
 
                     <div className="space-y-3.5">
                       {/* Bio */}
-                      <p className="text-[10.5px] text-white/50 leading-relaxed font-sans line-clamp-3 bg-white/[0.015] border border-white/5 rounded-lg p-2.5">
+                      <p className="text-[10.5px] text-foreground/50 leading-relaxed font-sans line-clamp-3 bg-foreground/[0.015] border border-border/5 rounded-lg p-2.5">
                         {profile.about || "Enter details in settings to populate biography info..."}
                       </p>
 
                       {/* Dynamic Badge Features */}
                       <div className="flex flex-wrap gap-1.5 pt-1">
                         {showEmail && (
-                          <div className="flex items-center gap-1 bg-white/5 border border-white/5 px-2 py-0.5 rounded text-[8px] font-mono text-white/60">
+                          <div className="flex items-center gap-1 bg-foreground/5 border border-border/5 px-2 py-0.5 rounded text-[8px] font-mono text-foreground/60">
                             <Mail className="h-2.5 w-2.5 text-brand-accent" /> {email}
                           </div>
                         )}
-                        <div className="flex items-center gap-1 bg-white/5 border border-white/5 px-2 py-0.5 rounded text-[8px] font-mono text-white/60">
+                        <div className="flex items-center gap-1 bg-foreground/5 border border-border/5 px-2 py-0.5 rounded text-[8px] font-mono text-foreground/60">
                           <Shield className="h-2.5 w-2.5" style={{ color: activeAccent.color }} /> {allowMessages ? "Open Connections" : "Strict Matching"}
                         </div>
                       </div>
@@ -857,12 +881,12 @@ export default function FounderSettingsPage() {
           {/* TAB 2: Notification Settings */}
           {activeTab === "notifications" && (
             <div className="space-y-6">
-              <div className="border-b border-white/5 pb-4">
-                <h3 className="text-sm font-semibold tracking-tight text-white font-outfit flex items-center gap-2">
-                  <Bell className="h-4.5 w-4.5" style={{ color: activeAccent.color }} />
+              <div className="border-b border-border/5 pb-4">
+                <h3 className="text-sm font-serif font-light text-foreground flex items-center gap-2">
+                  <Bell className="h-4 w-4" style={{ color: activeAccent.color }} />
                   Alert Notification Channels
                 </h3>
-                <p className="text-white/40 text-[11px] mt-1 font-mono uppercase tracking-wider">Configure real-time notifications and weekly cohorts digests</p>
+                <p className="text-foreground/40 text-[11px] mt-1 font-mono uppercase tracking-wider">Configure real-time notifications and weekly cohorts digests</p>
               </div>
 
               <div className="space-y-3.5 pt-1">
@@ -921,13 +945,13 @@ export default function FounderSettingsPage() {
               
               {/* Profile Verification & Primary Email */}
               <div className="space-y-6">
-                <div className="border-b border-white/5 pb-4 flex justify-between items-center">
+                <div className="border-b border-border/5 pb-4 flex justify-between items-center">
                   <div>
-                    <h3 className="text-sm font-semibold tracking-tight text-white font-outfit flex items-center gap-2">
-                      <Mail className="h-4.5 w-4.5" style={{ color: activeAccent.color }} />
+                    <h3 className="text-sm font-serif font-light text-foreground flex items-center gap-2">
+                      <Mail className="h-4 w-4" style={{ color: activeAccent.color }} />
                       Identity Authorization Email
                     </h3>
-                    <p className="text-white/40 text-[11px] mt-1 font-mono uppercase tracking-wider">Manage your principal identity login certificate</p>
+                    <p className="text-foreground/40 text-[11px] mt-1 font-mono uppercase tracking-wider">Manage your principal identity login certificate</p>
                   </div>
                   <Badge className="bg-[#34D399]/10 text-[#34D399] border-[#34D399]/20 flex items-center gap-1.5 py-0.5 px-3 rounded-full font-mono text-[9px]">
                     <CheckCircle2 className="h-3 w-3" />
@@ -937,13 +961,13 @@ export default function FounderSettingsPage() {
 
                 <form onSubmit={handleUpdateEmailSubmit} className="flex gap-3 max-w-md items-end pt-1">
                   <div className="flex-1 space-y-1.5">
-                    <label htmlFor="sec-email" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-white/50">Registered Email</label>
+                    <label htmlFor="sec-email" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Registered Email</label>
                     <Input
                       id="sec-email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className={cn("bg-black/40 border-white/5 text-xs text-white rounded-lg h-9 pr-3 focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
+                      className={cn("bg-background/40 border-border/5 text-xs text-foreground rounded-lg h-9 pr-3 focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
                       required
                     />
                   </div>
@@ -954,7 +978,7 @@ export default function FounderSettingsPage() {
                       "h-9 px-4.5 rounded-lg text-xs font-semibold tracking-wider font-mono cursor-pointer shrink-0 transition-all active:scale-[0.98]",
                       email.trim() !== "alex@edgevisionlabs.com"
                         ? activeAccent.btnBg
-                        : "bg-white/5 text-white/30 border border-white/5 cursor-not-allowed"
+                        : "bg-foreground/5 text-foreground/30 border border-border/5 cursor-not-allowed"
                     )}
                   >
                     {isUpdatingEmail ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Verify Identity"}
@@ -963,20 +987,20 @@ export default function FounderSettingsPage() {
               </div>
 
               {/* Password update & Strength Checker */}
-              <div className="space-y-6 pt-6 border-t border-white/5">
-                <div className="border-b border-white/5 pb-4">
-                  <h3 className="text-sm font-semibold tracking-tight text-white font-outfit flex items-center gap-2">
-                    <Key className="h-4.5 w-4.5" style={{ color: activeAccent.color }} />
+              <div className="space-y-6 pt-6 border-t border-border/5">
+                <div className="border-b border-border/5 pb-4">
+                  <h3 className="text-sm font-serif font-light text-foreground flex items-center gap-2">
+                    <Key className="h-4 w-4" style={{ color: activeAccent.color }} />
                     Credential Key Rotation
                   </h3>
-                  <p className="text-white/40 text-[11px] mt-1 font-mono uppercase tracking-wider">Change the secure keys protecting node configuration</p>
+                  <p className="text-foreground/40 text-[11px] mt-1 font-mono uppercase tracking-wider">Change the secure keys protecting node configuration</p>
                 </div>
 
                 <form onSubmit={handleUpdatePasswordSubmit} className="space-y-5 max-w-lg pt-1">
                   <div className="grid gap-4 sm:grid-cols-2">
                     {/* Current password */}
                     <div className="space-y-1.5">
-                      <label htmlFor="cur-pass" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-white/50">Current Password</label>
+                      <label htmlFor="cur-pass" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Current Password</label>
                       <div className="relative">
                         <Input
                           id="cur-pass"
@@ -984,13 +1008,13 @@ export default function FounderSettingsPage() {
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
                           placeholder="••••••••"
-                          className={cn("bg-black/40 border-white/5 text-xs text-white rounded-lg h-9 pr-9 focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
+                          className={cn("bg-background/40 border-border/5 text-xs text-foreground rounded-lg h-9 pr-9 focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
                           required
                         />
                         <button
                           type="button"
                           onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 cursor-pointer"
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-foreground/60 cursor-pointer"
                           aria-label="Toggle Current Password"
                         >
                           {showCurrentPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -1000,7 +1024,7 @@ export default function FounderSettingsPage() {
 
                     {/* New password */}
                     <div className="space-y-1.5">
-                      <label htmlFor="new-pass" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-white/50">New Password Key</label>
+                      <label htmlFor="new-pass" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">New Password Key</label>
                       <div className="relative">
                         <Input
                           id="new-pass"
@@ -1008,13 +1032,13 @@ export default function FounderSettingsPage() {
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
                           placeholder="••••••••"
-                          className={cn("bg-black/40 border-white/5 text-xs text-white rounded-lg h-9 pr-9 focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
+                          className={cn("bg-background/40 border-border/5 text-xs text-foreground rounded-lg h-9 pr-9 focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
                           required
                         />
                         <button
                           type="button"
                           onClick={() => setShowNewPassword(!showNewPassword)}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 cursor-pointer"
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground/30 hover:text-foreground/60 cursor-pointer"
                           aria-label="Toggle New Password"
                         >
                           {showNewPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -1025,29 +1049,29 @@ export default function FounderSettingsPage() {
 
                   {/* Password Strength Checklist */}
                   {newPassword && (
-                    <div className="bg-black/20 border border-white/5 rounded-xl p-4 space-y-3.5 animate-in slide-in-from-top-2 duration-300">
+                    <div className="bg-background/20 border border-border/5 rounded-xl p-4 space-y-3.5 animate-in slide-in-from-top-2 duration-300">
                       <div className="flex items-center justify-between text-[10px] font-mono font-semibold uppercase tracking-wider">
-                        <span className="text-white/40">Credential Strength</span>
-                        <span className="text-white">{strengthText}</span>
+                        <span className="text-foreground/40">Credential Strength</span>
+                        <span className="text-foreground">{strengthText}</span>
                       </div>
                       
-                      <Progress value={score} className="h-1.5 bg-white/5" indicatorClassName={strengthColor} />
+                      <Progress value={score} className="h-1.5 bg-foreground/5" indicatorClassName={strengthColor} />
                       
-                      <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-white/40">
+                      <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-foreground/40">
                         <div className="flex items-center gap-1.5">
-                          <div className={cn("size-2 rounded-full", checks.len ? "bg-emerald-500" : "bg-white/10")} />
+                          <div className={cn("size-2 rounded-full", checks.len ? "bg-emerald-500" : "bg-foreground/10")} />
                           <span>8+ Characters</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <div className={cn("size-2 rounded-full", checks.num ? "bg-emerald-500" : "bg-white/10")} />
+                          <div className={cn("size-2 rounded-full", checks.num ? "bg-emerald-500" : "bg-foreground/10")} />
                           <span>Includes Number</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <div className={cn("size-2 rounded-full", checks.spec ? "bg-emerald-500" : "bg-white/10")} />
+                          <div className={cn("size-2 rounded-full", checks.spec ? "bg-emerald-500" : "bg-foreground/10")} />
                           <span>Special Symbol</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <div className={cn("size-2 rounded-full", checks.case ? "bg-emerald-500" : "bg-white/10")} />
+                          <div className={cn("size-2 rounded-full", checks.case ? "bg-emerald-500" : "bg-foreground/10")} />
                           <span>Mixed Case Letters</span>
                         </div>
                       </div>
@@ -1061,7 +1085,7 @@ export default function FounderSettingsPage() {
                       "h-9 px-5 rounded-lg text-xs font-semibold tracking-wider font-mono cursor-pointer transition-all active:scale-[0.98]",
                       currentPassword && newPassword && score >= 75
                         ? activeAccent.btnBg
-                        : "bg-white/5 text-white/30 border border-white/5 cursor-not-allowed"
+                        : "bg-foreground/5 text-foreground/30 border border-border/5 cursor-not-allowed"
                     )}
                   >
                     {isUpdatingPassword ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : null}
@@ -1071,13 +1095,13 @@ export default function FounderSettingsPage() {
               </div>
 
               {/* Active Session Audit Trail */}
-              <div className="space-y-6 pt-6 border-t border-white/5">
-                <div className="border-b border-white/5 pb-4">
-                  <h3 className="text-sm font-semibold tracking-tight text-white font-outfit flex items-center gap-2">
-                    <Laptop className="h-4.5 w-4.5" style={{ color: activeAccent.color }} />
+              <div className="space-y-6 pt-6 border-t border-border/5">
+                <div className="border-b border-border/5 pb-4">
+                  <h3 className="text-sm font-serif font-light text-foreground flex items-center gap-2">
+                    <Laptop className="h-4 w-4" style={{ color: activeAccent.color }} />
                     Authorized Access Sessions & Nodes
                   </h3>
-                  <p className="text-white/40 text-[11px] mt-1 font-mono uppercase tracking-wider">Review active sync credentials linked to this developer</p>
+                  <p className="text-foreground/40 text-[11px] mt-1 font-mono uppercase tracking-wider">Review active sync credentials linked to this developer</p>
                 </div>
 
                 <div className="space-y-2.5 pt-1">
@@ -1085,18 +1109,18 @@ export default function FounderSettingsPage() {
                     <div
                       key={s.id}
                       className={cn(
-                        "flex items-center justify-between gap-4 rounded-xl border border-white/5 bg-black/20 p-4 transition-all duration-300",
-                        revokingId === s.id ? "opacity-40 scale-[0.98]" : "hover:bg-black/30"
+                        "flex items-center justify-between gap-4 rounded-xl border border-border/5 bg-background/20 p-4 transition-all duration-300",
+                        revokingId === s.id ? "opacity-40 scale-[0.98]" : "hover:bg-background/30"
                       )}
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
-                        <div className="size-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                          {s.device.includes("MacBook") && <Laptop className="h-4.5 w-4.5 text-white/60" />}
-                          {s.device.includes("iPhone") && <Smartphone className="h-4.5 w-4.5 text-white/60" />}
-                          {s.device.includes("Sync Node") && <Terminal className="h-4.5 w-4.5 text-white/60" />}
+                        <div className="size-9 rounded-lg bg-foreground/5 border border-border/10 flex items-center justify-center shrink-0">
+                          {s.device.includes("MacBook") && <Laptop className="h-4.5 w-4.5 text-foreground/60" />}
+                          {s.device.includes("iPhone") && <Smartphone className="h-4.5 w-4.5 text-foreground/60" />}
+                          {s.device.includes("Sync Node") && <Terminal className="h-4.5 w-4.5 text-foreground/60" />}
                         </div>
                         <div className="min-w-0 space-y-0.5">
-                          <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
                             {s.device}
                             {s.active && (
                               <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[8px] py-0 px-2 uppercase rounded-full scale-90">
@@ -1104,8 +1128,8 @@ export default function FounderSettingsPage() {
                               </Badge>
                             )}
                           </div>
-                          <p className="text-[10px] text-white/40 font-mono leading-none">{s.browser} • {s.location}</p>
-                          <p className="text-[9px] text-white/30 font-sans tracking-wide leading-none">{s.time}</p>
+                          <p className="text-[10px] text-foreground/40 font-mono leading-none">{s.browser} • {s.location}</p>
+                          <p className="text-[9px] text-foreground/30 font-sans tracking-wide leading-none">{s.time}</p>
                         </div>
                       </div>
 
@@ -1124,7 +1148,7 @@ export default function FounderSettingsPage() {
                   ))}
                   
                   {sessions.length === 1 && (
-                    <p className="text-[10px] text-white/20 font-mono text-center pt-2">No other active login nodes found.</p>
+                    <p className="text-[10px] text-foreground/20 font-mono text-center pt-2">No other active login nodes found.</p>
                   )}
                 </div>
               </div>
@@ -1136,8 +1160,8 @@ export default function FounderSettingsPage() {
           {activeTab === "danger" && (
             <div className="space-y-6">
               <div className="border-b border-red-500/10 pb-4">
-                <h3 className="text-sm font-semibold tracking-tight text-red-400 font-outfit flex items-center gap-2">
-                  <Trash2 className="h-4.5 w-4.5 text-red-400" />
+                <h3 className="text-sm font-serif font-light text-red-400 flex items-center gap-2">
+                  <Trash2 className="h-4 w-4 text-red-400" />
                   Developer Node Deletion Protocol
                 </h3>
                 <p className="text-red-500/40 text-[11px] mt-1 font-mono uppercase tracking-wider">Wipe cryptographics secrets and disconnect cohort escrows</p>
@@ -1149,7 +1173,7 @@ export default function FounderSettingsPage() {
                     <AlertTriangle className="h-4 w-4 shrink-0 text-red-400" />
                     Wipe Node Key Identity
                   </div>
-                  <p className="text-[11px] text-white/50 leading-relaxed font-sans">
+                  <p className="text-[11px] text-foreground/50 leading-relaxed font-sans">
                     Permanently delete your profile data caches, matching statistics, authorized node connections, and private message logs. Wiping node certificates is destructive and completely irreversible.
                   </p>
                 </div>
@@ -1169,12 +1193,12 @@ export default function FounderSettingsPage() {
 
       {/* Account Deletion Dialog Modal */}
       <Dialog open={isDeleteOpen} onOpenChange={(open) => !isDeleting && setIsDeleteOpen(open)}>
-        <DialogContent className="bg-zinc-950 border border-red-500/20 text-white backdrop-blur-xl rounded-2xl max-w-md shadow-2xl p-6">
-          <DialogHeader className="border-b border-white/5 pb-3">
-            <DialogTitle className="text-base font-bold text-red-400 font-outfit flex items-center gap-2">
+        <DialogContent className="bg-popover/95 border border-red-500/10 text-foreground backdrop-blur-2xl rounded-2xl max-w-md shadow-2xl p-6">
+          <DialogHeader className="border-b border-border/5 pb-3">
+            <DialogTitle className="text-base font-serif font-light text-red-400 flex items-center gap-2">
               <AlertTriangle className="h-4.5 w-4.5 text-red-400 animate-pulse" /> Confirm Identity Wipe
             </DialogTitle>
-            <DialogDescription className="text-white/40 text-xs mt-1 leading-normal">
+            <DialogDescription className="text-foreground/40 text-xs mt-1 leading-normal">
               You are about to execute node key destruction. Fill credentials below to verify matching sectors.
             </DialogDescription>
           </DialogHeader>
@@ -1185,9 +1209,9 @@ export default function FounderSettingsPage() {
               <span className="text-[10px] font-mono text-red-400 uppercase tracking-widest flex items-center gap-1.5">
                 <Loader2 className="h-3 w-3 animate-spin" /> Destroying Sectors...
               </span>
-              <div className="bg-black/90 p-4 border border-white/5 rounded-lg font-mono text-[10px] text-white/70 h-36 overflow-y-auto space-y-1">
+              <div className="bg-background/90 p-4 border border-border/5 rounded-lg font-mono text-[10px] text-foreground/70 h-36 overflow-y-auto space-y-1">
                 {wipeLogs.map((log, index) => (
-                  <div key={index} className={cn(log.includes("SUCCESS") ? "text-emerald-400" : log.includes("SYSTEM") ? "text-blue-400" : "text-white/60")}>
+                  <div key={index} className={cn(log.includes("SUCCESS") ? "text-emerald-400" : log.includes("SYSTEM") ? "text-blue-400" : "text-foreground/60")}>
                     {log}
                   </div>
                 ))}
@@ -1200,8 +1224,8 @@ export default function FounderSettingsPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="wipe-confirm" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-white/50">
-                  Type your email to confirm: <span className="text-white font-bold select-all">alex@edgevisionlabs.com</span>
+                <label htmlFor="wipe-confirm" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">
+                  Type your email to confirm: <span className="text-foreground font-bold select-all">alex@edgevisionlabs.com</span>
                 </label>
                 <Input
                   id="wipe-confirm"
@@ -1209,7 +1233,7 @@ export default function FounderSettingsPage() {
                   placeholder="alex@edgevisionlabs.com"
                   value={confirmEmail}
                   onChange={(e) => setConfirmEmail(e.target.value)}
-                  className="bg-black/40 border-white/5 text-xs text-white rounded-lg h-9 pr-3 focus-visible:ring-red-500/20 focus-visible:border-red-500/40"
+                  className="bg-background/40 border-border/5 text-xs text-foreground rounded-lg h-9 pr-3 focus-visible:ring-red-500/20 focus-visible:border-red-500/40"
                   required
                 />
               </div>
@@ -1222,7 +1246,7 @@ export default function FounderSettingsPage() {
                     setIsDeleteOpen(false)
                     setConfirmEmail("")
                   }}
-                  className="border-white/10 text-white hover:bg-white/5 text-xs font-semibold rounded-lg h-8 px-4"
+                  className="border-border/10 text-foreground hover:bg-foreground/5 text-xs font-semibold rounded-lg h-8 px-4"
                 >
                   Cancel
                 </Button>
@@ -1232,7 +1256,7 @@ export default function FounderSettingsPage() {
                   className={cn(
                     "rounded-lg text-xs font-semibold font-mono tracking-wider h-8 px-4 transition-all cursor-pointer",
                     confirmEmail === "alex@edgevisionlabs.com"
-                      ? "bg-red-500 text-white hover:bg-red-600 shadow-[0_0_12px_rgba(239,68,68,0.2)]"
+                      ? "bg-red-500 text-foreground hover:bg-red-600 shadow-[0_0_12px_rgba(239,68,68,0.2)]"
                       : "bg-red-950/20 text-red-500/40 border border-red-950/40 cursor-not-allowed"
                   )}
                 >
@@ -1261,14 +1285,14 @@ interface AutoSaveRowProps {
 
 function AutoSaveRow({ id, label, desc, checked, status, onToggle, activeAccent }: AutoSaveRowProps) {
   return (
-    <div className="flex items-start justify-between gap-4 rounded-xl border border-white/5 bg-black/20 p-4 transition hover:bg-black/30">
+    <div className="flex items-start justify-between gap-4 rounded-xl border border-border/5 bg-background/20 p-4 transition hover:bg-background/30">
       <div className="min-w-0 space-y-0.5">
-        <div className="font-semibold text-xs text-white font-mono uppercase tracking-wide flex items-center gap-2">
+        <div className="font-semibold text-xs text-foreground font-mono uppercase tracking-wide flex items-center gap-2">
           {label}
           {status && (
             <span className="text-[9px] font-mono lowercase font-normal flex items-center gap-1">
               {status === "saving" ? (
-                <span className="text-white/40 flex items-center gap-1">
+                <span className="text-foreground/40 flex items-center gap-1">
                   <Loader2 className="h-2.5 w-2.5 animate-spin" /> saving...
                 </span>
               ) : (
@@ -1279,7 +1303,7 @@ function AutoSaveRow({ id, label, desc, checked, status, onToggle, activeAccent 
             </span>
           )}
         </div>
-        {desc && <p className="text-[10px] text-white/40 leading-normal font-sans">{desc}</p>}
+        {desc && <p className="text-[10px] text-foreground/40 leading-normal font-sans">{desc}</p>}
       </div>
       <Switch
         checked={checked}
