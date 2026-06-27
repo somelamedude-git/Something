@@ -70,7 +70,7 @@ export function TransparencyTimeline() {
                   min={0}
                   max={sampleSpends.length - 1}
                   value={range[0]}
-                  onChange={(e) => setRange(([_, r]) => [Number.parseInt(e.target.value), r])}
+                  onChange={(e) => setRange(([, r]) => [Number.parseInt(e.target.value), r])}
                   className="w-full"
                   aria-label="Start index"
                 />
@@ -79,7 +79,7 @@ export function TransparencyTimeline() {
                   min={0}
                   max={sampleSpends.length - 1}
                   value={range[1]}
-                  onChange={(e) => setRange(([l, _]) => [l, Number.parseInt(e.target.value)])}
+                  onChange={(e) => setRange(([l]) => [l, Number.parseInt(e.target.value)])}
                   className="w-full -mt-2"
                   aria-label="End index"
                 />
