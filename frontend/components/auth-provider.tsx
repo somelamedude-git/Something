@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           const res = await apiClient.get("/auth/me")
           setUser(res.data || null)
-        } catch (err) {
+        } catch {
           setUser(null)
         } finally {
           setLoading(false)
