@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { MutinyResponse, Person, Investor, Idea, Patent } from "@/lib/mock-mutiny"
+import { MutinyResponse } from "@/lib/mock-mutiny"
 import { logFeedback } from "@/lib/mutiny-feedback"
 import { toast } from "@/components/ui/use-toast"
 import { User, Building, FileText, Award } from "lucide-react"
