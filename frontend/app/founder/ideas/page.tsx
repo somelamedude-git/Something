@@ -6,7 +6,6 @@ import axios from "axios"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
 import { Search, Plus, Filter, Eye, MessageSquare, Heart, Edit, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { PostIdeaModal } from "@/components/post-idea-modal"
@@ -426,28 +425,28 @@ export default function FounderIdeasPage() {
 
   function IdeaRow({ idea }: { idea: Idea }) {
     const stageColors = {
-      launched: { text: "text-brand-accent", bg: "bg-brand-accent/10", border: "border-brand-accent/20" },
-      mvp: { text: "text-[#F472B6]", bg: "bg-[#F472B6]/10", border: "border-[#F472B6]/20" },
-      prototype: { text: "text-[#C88E72]", bg: "bg-[#C88E72]/10", border: "border-[#C88E72]/20" },
-      concept: { text: "text-white/60", bg: "bg-white/5", border: "border-white/10" }
-    }[idea.stage] ?? { text: "text-white/60", bg: "bg-white/5", border: "border-white/10" }
+      launched: { text: "text-brand-accent", bg: "bg-brand-accent/5", border: "border-brand-accent/10" },
+      mvp: { text: "text-[#8293A4]", bg: "bg-[#8293A4]/5", border: "border-[#8293A4]/10" },
+      prototype: { text: "text-[#C88E72]", bg: "bg-[#C88E72]/5", border: "border-[#C88E72]/10" },
+      concept: { text: "text-foreground/40", bg: "bg-foreground/[0.02]", border: "border-border/[0.05]" }
+    }[idea.stage] ?? { text: "text-foreground/40", bg: "bg-foreground/[0.02]", border: "border-border/[0.05]" }
 
     return (
-      <div className="py-8 transition-colors group flex flex-col justify-between gap-4 first:pt-0 last:pb-0">
-        <div className="space-y-3">
+      <div className="py-7 transition-colors group flex flex-col justify-between gap-4 border-b border-border/[0.03] last:border-b-0">
+        <div className="space-y-2.5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2 mb-1">
-                <h3 className="font-semibold text-base leading-snug tracking-tight text-white group-hover:text-brand-accent transition-colors">
+                <h3 className="font-serif font-light text-lg leading-snug tracking-tight text-foreground group-hover:text-brand-accent transition-colors">
                   {idea.title}
                 </h3>
                 {idea.isDraft && (
-                  <Badge className="bg-[#C88E72]/10 text-[#C88E72] border-[#C88E72]/20 text-[9px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full border">
+                  <Badge className="bg-[#C88E72]/5 text-[#C88E72] border-[#C88E72]/10 text-[9px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full border">
                     Draft
                   </Badge>
                 )}
               </div>
-              <p className="text-[11px] font-mono text-white/35">by {idea.author}</p>
+              <p className="text-[10px] font-mono text-foreground/30 tracking-wide">by {idea.author}</p>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
               <Badge
@@ -463,7 +462,7 @@ export default function FounderIdeasPage() {
                   variant="ghost"
                   size="icon"
                   onClick={() => handleEditClick(idea)}
-                  className="h-7 w-7 text-white/40 hover:text-white hover:bg-white/5 rounded-full"
+                  className="h-7 w-7 text-foreground/30 hover:text-foreground hover:bg-foreground/5 rounded-full cursor-pointer"
                 >
                   <Edit className="h-3.5 w-3.5" />
                 </Button>
@@ -471,24 +470,24 @@ export default function FounderIdeasPage() {
             </div>
           </div>
 
-          <p className="text-sm text-white/60 leading-relaxed font-sans">{idea.desc || idea.description}</p>
+          <p className="text-sm text-foreground/55 font-light leading-relaxed font-sans">{idea.desc || idea.description}</p>
 
-          <div className="flex flex-wrap gap-2 pt-1">
+          <div className="flex flex-wrap gap-1.5 pt-1">
             {idea.tags.map((tag) => (
-              <Badge key={tag} className="bg-white/[0.02] text-white/40 border-white/5 text-[9px] font-mono rounded-md py-0.5 px-2">
+              <Badge key={tag} className="bg-foreground/[0.01] text-foreground/35 border-border/[0.03] text-[9px] font-mono rounded-md py-0.5 px-2">
                 #{tag}
               </Badge>
             ))}
           </div>
 
           {idea.lookingFor && idea.lookingFor.length > 0 && (
-            <div className="flex items-center gap-2 pt-2">
-              <span className="text-[9px] text-white/30 font-semibold uppercase tracking-widest font-mono">Looking for:</span>
+            <div className="flex items-center gap-2 pt-1.5">
+              <span className="text-[9px] text-foreground/30 font-semibold uppercase tracking-widest font-mono">Looking for:</span>
               <div className="flex flex-wrap gap-1.5">
                 {idea.lookingFor.map((item) => (
                   <Badge
                     key={item}
-                    className="bg-white/[0.01] text-white/60 border-white/5 text-[9px] rounded px-1.5 py-0.5"
+                    className="bg-foreground/[0.01] text-foreground/50 border-border/[0.03] text-[9.5px] rounded px-1.5 py-0.5"
                   >
                     {item}
                   </Badge>
@@ -498,11 +497,11 @@ export default function FounderIdeasPage() {
           )}
         </div>
 
-        <div className="flex items-center justify-between pt-2">
-          <div className="flex items-center gap-4 text-xs font-mono text-white/35">
+        <div className="flex items-center justify-between pt-1">
+          <div className="flex items-center gap-4.5 text-xs font-mono text-foreground/30">
             <button
               onClick={() => handleLikeIdea(idea.id)}
-              className="flex items-center gap-1.5 hover:text-[#F472B6] transition-colors"
+              className="flex items-center gap-1.5 hover:text-[#F472B6] transition-colors cursor-pointer"
             >
               <Heart className="h-3.5 w-3.5" />
               <span>{idea.likes}</span>
@@ -519,7 +518,7 @@ export default function FounderIdeasPage() {
           <Button
             variant="outline"
             onClick={() => handleViewClick(idea)}
-            className="h-7 text-[10px] font-semibold rounded-full border-white/10 text-white/80 hover:bg-white/10 hover:text-white transition-all px-4"
+            className="h-7 text-[10px] font-semibold rounded-full border-border/10 text-foreground/70 hover:bg-foreground/5 hover:text-foreground transition-all px-4 cursor-pointer bg-transparent"
           >
             {idea.isYours ? "Share" : "Explore"}
           </Button>
@@ -532,25 +531,25 @@ export default function FounderIdeasPage() {
     <div className="mx-auto max-w-4xl space-y-12 pt-4 pb-20">
       <PageHeader
         category="Ideas Workspace"
-        title="Ideas & Projects"
-        description="Share your concepts, manage active drafts, and discover what other builders are working on in the cohort."
+        title="Ideas & Drafts"
+        description="Share cohort submissions, organize build specifications, and explore developer telemetry."
         accentColor="emerald"
         action={
-          <Button onClick={() => { setEditingIdea(null); setIsModalOpen(true); }} className="rounded-full text-xs font-semibold px-6 py-2.5 bg-white text-[#0a0a0c] hover:bg-brand-accent hover:text-[#0a0a0c] transition-all duration-300 active:scale-[0.98] cursor-pointer">
+          <Button onClick={() => { setEditingIdea(null); setIsModalOpen(true); }} className="rounded-full text-xs font-semibold px-6 py-2.5 bg-foreground text-background hover:bg-brand-accent hover:text-background transition-all duration-300 active:scale-[0.98] cursor-pointer">
             <Plus className="mr-1.5 h-3.5 w-3.5" /> Post new idea
           </Button>
         }
       />
 
-      {/* Tabs and search */}
-      <div className="py-6 border-y border-white/5">
+      {/* Tabs and search (Capsule UI style like Claude) */}
+      <div className="py-6 border-y border-border/[0.03]">
         <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
-          <div className="flex rounded-lg border border-white/5 bg-black/40 p-1 shrink-0">
+          <div className="flex rounded-full border border-border/[0.03] bg-background/30 p-1 shrink-0">
             <button
               onClick={() => setTab("yours")}
               className={cn(
-                "px-4 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 cursor-pointer",
-                tab === "yours" ? "bg-white text-black shadow-lg" : "text-white/50 hover:text-white"
+                "px-5 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 cursor-pointer",
+                tab === "yours" ? "bg-primary text-primary-foreground shadow-md" : "text-foreground/40 hover:text-foreground/80"
               )}
             >
               Your ideas ({yourIdeas.length})
@@ -558,8 +557,8 @@ export default function FounderIdeasPage() {
             <button
               onClick={() => setTab("discover")}
               className={cn(
-                "px-4 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 cursor-pointer",
-                tab === "discover" ? "bg-white text-black shadow-lg" : "text-white/50 hover:text-white"
+                "px-5 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 cursor-pointer",
+                tab === "discover" ? "bg-primary text-primary-foreground shadow-md" : "text-foreground/40 hover:text-foreground/80"
               )}
             >
               Discover
@@ -568,23 +567,23 @@ export default function FounderIdeasPage() {
 
           <div className="flex gap-2 flex-1 items-center">
             <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/30" />
               <Input
                 placeholder="Search ideas, tags, authors…"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="pl-9 h-9 bg-black/40 border-white/5 text-white placeholder:text-white/30 rounded-lg focus-visible:ring-brand-accent focus-visible:border-brand-accent/20"
+                className="pl-10 h-9.5 bg-background/30 border-border/[0.03] text-foreground placeholder:text-foreground/20 rounded-full focus-visible:ring-brand-accent focus-visible:border-brand-accent/25 focus:bg-background/50 transition-all font-sans"
               />
             </div>
             <Button
               onClick={() => setShowFilters(!showFilters)}
               variant="outline"
               className={cn(
-                "h-9 border-white/10 text-white/80 hover:bg-white/5 hover:text-white rounded-lg px-4 text-xs font-semibold bg-transparent transition-all",
-                showFilters && "bg-white/10 border-white/20 text-white"
+                "h-9.5 border-border/10 text-foreground/70 hover:bg-foreground/5 hover:text-foreground rounded-full px-4.5 text-xs font-semibold bg-transparent transition-all cursor-pointer",
+                showFilters && "bg-foreground/5 border-border/20 text-foreground"
               )}
             >
-              <Filter className="mr-2 h-4 w-4 text-white/40" />
+              <Filter className="mr-2 h-4 w-4 text-foreground/30" />
               Filter
             </Button>
           </div>
@@ -592,21 +591,21 @@ export default function FounderIdeasPage() {
 
         {/* Collapsible Filter Panel */}
         {showFilters && (
-          <div className="border-t border-white/5 mt-4 pt-4 space-y-4 transition-all duration-300">
+          <div className="border-t border-border/[0.03] mt-4 pt-4 space-y-4 transition-all duration-300">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Stage Filter */}
               <div className="space-y-2">
-                <span className="text-[10px] uppercase tracking-wider text-white/40 font-semibold font-mono block">Project Stage</span>
+                <span className="text-[9px] uppercase tracking-[0.15em] text-foreground/30 font-semibold font-mono block">Project Stage</span>
                 <div className="flex flex-wrap gap-1.5">
                   {["all", "concept", "prototype", "mvp", "launched"].map((stageOpt) => (
                     <button
                       key={stageOpt}
-                      onClick={() => setStageFilter(stageOpt as any)}
+                      onClick={() => setStageFilter(stageOpt as "all" | Stage)}
                       className={cn(
-                        "px-3 py-1 rounded-lg border text-xs font-medium transition-all capitalize",
+                        "px-3 py-1 rounded-full border text-xs font-medium transition-all capitalize cursor-pointer",
                         stageFilter === stageOpt
                           ? "border-brand-accent/30 bg-brand-accent/10 text-brand-accent"
-                          : "border-white/5 bg-transparent text-white/50 hover:bg-white/5"
+                          : "border-border/5 bg-transparent text-foreground/40 hover:bg-foreground/5 hover:text-foreground"
                       )}
                     >
                       {stageOpt}
@@ -617,21 +616,21 @@ export default function FounderIdeasPage() {
 
               {/* Sorting Filter */}
               <div className="space-y-2">
-                <span className="text-[10px] uppercase tracking-wider text-white/40 font-semibold font-mono block">Sort Criteria</span>
+                <span className="text-[9px] uppercase tracking-[0.15em] text-foreground/30 font-semibold font-mono block">Sort Criteria</span>
                 <div className="flex flex-wrap gap-1.5">
                   {[
                     { key: "newest", label: "Newest Releases" },
-                    { key: "likes", label: "Most Conviction (Likes)" },
+                    { key: "likes", label: "Most Conviction" },
                     { key: "views", label: "Most Viewed" },
                   ].map((sortOpt) => (
                     <button
                       key={sortOpt.key}
-                      onClick={() => setSortBy(sortOpt.key as any)}
+                      onClick={() => setSortBy(sortOpt.key as "newest" | "likes" | "views")}
                       className={cn(
-                        "px-3 py-1 rounded-lg border text-xs font-medium transition-all",
+                        "px-3 py-1 rounded-full border text-xs font-medium transition-all cursor-pointer",
                         sortBy === sortOpt.key
                           ? "border-brand-accent/30 bg-brand-accent/10 text-brand-accent"
-                          : "border-white/5 bg-transparent text-white/50 hover:bg-white/5"
+                          : "border-border/5 bg-transparent text-foreground/40 hover:bg-foreground/5 hover:text-foreground"
                       )}
                     >
                       {sortOpt.label}
@@ -654,19 +653,19 @@ export default function FounderIdeasPage() {
       {/* Grid rendering */}
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-white/20" />
+          <Loader2 className="h-6 w-6 animate-spin text-foreground/20" />
         </div>
       ) : (
         <>
-          <div className="divide-y divide-white/5">
+          <div className="flex flex-col">
             {filtered.map((idea) => (
               <IdeaRow key={idea.id} idea={idea} />
             ))}
           </div>
 
           {filtered.length === 0 && (
-            <div className="text-center py-20 rounded-2xl border border-dashed border-white/5 bg-white/[0.005]">
-              <div className="text-white/30 text-xs">No ideas found matching your search.</div>
+            <div className="text-center py-20 rounded-2xl border border-dashed border-border/5 bg-foreground/[0.002]">
+              <div className="text-foreground/30 text-xs">No ideas found matching your search.</div>
             </div>
           )}
         </>
