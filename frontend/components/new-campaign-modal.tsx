@@ -29,7 +29,7 @@ type FundingType = "milestone" | "equity" | "revenue-share" | "grant"
 interface NewCampaignModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreateCampaign: (campaign: any) => void
+  onCreateCampaign: (campaign: Record<string, unknown>) => void
 }
 
 export function NewCampaignModal({ open, onOpenChange, onCreateCampaign }: NewCampaignModalProps) {
@@ -119,10 +119,10 @@ export function NewCampaignModal({ open, onOpenChange, onCreateCampaign }: NewCa
     const newUploads = { ...formData.uploads }
 
     if (type === "presentation" || type === "video") {
-      newUploads[type as keyof typeof newUploads] = files[0] as any
+      (newUploads as Record<string, unknown>)[type] = files[0]
     } else {
       const currentFiles = newUploads[type as keyof typeof newUploads] as File[]
-      newUploads[type as keyof typeof newUploads] = [...currentFiles, ...Array.from(files)] as any
+      ;(newUploads as Record<string, unknown>)[type] = [...currentFiles, ...Array.from(files)]
     }
 
     setFormData({ ...formData, uploads: newUploads })
@@ -132,11 +132,11 @@ export function NewCampaignModal({ open, onOpenChange, onCreateCampaign }: NewCa
     const newUploads = { ...formData.uploads }
 
     if (type === "presentation" || type === "video") {
-      newUploads[type as keyof typeof newUploads] = null as any
+      ;(newUploads as Record<string, unknown>)[type] = null
     } else {
       const currentFiles = newUploads[type as keyof typeof newUploads] as File[]
       if (index !== undefined) {
-        newUploads[type as keyof typeof newUploads] = currentFiles.filter((_, i) => i !== index) as any
+        ;(newUploads as Record<string, unknown>)[type] = currentFiles.filter((_, i) => i !== index)
       }
     }
 
