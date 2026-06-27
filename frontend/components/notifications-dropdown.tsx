@@ -135,9 +135,9 @@ export function NotificationsDropdown() {
     <DropdownMenu onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className="relative border-white/10 text-white/80 hover:bg-white/5 hover:text-white rounded-full bg-transparent transition-all"
+          className="relative border border-border/40 text-foreground/60 hover:bg-accent hover:text-foreground rounded-full bg-transparent transition-all h-8 w-8"
         >
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
@@ -149,45 +149,51 @@ export function NotificationsDropdown() {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 bg-zinc-950/95 border border-white/5 text-white backdrop-blur-xl rounded-2xl shadow-2xl p-2">
-        <DropdownMenuLabel className="font-semibold text-[10px] text-white/40 px-3 py-2 uppercase tracking-wider font-mono">
+      <DropdownMenuContent align="end" className="w-80 bg-popover border border-border text-popover-foreground backdrop-blur-xl rounded-2xl shadow-2xl p-2">
+        <DropdownMenuLabel className="font-semibold text-[10px] text-muted-foreground px-3 py-2 uppercase tracking-wider font-mono">
           Inbox Alerts
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-white/5 mx-2" />
+        <DropdownMenuSeparator className="bg-border mx-2" />
         <div className="max-h-72 overflow-y-auto my-1" style={{ scrollbarWidth: "thin" }}>
           {isLoading ? (
             <div className="flex items-center justify-center p-6">
-              <Loader2 className="h-5 w-5 animate-spin text-[#34D399]" />
+              <Loader2 className="h-5 w-5 animate-spin text-[var(--brand-accent)]" />
             </div>
           ) : notifications.length > 0 ? (
             notifications.map((notification) => (
               <DropdownMenuItem
                 key={notification.id}
-                className="flex items-start gap-3 p-3 focus:bg-white/5 rounded-xl cursor-pointer transition-colors focus:text-white"
+                className="flex items-start gap-3 p-3 focus:bg-accent rounded-xl cursor-pointer transition-colors focus:text-foreground"
               >
                 <div
                   className={cn(
-                    "mt-1.5 h-2 w-2 flex-shrink-0 rounded-full",
-                    notification.read ? "bg-transparent" : "bg-[#34D399] shadow-[0_0_6px_#34D399]"
+                    "mt-1.5 h-2 w-2 flex-shrink-0 rounded-full transition-all",
+                    notification.read
+                      ? "bg-transparent"
+                      : "shadow-[0_0_6px_var(--brand-accent)]"
                   )}
+                  style={!notification.read ? { background: "var(--brand-accent)" } : undefined}
                 />
                 <div className="flex-1 space-y-1">
-                  <p className="text-xs text-white/80 leading-normal font-sans font-light">
+                  <p className={cn(
+                    "text-xs leading-normal font-sans",
+                    notification.read ? "text-muted-foreground font-light" : "text-foreground font-medium"
+                  )}>
                     {notification.text}
                   </p>
-                  <span className="block text-[9px] font-mono text-white/30">{notification.timestamp}</span>
+                  <span className="block text-[9px] font-mono text-muted-foreground/60">{notification.timestamp}</span>
                 </div>
               </DropdownMenuItem>
             ))
           ) : (
-            <p className="p-6 text-center text-xs text-white/40 font-mono">No alerts received.</p>
+            <p className="p-6 text-center text-xs text-muted-foreground font-mono">No alerts received.</p>
           )}
         </div>
-        <DropdownMenuSeparator className="bg-white/5 mx-2" />
+        <DropdownMenuSeparator className="bg-border mx-2" />
         <DropdownMenuItem
           onClick={handleMarkAllAsRead}
           disabled={unreadCount === 0}
-          className="flex items-center justify-center gap-2 p-2.5 text-xs text-white/50 hover:text-white focus:bg-white/5 rounded-xl cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all font-semibold font-mono"
+          className="flex items-center justify-center gap-2 p-2.5 text-xs text-muted-foreground hover:text-foreground focus:bg-accent rounded-xl cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all font-semibold font-mono"
         >
           <Check className="h-3.5 w-3.5" /> Mark all as read
         </DropdownMenuItem>
