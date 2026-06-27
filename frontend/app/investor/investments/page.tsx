@@ -88,8 +88,8 @@ export default function InvestorInvestmentsPage() {
       <div className="mx-auto max-w-[1400px]">
         <div className="flex gap-6">
           <div className="min-w-0 flex-1">
-            <div className="flex items-center justify-center py-12">
-              <div className="text-white/60">Loading portfolio...</div>
+            <div className="flex items-center justify-center py-20">
+              <div className="text-muted-foreground font-mono text-sm animate-pulse">Loading portfolio…</div>
             </div>
           </div>
           <ConciergeRail />
@@ -103,9 +103,9 @@ export default function InvestorInvestmentsPage() {
       <div className="mx-auto max-w-[1400px]">
         <div className="flex gap-6">
           <div className="min-w-0 flex-1">
-            <div className="flex flex-col items-center justify-center py-12 gap-4">
-              <div className="text-rose-300">{error}</div>
-              <Button onClick={fetchPortfolio} className="bg-white text-[#0b0b0c] hover:bg-white/90">
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <div className="text-rose-500 text-sm font-mono">{error}</div>
+              <Button onClick={fetchPortfolio} className="bg-primary text-primary-foreground hover:opacity-90">
                 Retry
               </Button>
             </div>
@@ -117,21 +117,36 @@ export default function InvestorInvestmentsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px]">
-      <div className="flex gap-6">
+    <div className="mx-auto max-w-[1400px] pb-16">
+      <div className="flex gap-8">
         {/* Main */}
-        <div className="min-w-0 flex-1 space-y-6">
-          {/* Summary strip (calm) */}
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Metric label="Committed" value={`$${totalCommitted.toLocaleString()}`} />
-            <Metric label="Released" value={`$${totalReleased.toLocaleString()}`} />
+        <div className="min-w-0 flex-1 space-y-8">
+
+          {/* Page header */}
+          <div className="space-y-1 pt-2">
+            <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground flex items-center gap-2">
+              <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: "var(--brand-accent)" }} />
+              Portfolio
+            </p>
+            <h1 className="text-3xl sm:text-4xl font-serif font-light tracking-tight text-foreground leading-tight">
+              My Investments
+            </h1>
+            <p className="text-sm text-muted-foreground font-sans max-w-lg mt-1">
+              Active commitments, fund deployment status, and trust performance.
+            </p>
+          </div>
+
+          {/* Summary strip */}
+          <div className="grid gap-px sm:grid-cols-3 border border-border rounded-xl overflow-hidden">
+            <Metric label="Committed"  value={`$${totalCommitted.toLocaleString()}`} />
+            <Metric label="Released"   value={`$${totalReleased.toLocaleString()}`} />
             <Metric label="Unreleased" value={`$${unallocated.toLocaleString()}`} />
           </div>
 
           {/* Portfolio list */}
-          <div className="rounded-xl bg-[#101113]">
+          <div className="rounded-xl border border-border overflow-hidden">
             {portfolio.length === 0 ? (
-              <div className="px-4 py-12 text-center text-white/60">
+              <div className="px-6 py-16 text-center text-muted-foreground font-mono text-sm">
                 No investments found
               </div>
             ) : (
@@ -144,37 +159,36 @@ export default function InvestorInvestmentsPage() {
                   <div
                     key={p.id}
                     className={cn(
-                      "px-4 py-4 hover:bg-white/[0.03] transition-colors",
-                      idx !== 0 && "border-t border-white/5",
+                      "px-5 py-5 hover:bg-accent/20 transition-colors",
+                      idx !== 0 && "border-t border-border/60",
                     )}
                   >
-                    {/* Top line: name and tags */}
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                      <div className="text-base font-semibold">{p.name}</div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="secondary" className="bg-white/[0.04] text-white border-white/10">
-                          {p.stage}
-                        </Badge>
-                        <span className="text-xs text-white/60">• {p.location}</span>
-                        <span className="text-sm">
-                          Trust <span className="font-semibold">{p.trustPoints}</span>
-                          <span
-                            className={cn(
-                              "ml-1 text-xs",
-                              delta > 0 ? "text-emerald-300" : delta < 0 ? "text-rose-300" : "text-white/70",
-                            )}
-                          >
-                            ({deltaStr})
+                    {/* Top line */}
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                      <div className="flex-1 space-y-1.5">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-base font-semibold text-foreground">{p.name}</span>
+                          <Badge variant="secondary" className="bg-accent text-foreground/70 border-border text-[10px] font-mono">
+                            {p.stage}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">&middot; {p.location}</span>
+                          <span className="text-sm text-foreground/70">
+                            Trust <span className="font-semibold text-foreground">{p.trustPoints}</span>
+                            <span className={cn("ml-1 text-xs", delta > 0 ? "text-emerald-500" : delta < 0 ? "text-rose-500" : "text-muted-foreground")}>
+                              ({deltaStr})
+                            </span>
                           </span>
-                        </span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">{p.next}</div>
                       </div>
-                      <div className="sm:ml-auto flex items-center gap-2">
-                        <Button asChild className="h-8 rounded-md bg-white text-[#0b0b0c] hover:bg-white/90">
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Button asChild size="sm" className="h-8 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs">
                           <Link href={`/investor/search/${p.id}`}>View brief</Link>
                         </Button>
                         <Button
                           variant="outline"
-                          className="h-8 rounded-md border-white/10 text-white hover:bg-white/[0.06] bg-transparent"
+                          size="sm"
+                          className="h-8 rounded-lg border-border/60 text-foreground/60 hover:bg-accent hover:text-foreground bg-transparent text-xs"
                           onClick={() => handleRequestRelease(p.id)}
                         >
                           Request release
@@ -183,37 +197,34 @@ export default function InvestorInvestmentsPage() {
                     </div>
 
                     {/* Progress + numbers */}
-                    <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                    <div className="mt-4 grid gap-3 sm:grid-cols-3">
                       <div className="sm:col-span-2">
-                        <div className="flex items-center justify-between text-xs text-white/60">
-                          <span>Progress (released / committed)</span>
-                          <span>{pct}%</span>
+                        <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-2">
+                          <span className="font-mono uppercase tracking-wider">Released / Committed</span>
+                          <span className="font-mono">{pct}%</span>
                         </div>
-                        <div className="mt-2 h-2 rounded-full bg-[#0f1012]">
+                        <div className="h-1 rounded-full bg-border overflow-hidden">
                           <div
-                            className="h-2 rounded-full bg-white"
-                            style={{ width: `${pct}%` }}
+                            className="h-1 rounded-full transition-all"
+                            style={{ width: `${pct}%`, background: "var(--brand-accent)" }}
                             aria-label="Funding progress"
                           />
                         </div>
                       </div>
                       <div className="grid grid-cols-3 gap-2">
                         <SmallStat label="Committed" value={`$${p.committed.toLocaleString()}`} />
-                        <SmallStat label="Released" value={`$${p.released.toLocaleString()}`} />
-                        <SmallStat label="Perf" value={p.perf} />
+                        <SmallStat label="Released"  value={`$${p.released.toLocaleString()}`} />
+                        <SmallStat label="Perf"      value={p.perf} />
                       </div>
                     </div>
 
                     {/* Founders */}
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <span className="text-xs text-white/60">Founders</span>
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Founders</span>
                       {p.founders.map((f) => (
                         <FounderDialog key={f.id} founder={f} />
                       ))}
                     </div>
-
-                    {/* Next step */}
-                    <div className="mt-2 text-xs text-white/60">{p.next}</div>
                   </div>
                 )
               })
@@ -230,18 +241,18 @@ export default function InvestorInvestmentsPage() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-[#1a1b1e] bg-[#101113] p-4">
-      <div className="text-xs text-white/60">{label}</div>
-      <div className="mt-1 text-2xl font-semibold">{value}</div>
+    <div className="bg-background p-5 group hover:bg-accent/30 transition-colors">
+      <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">{label}</div>
+      <div className="text-2xl font-serif font-light text-foreground tracking-tight">{value}</div>
     </div>
   )
 }
 
 function SmallStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-white/10 bg-[#0f1012] px-3 py-2">
-      <div className="text-[11px] text-white/60">{label}</div>
-      <div className="mt-0.5 text-sm font-semibold">{value}</div>
+    <div className="rounded-lg border border-border bg-accent/30 px-3 py-2">
+      <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="mt-0.5 text-sm font-semibold text-foreground">{value}</div>
     </div>
   )
 }
