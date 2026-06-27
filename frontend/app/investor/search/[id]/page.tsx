@@ -2,9 +2,9 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, FileText, ExternalLink, ShieldCheck } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 type Project = {
   id: string
@@ -22,7 +22,6 @@ type Project = {
   uploads: { type: "deck" | "link" | "image"; label: string; href?: string; src?: string }[]
 }
 
-// Minimal mock; ids match search page
 const MOCK: Project[] = [
   {
     id: "p1",
@@ -41,9 +40,9 @@ const MOCK: Project[] = [
       { id: "f-ian", name: "Ian R.", role: "ML/Edge" },
     ],
     uploads: [
-      { type: "deck", label: "Pitch Deck.pdf", href: "#" },
-      { type: "link", label: "Website", href: "#" },
-      { type: "image", label: "Sensor Module", src: "/sensor-module.png" },
+      { type: "deck",  label: "Pitch Deck.pdf",  href: "#" },
+      { type: "link",  label: "Website",          href: "#" },
+      { type: "image", label: "Sensor Module",    src: "/sensor-module.png" },
     ],
   },
   {
@@ -61,7 +60,7 @@ const MOCK: Project[] = [
     founders: [{ id: "f-lee", name: "Lee K.", role: "Founder" }],
     uploads: [
       { type: "deck", label: "Intro Deck.pdf", href: "#" },
-      { type: "link", label: "Data Room", href: "#" },
+      { type: "link", label: "Data Room",      href: "#" },
     ],
   },
 ]
@@ -70,188 +69,210 @@ export default function ProjectBriefPage({ params }: { params: { id: string } })
   const p = MOCK.find((x) => x.id === params.id)
   if (!p) return notFound()
 
-  const baseline = 75
-  const tp = clamp(p.trustPoints, 1, 100)
-  const delta = tp - baseline
+  const tp       = clamp(p.trustPoints, 1, 100)
+  const delta    = tp - 75
   const deltaStr = delta === 0 ? "0" : delta > 0 ? `+${delta}` : `${delta}`
   const progress = Math.max(0, Math.min(100, Math.round((p.fundsSpent / Math.max(1, p.fundsGained)) * 100)))
 
   return (
-    <div className="mx-auto max-w-[1100px] space-y-6">
-      {/* Top bar */}
-      <div className="flex items-center gap-3">
+    <div className="mx-auto max-w-[1100px] space-y-8 pb-16">
+
+      {/* Back button */}
+      <div className="pt-2">
         <Button
           asChild
-          variant="outline"
-          className="h-8 rounded-md border-white/10 text-white hover:bg-white/10 bg-transparent"
+          variant="ghost"
+          className="h-8 rounded-lg text-foreground/60 hover:text-foreground hover:bg-accent -ml-2 text-sm"
         >
           <Link href="/investor/search">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
             Back to search
           </Link>
         </Button>
       </div>
 
-      {/* Header */}
-      <section className="rounded-xl border border-[#1a1b1e] bg-[#101113] p-4">
-        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[1fr_auto]">
-          <div className="min-w-0">
+      {/* ── Header ── */}
+      <div>
+        <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground flex items-center gap-2 mb-2">
+          <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: "var(--brand-accent)" }} />
+          Project Brief
+        </p>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-semibold">{p.name}</h1>
-              <Badge variant="secondary" className="bg-white/[0.05] text-white border-[#1a1b1e]">
+              <h1 className="text-3xl font-serif font-light tracking-tight text-foreground">{p.name}</h1>
+              <Badge variant="secondary" className="bg-accent text-foreground/70 border-border font-mono text-[10px]">
                 {p.stage}
               </Badge>
               {p.domains.map((d) => (
-                <Badge key={d} variant="secondary" className="bg-white/[0.05] text-white border-[#1a1b1e]">
+                <Badge key={d} variant="secondary" className="bg-accent/60 text-foreground/60 border-border/60 text-[10px]">
                   {d}
                 </Badge>
               ))}
-              <span className="text-xs text-white/60">• {p.location}</span>
+              <span className="text-xs text-muted-foreground">&middot; {p.location}</span>
             </div>
-            <p className="mt-2 text-sm text-white/70">{p.desc}</p>
+            <p className="text-sm text-muted-foreground max-w-lg leading-relaxed">{p.desc}</p>
           </div>
 
-          <div className="lg:justify-self-end">
-            <div className="text-sm">
-              Trust <span className="font-semibold">{tp}</span>
-              <span className={cnDelta(delta)}>{` (${deltaStr})`}</span>
+          <div className="lg:shrink-0 space-y-2">
+            <div className="text-sm text-foreground/70">
+              Trust <span className="font-semibold text-foreground">{tp}</span>
+              <span className={cn("ml-1 text-xs", delta > 0 ? "text-emerald-500" : delta < 0 ? "text-rose-500" : "text-muted-foreground")}>
+                ({deltaStr})
+              </span>
             </div>
-            <div className="mt-2 h-2 w-full max-w-[220px] rounded bg-white/10">
+            <div className="h-1 w-48 rounded-full bg-border overflow-hidden">
               <div
-                className="h-2 rounded bg-white"
-                style={{ width: `${Math.max(2, (tp / 100) * 100)}%`, opacity: 0.8 }}
+                className="h-1 rounded-full transition-all"
+                style={{ width: `${Math.max(2, (tp / 100) * 100)}%`, background: "var(--brand-accent)" }}
                 aria-label="Trust meter"
               />
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Funds */}
-      <section className="rounded-xl border border-[#1a1b1e] bg-[#101113] p-4">
-        <div className="grid gap-4 sm:grid-cols-3">
+      {/* ── Funds ── */}
+      <div>
+        <p className="text-[9px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-3">Capital</p>
+        <div className="grid gap-px sm:grid-cols-3 border border-border rounded-xl overflow-hidden">
           <Stat label="Funds gained" value={`$${p.fundsGained.toLocaleString()}`} />
-          <Stat label="Spent" value={`$${p.fundsSpent.toLocaleString()}`} />
-          <Stat label="Needed" value={`$${p.investmentNeeded.toLocaleString()}`} />
+          <Stat label="Spent"        value={`$${p.fundsSpent.toLocaleString()}`} />
+          <Stat label="Needed"       value={`$${p.investmentNeeded.toLocaleString()}`} />
         </div>
-        <div className="mt-4">
-          <div className="flex items-center justify-between text-xs text-white/60">
-            <span>Progress</span>
-            <span>{progress}% of gained spent</span>
+        <div className="mt-3">
+          <div className="flex items-center justify-between text-[10px] text-muted-foreground font-mono mb-1.5">
+            <span className="uppercase tracking-wider">Burn rate (spent / gained)</span>
+            <span>{progress}%</span>
           </div>
-          <div className="mt-2 h-2 rounded bg-white/10">
-            <div className="h-2 rounded bg-white" style={{ width: `${progress}%`, opacity: 0.8 }} />
+          <div className="h-1 rounded-full bg-border overflow-hidden">
+            <div
+              className="h-1 rounded-full transition-all"
+              style={{ width: `${progress}%`, background: "var(--brand-accent)" }}
+            />
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Uploads */}
-      <section className="rounded-xl border border-[#1a1b1e] bg-[#101113] p-4">
-        <h2 className="text-base font-medium">Founder uploads</h2>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+      {/* ── Uploads ── */}
+      <div>
+        <p className="text-[9px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-3">Founder Uploads</p>
+        <div className="grid gap-3 sm:grid-cols-2">
           {p.uploads.map((u, i) => {
             if (u.type === "deck" || u.type === "link") {
               return (
-                <Card key={i} className="border-[#1a1b1e] bg-[#0f1012]">
-                  <CardContent className="p-3 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 text-sm">
-                      {u.type === "deck" ? (
-                        <FileText className="h-4 w-4 opacity-70" />
-                      ) : (
-                        <ExternalLink className="h-4 w-4 opacity-70" />
-                      )}
-                      <span className="truncate">{u.label}</span>
-                    </div>
-                    <Button
-                      variant="outline"
-                      className="h-8 rounded-md border-white/10 text-white hover:bg-white/10 bg-transparent"
-                      asChild
-                    >
-                      <Link href={u.href || "#"}>Open</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
+                <div key={i} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-background p-4 hover:bg-accent/20 transition-colors">
+                  <div className="flex items-center gap-2 text-sm text-foreground/70 min-w-0">
+                    {u.type === "deck"
+                      ? <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      : <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    }
+                    <span className="truncate">{u.label}</span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 rounded-lg border-border/60 text-foreground/60 hover:bg-accent hover:text-foreground bg-transparent text-xs shrink-0"
+                    asChild
+                  >
+                    <Link href={u.href || "#"}>Open</Link>
+                  </Button>
+                </div>
               )
             }
             return (
-              <Card key={i} className="border-[#1a1b1e] bg-[#0f1012]">
-                <CardContent className="p-3">
-                  <img
-                    alt={u.label}
-                    src={u.src || "/placeholder.svg?height=120&width=200&query=project%20image"}
-                    className="h-28 w-full rounded-md object-cover"
-                  />
-                  <div className="mt-2 text-sm text-white/80">{u.label}</div>
-                </CardContent>
-              </Card>
+              <div key={i} className="rounded-xl border border-border overflow-hidden bg-accent/20">
+                <img
+                  alt={u.label}
+                  src={u.src || "/placeholder.svg?height=120&width=200&query=project%20image"}
+                  className="h-28 w-full object-cover"
+                />
+                <div className="px-4 py-2.5 text-sm text-foreground/70">{u.label}</div>
+              </div>
             )
           })}
         </div>
-      </section>
+      </div>
 
-      {/* Founders */}
-      <section className="rounded-xl border border-[#1a1b1e] bg-[#101113] p-4">
-        <h2 className="text-base font-medium">Founders</h2>
-        <div className="mt-3 divide-y divide-white/5 rounded-lg border border-white/10 bg-black/30">
-          {p.founders.map((f) => (
-            <div key={f.id} className="px-3 py-3 flex items-center justify-between gap-2">
+      {/* ── Founders ── */}
+      <div>
+        <p className="text-[9px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-3">Founders</p>
+        <div className="rounded-xl border border-border overflow-hidden">
+          {p.founders.map((f, i) => (
+            <div
+              key={f.id}
+              className={cn(
+                "px-5 py-4 flex items-center justify-between gap-3 hover:bg-accent/20 transition-colors",
+                i !== 0 && "border-t border-border/60"
+              )}
+            >
               <div>
-                <div className="font-medium">{f.name}</div>
-                <div className="text-xs text-white/60">{f.role}</div>
+                <div className="font-medium text-sm text-foreground">{f.name}</div>
+                <div className="text-xs text-muted-foreground font-mono">{f.role}</div>
               </div>
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
-                  className="h-8 rounded-md border-white/10 text-white hover:bg-white/10 bg-transparent"
+                  size="sm"
+                  className="h-8 rounded-lg border-border/60 text-foreground/60 hover:bg-accent hover:text-foreground bg-transparent text-xs"
                 >
                   View profile
                 </Button>
-                <Button className="h-8 rounded-md bg-white text-[#0b0b0c] hover:bg-white/90">Start chat</Button>
+                <Button
+                  size="sm"
+                  className="h-8 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs"
+                >
+                  Start chat
+                </Button>
               </div>
             </div>
           ))}
         </div>
-      </section>
+      </div>
 
-      {/* Actions */}
-      <section className="rounded-xl border border-[#1a1b1e] bg-[#101113] p-4">
+      {/* ── Actions ── */}
+      <div>
+        <p className="text-[9px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-3">Actions</p>
         <div className="flex flex-wrap items-center gap-3">
-          <Button className="rounded-md bg-white text-[#0b0b0c] hover:bg-white/90">Commit funds</Button>
-          <Button variant="outline" className="rounded-md border-white/10 text-white hover:bg-white/10 bg-transparent">
+          <Button className="rounded-lg bg-primary text-primary-foreground hover:opacity-90 font-medium">
+            Commit funds
+          </Button>
+          <Button
+            variant="outline"
+            className="rounded-lg border-border/60 text-foreground/60 hover:bg-accent hover:text-foreground bg-transparent"
+          >
             <ShieldCheck className="mr-2 h-4 w-4" />
             Request NDA
           </Button>
-          <Button variant="outline" className="rounded-md border-white/10 text-white hover:bg-white/10 bg-transparent">
+          <Button
+            variant="outline"
+            className="rounded-lg border-border/60 text-foreground/60 hover:bg-accent hover:text-foreground bg-transparent"
+          >
             Request update
           </Button>
         </div>
-      </section>
+      </div>
 
-      <Separator className="bg-white/10" />
+      <Separator className="bg-border/60" />
 
-      <div className="text-xs text-white/50">
-        Verified projects show an additional badge provided by Something after review.
+      <div className="text-xs text-muted-foreground font-mono">
+        Verified projects display an additional badge after Something review.
       </div>
     </div>
   )
 }
 
-/* Local components */
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="rounded-md border border-white/10 bg-black/30 p-3">
-      <div className="text-[11px] text-white/60">{label}</div>
-      <div className="mt-1 text-sm font-semibold text-white">
-        {value} {hint ? <span className="ml-1 text-xs text-white/60">{hint}</span> : null}
+    <div className="bg-background p-5 hover:bg-accent/30 transition-colors">
+      <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1.5">{label}</div>
+      <div className="text-lg font-serif font-light text-foreground tracking-tight">
+        {value}{hint ? <span className="ml-1 text-xs text-muted-foreground">{hint}</span> : null}
       </div>
     </div>
   )
 }
 
-/* Utils */
-function cnDelta(delta: number) {
-  return `ml-1 text-xs ${delta > 0 ? "text-emerald-300" : delta < 0 ? "text-rose-300" : "text-white/70"}`
-}
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n))
 }
