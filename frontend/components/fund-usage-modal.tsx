@@ -9,14 +9,25 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { X, FileText, ImageIcon, Receipt, DollarSign } from "lucide-react"
 
+interface FundUsageEntry {
+  category: string
+  amount: string
+  description: string
+  date: string
+  vendor: string
+  receipts: File[]
+  proofImages: File[]
+  notes: string
+}
+
 interface FundUsageModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  campaign: any
-  onAddUsage: (usage: any) => void
+  campaign?: Record<string, unknown>
+  onAddUsage: (usage: FundUsageEntry & { id: number; createdAt: string; status: string }) => void
 }
 
-export function FundUsageModal({ open, onOpenChange, campaign, onAddUsage }: FundUsageModalProps) {
+export function FundUsageModal({ open, onOpenChange, onAddUsage }: FundUsageModalProps) {
   const [formData, setFormData] = useState({
     category: "",
     amount: "",
@@ -45,7 +56,7 @@ export function FundUsageModal({ open, onOpenChange, campaign, onAddUsage }: Fun
 
     const newFormData = { ...formData }
     const currentFiles = newFormData[type as keyof typeof formData] as File[]
-    newFormData[type as keyof typeof formData] = [...currentFiles, ...Array.from(files)] as any
+    ;(newFormData as Record<string, unknown>)[type] = [...currentFiles, ...Array.from(files)]
 
     setFormData(newFormData)
   }
@@ -53,7 +64,7 @@ export function FundUsageModal({ open, onOpenChange, campaign, onAddUsage }: Fun
   const removeFile = (type: string, index: number) => {
     const newFormData = { ...formData }
     const currentFiles = newFormData[type as keyof typeof formData] as File[]
-    newFormData[type as keyof typeof formData] = currentFiles.filter((_, i) => i !== index) as any
+    ;(newFormData as Record<string, unknown>)[type] = currentFiles.filter((_, i) => i !== index)
     setFormData(newFormData)
   }
 
@@ -88,7 +99,7 @@ export function FundUsageModal({ open, onOpenChange, campaign, onAddUsage }: Fun
             <Receipt className="h-5 w-5" />
             Report Fund Usage
           </DialogTitle>
-          <p className="text-sm text-white/60">Show the community how you're using the funds with receipts and proof</p>
+          <p className="text-sm text-white/60">Show the community how you&apos;re using the funds with receipts and proof</p>
         </DialogHeader>
 
         <div className="space-y-6">
