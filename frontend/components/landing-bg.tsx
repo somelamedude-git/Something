@@ -173,7 +173,7 @@ export function LandingBg() {
         // 2. Parallax Screen-Space Coordinates
         const visualY = p.y - scrollY * p.depth
         // Wrap screen Y to keep it looping on view
-        let screenY = ((visualY % H) + H) % H
+        const screenY = ((visualY % H) + H) % H
 
         // 3. Mouse Physics (in screen space)
         if (mouse.x > 0 && mouse.y > 0) {
