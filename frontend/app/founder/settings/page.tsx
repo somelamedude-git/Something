@@ -436,7 +436,7 @@ export default function FounderSettingsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-12 relative pb-20">
+    <div className="w-full pt-6 pb-24 px-6 xl:px-10 relative">
       
       {/* Toast Notification Container */}
       <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none">
@@ -476,7 +476,7 @@ export default function FounderSettingsPage() {
         <p className="text-foreground/40 text-xs font-sans font-light leading-relaxed">Personalize your identity aesthetic, configure visibility nodes, manage credentials, and set notification thresholds.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6 items-start">
         
         {/* Left Side: Sidebar Control & Accent Choice */}
         <div className="lg:col-span-3 space-y-6">
@@ -496,9 +496,9 @@ export default function FounderSettingsPage() {
                    )}
                 >
                   {isActive && (
-                    <div className="absolute left-0 top-3 bottom-3 w-[2px] bg-[#34D399] rounded-r-full" />
+                    <div className="absolute left-0 top-3 bottom-3 w-[2px] bg-brand-accent rounded-r-full" />
                   )}
-                  <TabIcon className={cn("h-4 w-4 shrink-0 transition-colors", isActive ? "text-[#34D399]" : "text-foreground/30")} />
+                  <TabIcon className={cn("h-4 w-4 shrink-0 transition-colors", isActive ? "text-brand-accent" : "text-foreground/30")} />
                   {t.label}
                 </button>
               )
@@ -544,7 +544,7 @@ export default function FounderSettingsPage() {
         </div>
 
         {/* Right Side: Tab Contents Panel */}
-        <div className="lg:col-span-9 lg:border-l lg:border-border/5 lg:pl-8 min-h-[500px]">
+        <div className="lg:col-span-9 lg:border-l lg:border-border/5 lg:pl-8 lg:pt-1 min-h-[500px]">
           
           {activeTab === "profile" && (
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 xl:divide-x xl:divide-white/5 items-start">
@@ -953,7 +953,7 @@ export default function FounderSettingsPage() {
                     </h3>
                     <p className="text-foreground/40 text-[11px] mt-1 font-mono uppercase tracking-wider">Manage your principal identity login certificate</p>
                   </div>
-                  <Badge className="bg-[#34D399]/10 text-[#34D399] border-[#34D399]/20 flex items-center gap-1.5 py-0.5 px-3 rounded-full font-mono text-[9px]">
+                  <Badge className="bg-brand-accent/10 text-brand-accent border-brand-accent/20 flex items-center gap-1.5 py-0.5 px-3 rounded-full font-mono text-[9px]">
                     <CheckCircle2 className="h-3 w-3" />
                     Verified Principal
                   </Badge>
@@ -1159,18 +1159,18 @@ export default function FounderSettingsPage() {
           {/* TAB 4: Danger Zone */}
           {activeTab === "danger" && (
             <div className="space-y-6">
-              <div className="border-b border-red-500/10 pb-4">
-                <h3 className="text-sm font-serif font-light text-red-400 flex items-center gap-2">
-                  <Trash2 className="h-4 w-4 text-red-400" />
+              <div className="border-b border-destructive/10 pb-4">
+                <h3 className="text-sm font-serif font-light text-destructive flex items-center gap-2">
+                  <Trash2 className="h-4 w-4 text-destructive" />
                   Developer Node Deletion Protocol
                 </h3>
-                <p className="text-red-500/40 text-[11px] mt-1 font-mono uppercase tracking-wider">Wipe cryptographics secrets and disconnect cohort escrows</p>
+                <p className="text-destructive/50 text-[11px] mt-1 font-mono uppercase tracking-wider">Wipe cryptographics secrets and disconnect cohort escrows</p>
               </div>
 
-              <div className="rounded-xl border border-red-500/10 bg-red-500/[0.01] p-4.5 space-y-4 pt-1">
+              <div className="rounded-xl border border-destructive/20 bg-destructive/[0.02] p-4.5 space-y-4">
                 <div className="space-y-1.5">
-                  <div className="text-xs font-bold text-red-300 flex items-center gap-1.5">
-                    <AlertTriangle className="h-4 w-4 shrink-0 text-red-400" />
+                  <div className="text-xs font-bold text-destructive flex items-center gap-1.5">
+                    <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" />
                     Wipe Node Key Identity
                   </div>
                   <p className="text-[11px] text-foreground/50 leading-relaxed font-sans">
@@ -1180,7 +1180,7 @@ export default function FounderSettingsPage() {
 
                 <Button
                   onClick={() => setIsDeleteOpen(true)}
-                  className="bg-transparent border border-red-500/20 hover:border-red-500/40 text-red-300 hover:bg-red-500/10 rounded-lg text-xs font-semibold font-mono tracking-wider h-9 px-4.5 transition-all cursor-pointer"
+                  className="bg-transparent border border-destructive/30 hover:border-destructive/60 text-destructive hover:bg-destructive/10 rounded-lg text-xs font-semibold font-mono tracking-wider h-9 px-4.5 transition-all cursor-pointer"
                 >
                   Initiate Deletion Protocol
                 </Button>
@@ -1193,10 +1193,10 @@ export default function FounderSettingsPage() {
 
       {/* Account Deletion Dialog Modal */}
       <Dialog open={isDeleteOpen} onOpenChange={(open) => !isDeleting && setIsDeleteOpen(open)}>
-        <DialogContent className="bg-popover/95 border border-red-500/10 text-foreground backdrop-blur-2xl rounded-2xl max-w-md shadow-2xl p-6">
+        <DialogContent className="bg-popover/95 border border-destructive/20 text-foreground backdrop-blur-2xl rounded-2xl max-w-md shadow-2xl p-6">
           <DialogHeader className="border-b border-border/5 pb-3">
-            <DialogTitle className="text-base font-serif font-light text-red-400 flex items-center gap-2">
-              <AlertTriangle className="h-4.5 w-4.5 text-red-400 animate-pulse" /> Confirm Identity Wipe
+            <DialogTitle className="text-base font-serif font-light text-destructive flex items-center gap-2">
+              <AlertTriangle className="h-4.5 w-4.5 text-destructive animate-pulse" /> Confirm Identity Wipe
             </DialogTitle>
             <DialogDescription className="text-foreground/40 text-xs mt-1 leading-normal">
               You are about to execute node key destruction. Fill credentials below to verify matching sectors.
@@ -1206,7 +1206,7 @@ export default function FounderSettingsPage() {
           {/* Interactive Wipe logs console */}
           {isDeleting ? (
             <div className="space-y-2 pt-2.5">
-              <span className="text-[10px] font-mono text-red-400 uppercase tracking-widest flex items-center gap-1.5">
+              <span className="text-[10px] font-mono text-destructive uppercase tracking-widest flex items-center gap-1.5">
                 <Loader2 className="h-3 w-3 animate-spin" /> Destroying Sectors...
               </span>
               <div className="bg-background/90 p-4 border border-border/5 rounded-lg font-mono text-[10px] text-foreground/70 h-36 overflow-y-auto space-y-1">
@@ -1219,7 +1219,7 @@ export default function FounderSettingsPage() {
             </div>
           ) : (
             <form onSubmit={handleDeleteAccountSubmit} className="space-y-4 pt-4">
-              <div className="rounded-lg border border-red-500/10 bg-red-500/[0.01] p-3 text-[10px] text-red-300/80 leading-relaxed font-mono">
+              <div className="rounded-lg border border-destructive/20 bg-destructive/[0.02] p-3 text-[10px] text-destructive/80 leading-relaxed font-mono">
                 WARNING: Cryptographic credentials will be revoked. Pending milestone escrows will be frozen.
               </div>
 
@@ -1233,7 +1233,7 @@ export default function FounderSettingsPage() {
                   placeholder="alex@edgevisionlabs.com"
                   value={confirmEmail}
                   onChange={(e) => setConfirmEmail(e.target.value)}
-                  className="bg-background/40 border-border/5 text-xs text-foreground rounded-lg h-9 pr-3 focus-visible:ring-red-500/20 focus-visible:border-red-500/40"
+                  className="bg-background/40 border-border/5 text-xs text-foreground rounded-lg h-9 pr-3 focus-visible:ring-destructive/20 focus-visible:border-destructive/40"
                   required
                 />
               </div>
@@ -1256,8 +1256,8 @@ export default function FounderSettingsPage() {
                   className={cn(
                     "rounded-lg text-xs font-semibold font-mono tracking-wider h-8 px-4 transition-all cursor-pointer",
                     confirmEmail === "alex@edgevisionlabs.com"
-                      ? "bg-red-500 text-foreground hover:bg-red-600 shadow-[0_0_12px_rgba(239,68,68,0.2)]"
-                      : "bg-red-950/20 text-red-500/40 border border-red-950/40 cursor-not-allowed"
+                      ? "bg-destructive text-destructive-foreground hover:opacity-90 shadow-[0_0_12px_rgba(239,68,68,0.2)]"
+                      : "bg-destructive/10 text-destructive/40 border border-destructive/20 cursor-not-allowed"
                   )}
                 >
                   <Trash2 className="h-3 w-3 mr-1" />
