@@ -129,7 +129,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-weight: var(--theme-font-weight, 400);
+    font-weight: var(--theme-body-weight, 400);
     letter-spacing: var(--theme-letter-spacing, 0em);
   }
 }
