@@ -1,6 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { useAvatar } from "@/components/avatar-context"
+import { AvatarUploader } from "@/components/avatar-uploader"
+import axios from "axios"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -19,6 +22,20 @@ const TABS: { key: Tab; label: string; icon: React.ElementType }[] = [
 
 export default function InvestorSettingsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("notifications")
+  const { avatarUrl, setAvatarUrl, userName, setUserName } = useAvatar()
+
+  const uploadAvatar = async (file: File) => {
+    try {
+      const formData = new FormData()
+      formData.append("avatar", file)
+      const response = await axios.post<{ url: string }>("#/api/investor/avatar", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      setAvatarUrl(response.data.url)
+    } catch (err) {
+      console.error("Error uploading avatar:", err)
+    }
+  }
 
   // Notifications state
   const [emailNotifications, setEmailNotifications] = useState(true)
@@ -227,7 +244,31 @@ export default function InvestorSettingsPage() {
                 title="Account Details"
                 desc="Update your email address and change your password."
               />
+              <div className="space-y-3">
+                <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Profile photo</p>
+                <div className="p-4 rounded-xl border border-border/60 bg-accent/20 flex items-center justify-between">
+                  <AvatarUploader
+                    name={userName}
+                    src={avatarUrl}
+                    onChange={(file, url) => {
+                      if (file) uploadAvatar(file)
+                      else setAvatarUrl(url)
+                    }}
+                    size={64}
+                  />
+                </div>
+              </div>
 
+              <div className="space-y-3">
+                <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Investor Name</p>
+                <Input
+                  id="username-input"
+                  type="text"
+                  value={userName}
+                  onChange={e => setUserName(e.target.value)}
+                  className="bg-accent/30 border-border/60 text-foreground"
+                />
+              </div>
               <div className="space-y-3">
                 <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Email address</p>
                 <div className="flex gap-2">

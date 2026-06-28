@@ -40,7 +40,11 @@ export default function InvestorLayout({ children }: { children: React.ReactNode
   useEffect(() => {
     setMounted(true)
     const saved = localStorage.getItem("founder_settings_accent")
-    if (saved) setAccentKey(saved)
+    if (saved) {
+      setAccentKey(saved)
+    } else {
+      setAccentKey(theme === "dark" ? "violet" : "emerald")
+    }
 
     const handleAccentUpdate = (e: Event) => {
       const ce = e as CustomEvent<{ accent: string }>
@@ -48,7 +52,11 @@ export default function InvestorLayout({ children }: { children: React.ReactNode
     }
     const handleStorageChange = () => {
       const s = localStorage.getItem("founder_settings_accent")
-      if (s) setAccentKey(s)
+      if (s) {
+        setAccentKey(s)
+      } else {
+        setAccentKey(theme === "dark" ? "violet" : "emerald")
+      }
     }
     window.addEventListener("founder-accent-update", handleAccentUpdate)
     window.addEventListener("storage", handleStorageChange)
@@ -56,7 +64,16 @@ export default function InvestorLayout({ children }: { children: React.ReactNode
       window.removeEventListener("founder-accent-update", handleAccentUpdate)
       window.removeEventListener("storage", handleStorageChange)
     }
-  }, [])
+  }, [theme])
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && mounted) {
+      const saved = localStorage.getItem("founder_settings_accent")
+      if (!saved) {
+        setAccentKey(theme === "dark" ? "violet" : "emerald")
+      }
+    }
+  }, [theme, mounted])
 
   // ── Full CSS token injection (mirrors founder layout exactly) ──────────
   useEffect(() => {
@@ -110,6 +127,10 @@ export default function InvestorLayout({ children }: { children: React.ReactNode
     root.style.setProperty("--accent-foreground",         t.fgOklch)
     root.style.setProperty("--theme-font-weight",         t.fontWeight)
     root.style.setProperty("--theme-letter-spacing",      t.letterSpacing)
+    
+    const rawWeight = parseInt(t.fontWeight) || 400
+    const bodyWeight = isDark ? Math.max(380, rawWeight) : Math.max(420, rawWeight + 20)
+    root.style.setProperty("--theme-body-weight",         bodyWeight.toString())
   }, [accentKey, theme, mounted])
 
   return (

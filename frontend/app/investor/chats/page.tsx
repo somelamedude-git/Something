@@ -171,7 +171,7 @@ export default function InvestorChatsPage() {
                   placeholder="Search conversations..."
                   value={query}
                   onChange={e => setQuery(e.target.value)}
-                  className="h-9 w-full pl-8 bg-accent/30 border-transparent text-white placeholder:text-foreground/40 focus:ring-1 focus:ring-white/20"
+                  className="h-9 w-full pl-8 bg-accent/30 border-transparent text-foreground placeholder:text-foreground/40 focus:ring-1 focus:ring-[var(--brand-accent)]/30"
                 />
               </div>
             </div>
@@ -200,14 +200,14 @@ export default function InvestorChatsPage() {
                         <div className="grid size-10 place-items-center rounded-full text-xs font-medium bg-accent/30">
                           {t.name.split(" ").map(n => n[0]).join("").substring(0, 2)}
                         </div>
-                        {t.isOnline && <div className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full bg-green-400 border-2 border-[#101113]" />}
+                        {t.isOnline && <div className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full bg-green-400 border-2 border-background" />}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="truncate text-sm font-medium text-white/90">{t.name}</span>
+                          <span className="truncate text-sm font-medium text-foreground/90">{t.name}</span>
                           <div className="flex items-center gap-1.5 ml-2">
                             {t.unreadCount > 0 && (
-                              <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-white/90 text-[#101113] rounded-full">{t.unreadCount}</span>
+                              <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-medium bg-primary text-primary-foreground rounded-full">{t.unreadCount}</span>
                             )}
                             <span className="text-[10px] text-foreground/50 whitespace-nowrap">{formatTime(t.lastActive)}</span>
                           </div>
@@ -226,7 +226,7 @@ export default function InvestorChatsPage() {
         <section className={cn("lg:block", showOnlyListOnMobile ? "hidden" : "block")}>
           <div className="rounded-xl bg-background overflow-hidden flex flex-col h-[600px] lg:h-[700px]">
             {/* Header */}
-            <div className="flex h-14 items-center gap-3 px-3 sm:px-4 border-b border-white/[0.06]">
+            <div className="flex h-14 items-center gap-3 px-3 sm:px-4 border-b border-border/40">
               <button className="lg:hidden" onClick={() => setActiveId(null)}><ChevronLeft className="h-5 w-5" /></button>
               {activeThread ? (
                 <div className="truncate text-sm font-medium leading-tight">{activeThread.name}</div>
@@ -239,7 +239,7 @@ export default function InvestorChatsPage() {
             <div ref={listRef} className="flex-1 overflow-y-auto px-3 py-4 sm:px-4 space-y-4">
               {isLoadingMessages ? (
                 <div className="grid h-full place-items-center">
-                  <div className="animate-spin size-5 border-2 border-white/20 border-t-white/60 rounded-full" />
+                  <div className="animate-spin size-5 border-2 border-border border-t-foreground/60 rounded-full" />
                 </div>
               ) : (
                 activeMessages.map((m, i) => {
@@ -248,7 +248,7 @@ export default function InvestorChatsPage() {
                   return (
                     <div key={m.id} className={cn("flex w-full", isYou ? "justify-end" : "justify-start")}>
                       <div className="max-w-[85%] sm:max-w-[78%]">
-                        <div className={cn("rounded-2xl px-3 py-2.5 text-sm", isYou ? "bg-white text-[#0b0b0c] rounded-br-md" : "bg-[#1a1b1e] text-white rounded-bl-md")}>
+                        <div className={cn("rounded-2xl px-3 py-2.5 text-sm", isYou ? "bg-primary text-primary-foreground rounded-br-md" : "bg-accent text-foreground rounded-bl-md")}>
                           <p>{m.text}</p>
                         </div>
                         <div className={cn("flex items-center gap-1 mt-1 text-[10px]", isYou ? "justify-end text-foreground/50" : "text-foreground/50")}>
@@ -267,7 +267,7 @@ export default function InvestorChatsPage() {
             </div>
 
             {/* Input area */}
-            <form onSubmit={onSend} className="flex items-end gap-2 p-3 border-t border-white/[0.06]">
+            <form onSubmit={onSend} className="flex items-end gap-2 p-3 border-t border-border/40">
               <textarea
                 ref={inputRef}
                 placeholder={activeThread ? "Type a message..." : "Select a conversation to start"}
@@ -275,10 +275,10 @@ export default function InvestorChatsPage() {
                 value={text}
                 onChange={e => setText(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) onSend(e); }}
-                className="w-full min-h-[40px] max-h-[120px] py-2.5 px-3 rounded-2xl bg-accent/30 border-transparent text-white placeholder:text-foreground/40 focus:ring-1 focus:ring-white/20 resize-none"
+                className="w-full min-h-[40px] max-h-[120px] py-2.5 px-3 rounded-2xl bg-accent/30 border-transparent text-foreground placeholder:text-foreground/40 focus:ring-1 focus:ring-[var(--brand-accent)]/30 resize-none"
                 rows={1}
               />
-              <Button type="submit" size="icon" disabled={!activeThread || text.trim().length === 0} className="size-10 rounded-full flex-shrink-0 bg-white text-background enabled:hover:bg-white/90 disabled:bg-white/20 disabled:text-muted-foreground">
+              <Button type="submit" size="icon" disabled={!activeThread || text.trim().length === 0} className="size-10 rounded-full flex-shrink-0 bg-primary text-primary-foreground enabled:hover:opacity-90 disabled:opacity-30">
                 <Send className="h-4 w-4" />
               </Button>
             </form>

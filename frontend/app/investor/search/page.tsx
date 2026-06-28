@@ -177,12 +177,30 @@ export default function InvestorSearchPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px]">
-      <div className="flex gap-6">
+    <div className="w-full pt-6 pb-24 px-6 xl:px-10">
+      <div className="flex flex-col lg:flex-row gap-10 xl:gap-14">
         {/* Main column */}
-        <div className="min-w-0 flex-1 space-y-6">
-          {/* Top bar */}
-          <div className="rounded-xl border border-border bg-background p-3 sm:p-4">
+        <div className="min-w-0 flex-1 space-y-8">
+          
+          {/* Header */}
+          <div className="space-y-1.5 pb-2">
+            <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground flex items-center gap-2">
+              <span
+                className="inline-block h-1.5 w-1.5 rounded-full"
+                style={{ background: "var(--brand-accent)" }}
+              />
+              Dealflow Discover
+            </p>
+            <h1 className="text-3xl sm:text-4xl font-serif font-light tracking-tight text-foreground leading-tight">
+              Discover Projects
+            </h1>
+            <p className="text-sm text-muted-foreground font-sans max-w-lg mt-1 leading-relaxed">
+              Explore cohort project briefs, filter by domain, or evaluate milestone telemetry metrics.
+            </p>
+          </div>
+
+          {/* Top filter bar */}
+          <div className="rounded-xl border border-border/[0.04] bg-background/20 p-3 sm:p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="relative flex-1">
                 <SearchIcon className="pointer-events-none absolute left-3 top-1/2 z-10 h-3.5 w-3.5 -translate-y-1/2 text-foreground/30" />
@@ -190,7 +208,7 @@ export default function InvestorSearchPage() {
                   placeholder="Domains, founders, keywords…"
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  className="h-9 w-full pl-9 bg-accent/30 border-border/60 text-foreground placeholder:text-foreground/30 rounded-lg"
+                  className="h-9.5 w-full pl-9 bg-accent/30 border-border/[0.03] text-foreground placeholder:text-foreground/30 rounded-lg focus-visible:ring-brand-accent/30 focus-visible:border-brand-accent/20 transition-all font-sans"
                 />
               </div>
 
@@ -199,7 +217,7 @@ export default function InvestorSearchPage() {
                   <Button
                     variant="outline"
                     className={cn(
-                      "h-9 rounded-md border-border/40 text-foreground/60 hover:bg-accent hover:text-foreground bg-transparent transition-all",
+                      "h-9.5 rounded-lg border-border/40 text-foreground/60 hover:bg-accent hover:text-foreground bg-transparent transition-all",
                       activeCount > 0 && "border-border text-foreground",
                     )}
                   >
@@ -229,65 +247,73 @@ export default function InvestorSearchPage() {
           </div>
 
           {/* Minimal results list */}
-          <div className="rounded-xl border border-border overflow-hidden">
+          <div className="space-y-1">
+            <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground pb-2 border-b border-border/[0.03] mb-2">
+              Results ({results.length})
+            </p>
+            
             {results.length === 0 && (
-              <div className="p-6 text-sm text-muted-foreground font-mono text-center">No projects match your filters. Try broadening.</div>
+              <div className="p-12 text-xs text-muted-foreground font-mono text-center border border-border/[0.03] rounded-xl bg-foreground/[0.01]">
+                No projects match your filters. Try broadening.
+              </div>
             )}
 
-            {results.map((r, idx) => (
-              <div
-                key={r.id}
-                className={cn(
-                  "px-5 py-4 hover:bg-accent/20 transition-colors",
-                  idx !== 0 && "border-t border-border/60",
-                )}
-              >
-                <div className="flex flex-col sm:flex-row sm:items-start gap-2">
-                  <div className="flex-1 space-y-1.5">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-base font-semibold text-foreground">{r.name}</span>
-                      <Badge variant="secondary" className="bg-accent text-foreground/70 border-border text-[10px] font-mono">
-                        {r.stage}
-                      </Badge>
-                      {r.domains.map((d) => (
-                        <Badge key={d} variant="secondary" className="bg-accent/60 text-foreground/60 border-border/60 text-[10px]">
-                          {d}
-                        </Badge>
-                      ))}
-                      <span className="text-xs text-muted-foreground">· {r.location}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground font-sans leading-snug">{r.desc}</p>
-                    <div className="text-xs text-muted-foreground">
-                      {launchedLabel(r.launchedAt)} · Needs{" "}
-                      <span className="text-foreground font-medium">{formatUSD(r.investmentNeeded)}</span>
-                    </div>
-                  </div>
-                  <div className="sm:ml-4 flex items-center gap-3 shrink-0">
-                    {(() => {
-                      const tp = clamp(r.trustPoints, 1, 100)
-                      const delta = tp - 75
-                      const deltaStr = delta === 0 ? "0" : delta > 0 ? `+${delta}` : `${delta}`
-                      return (
-                        <span className="text-sm text-foreground/70">
-                          Trust <span className="font-semibold text-foreground">{tp}</span>
-                          <span
-                            className={cn(
-                              "ml-1 text-xs",
-                              delta > 0 ? "text-emerald-500" : delta < 0 ? "text-rose-500" : "text-muted-foreground",
-                            )}
-                          >
-                            ({deltaStr})
-                          </span>
+            <div className="divide-y divide-border/[0.03]">
+              {results.map((r) => (
+                <div
+                  key={r.id}
+                  className="py-5 hover:px-2 rounded-lg -mx-2 hover:bg-foreground/[0.01] transition-all duration-200"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                    <div className="flex-1 space-y-1.5 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-semibold text-foreground group-hover:text-brand-accent transition-colors">
+                          {r.name}
                         </span>
-                      )
-                    })()}
-                    <Button asChild size="sm" className="h-8 rounded-lg bg-primary text-primary-foreground hover:opacity-90 text-xs">
-                      <Link href={`/investor/search/${r.id}`}>View brief</Link>
-                    </Button>
+                        <Badge variant="secondary" className="bg-accent/40 text-foreground border-border/40 text-[9px] font-mono px-2 py-0.5 rounded">
+                          {r.stage}
+                        </Badge>
+                        {r.domains.map((d) => (
+                          <Badge key={d} variant="secondary" className="bg-accent/20 text-muted-foreground border-border/10 text-[9px] px-1.5 py-0.5 rounded">
+                            {d}
+                          </Badge>
+                        ))}
+                        <span className="text-xs text-muted-foreground">· {r.location}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground font-sans leading-relaxed max-w-2xl">{r.desc}</p>
+                      <div className="text-[11px] text-muted-foreground/80 font-mono">
+                        {launchedLabel(r.launchedAt)} · Needs{" "}
+                        <span className="text-foreground font-medium">{formatUSD(r.investmentNeeded)}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="sm:ml-4 flex items-center justify-between sm:justify-end gap-5 shrink-0">
+                      {(() => {
+                        const tp = clamp(r.trustPoints, 1, 100)
+                        const delta = tp - 75
+                        const deltaStr = delta === 0 ? "0" : delta > 0 ? `+${delta}` : `${delta}`
+                        return (
+                          <span className="text-xs text-muted-foreground">
+                            Trust <span className="font-semibold text-foreground">{tp}</span>
+                            <span
+                              className={cn(
+                                "ml-1 text-[10px] font-mono",
+                                delta > 0 ? "text-emerald-500" : delta < 0 ? "text-rose-500" : "text-muted-foreground",
+                              )}
+                            >
+                              ({deltaStr})
+                            </span>
+                          </span>
+                        )
+                      })()}
+                      <Button asChild size="sm" className="h-8.5 rounded-full bg-foreground text-background hover:bg-foreground/90 text-xs px-4 cursor-pointer">
+                        <Link href={`/investor/search/${r.id}`}>View brief</Link>
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
@@ -335,13 +361,13 @@ function FiltersSheet({
   } = state
 
   return (
-    <SheetContent side="right" className="w-full sm:max-w-md bg-popover border-l border-border text-popover-foreground">
-      <SheetHeader>
-        <SheetTitle className="font-serif font-light text-xl">Filters</SheetTitle>
+    <SheetContent side="right" className="w-full sm:max-w-md bg-popover/95 border-l border-border/40 backdrop-blur-xl text-popover-foreground flex flex-col h-full shadow-2xl p-6">
+      <SheetHeader className="pb-4 border-b border-border/10">
+        <SheetTitle className="font-serif font-light text-xl text-foreground">Filters</SheetTitle>
         <SheetDescription className="text-muted-foreground text-xs font-mono">Narrow your search to the right opportunities.</SheetDescription>
       </SheetHeader>
 
-      <div className="mt-6 grid gap-7">
+      <div className="flex-1 overflow-y-auto pr-1 py-6 space-y-8 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-foreground/10 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
         <FacetBlock title="Domain(s)">
           <div className="flex flex-wrap gap-2">
             {ALL_DOMAINS.map((d) => {
@@ -353,10 +379,10 @@ function FiltersSheet({
                     setSelectedDomains(on ? selectedDomains.filter((x) => x !== d) : [...selectedDomains, d])
                   }
                   className={cn(
-                    "text-xs rounded-full px-3 py-1.5 border transition-all",
+                    "text-xs rounded-full px-3 py-1.5 border transition-all cursor-pointer",
                     on
                       ? "border-[var(--brand-accent)] bg-[var(--brand-accent)]/10 text-foreground"
-                      : "border-border/60 text-foreground/60 hover:bg-accent",
+                      : "border-border/60 text-foreground/60 hover:bg-accent/40",
                   )}
                   aria-pressed={on}
                 >
@@ -372,25 +398,32 @@ function FiltersSheet({
             {ALL_LOCATIONS.map((loc) => {
               const on = selectedLocations.includes(loc)
               return (
-                <label
+                <button
                   key={loc}
+                  onClick={() =>
+                    setSelectedLocations(
+                      on ? selectedLocations.filter((x) => x !== loc) : [...selectedLocations, loc],
+                    )
+                  }
                   className={cn(
-                    "flex cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 text-xs transition-all",
-                    on ? "border-[var(--brand-accent)]/40 bg-accent text-foreground" : "border-border/60 text-foreground/60 hover:bg-accent",
+                    "flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition-all cursor-pointer text-left w-full",
+                    on 
+                      ? "border-[var(--brand-accent)] bg-[var(--brand-accent)]/10 text-foreground" 
+                      : "border-border/60 text-foreground/60 hover:bg-accent/40",
                   )}
                 >
-                  <input
-                    type="checkbox"
-                    className="accent-[var(--brand-accent)]"
-                    checked={on}
-                    onChange={() =>
-                      setSelectedLocations(
-                        on ? selectedLocations.filter((x) => x !== loc) : [...selectedLocations, loc],
-                      )
-                    }
-                  />
+                  <div className={cn(
+                    "size-3.5 rounded border flex items-center justify-center shrink-0 transition-all",
+                    on ? "border-[var(--brand-accent)] bg-[var(--brand-accent)]" : "border-border/40 bg-transparent"
+                  )}>
+                    {on && (
+                      <svg className="size-2 text-background stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                      </svg>
+                    )}
+                  </div>
                   <span>{loc}</span>
-                </label>
+                </button>
               )
             })}
           </div>
@@ -409,10 +442,10 @@ function FiltersSheet({
                 key={o.k}
                 onClick={() => setLaunchedWhen(o.k as WhenKey)}
                 className={cn(
-                  "text-xs rounded-full px-3 py-1.5 border transition-all",
+                  "text-xs rounded-full px-3 py-1.5 border transition-all cursor-pointer",
                   launchedWhen === o.k
                     ? "border-[var(--brand-accent)] bg-[var(--brand-accent)]/10 text-foreground"
-                    : "border-border/60 text-foreground/60 hover:bg-accent",
+                    : "border-border/60 text-foreground/60 hover:bg-accent/40",
                 )}
                 aria-pressed={launchedWhen === o.k}
               >
@@ -433,9 +466,9 @@ function FiltersSheet({
                 value={minTrust}
                 onChange={(e) => setMinTrust(Number.parseInt(e.target.value))}
                 aria-label="Minimum trust points"
-                className="w-full accent-[var(--brand-accent)]"
+                className="w-full h-1 bg-foreground/10 rounded-lg appearance-none cursor-pointer accent-[var(--brand-accent)]"
               />
-              <div className="w-16 text-right text-sm text-foreground/70 font-mono">{minTrust} / 100</div>
+              <div className="w-16 text-right text-xs text-foreground/75 font-mono font-semibold">{minTrust} / 100</div>
             </div>
             <div className="text-[10px] text-muted-foreground font-mono">Baseline 75 — signals raise or lower this.</div>
           </div>
@@ -452,7 +485,7 @@ function FiltersSheet({
                   step={1000}
                   value={investMin}
                   onChange={(e) => setInvestMin(safeInt(e.target.value, investMin))}
-                  className="h-8 bg-accent/30 border-border/60 text-foreground text-xs"
+                  className="h-9 bg-accent/20 border-border/40 text-foreground text-xs rounded-lg [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus-visible:ring-brand-accent/25 focus-visible:border-brand-accent/30"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -463,7 +496,7 @@ function FiltersSheet({
                   step={1000}
                   value={investMax}
                   onChange={(e) => setInvestMax(safeInt(e.target.value, investMax))}
-                  className="h-8 bg-accent/30 border-border/60 text-foreground text-xs"
+                  className="h-9 bg-accent/20 border-border/40 text-foreground text-xs rounded-lg [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus-visible:ring-brand-accent/25 focus-visible:border-brand-accent/30"
                 />
               </div>
             </div>
@@ -474,16 +507,16 @@ function FiltersSheet({
         </FacetBlock>
       </div>
 
-      <SheetFooter className="mt-8 flex items-center gap-2">
+      <SheetFooter className="mt-auto pt-4 border-t border-border/10 flex items-center justify-end gap-2.5 shrink-0">
         <Button
           variant="outline"
           onClick={onReset}
-          className="rounded-lg border-border/60 text-foreground/60 hover:bg-accent bg-transparent"
+          className="rounded-full border-border/40 text-foreground/60 hover:bg-accent/40 bg-transparent text-xs font-semibold px-5 h-9.5 cursor-pointer"
         >
           Reset
         </Button>
         <SheetClose asChild>
-          <Button className="rounded-lg bg-primary text-primary-foreground hover:opacity-90">Apply</Button>
+          <Button className="rounded-full bg-primary text-primary-foreground hover:opacity-90 text-xs font-semibold px-5 h-9.5 cursor-pointer">Apply</Button>
         </SheetClose>
       </SheetFooter>
     </SheetContent>

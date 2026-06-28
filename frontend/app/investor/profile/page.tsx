@@ -373,7 +373,7 @@ export default function InvestorProfilePage() {
                       onClick={() => toggleInterest(t)}
                       className={cn(
                         "text-xs rounded-md px-3 py-1.5 border transition",
-                        on ? "border-white/30 bg-white/[0.06]" : "border-border text-foreground/80 hover:bg-white/[0.03]",
+                        on ? "border-[var(--brand-accent)] bg-[var(--brand-accent)]/10 text-foreground" : "border-border/60 text-foreground/80 hover:bg-accent/40",
                       )}
                       aria-pressed={on}
                     >
@@ -419,7 +419,7 @@ export default function InvestorProfilePage() {
                         onClick={() => toggleStage(s)}
                         className={cn(
                           "text-xs rounded-md px-3 py-1.5 border transition",
-                          on ? "border-white/30 bg-white/[0.06]" : "border-border hover:bg-white/[0.03]",
+                          on ? "border-[var(--brand-accent)] bg-[var(--brand-accent)]/10 text-foreground" : "border-border/60 text-foreground/80 hover:bg-accent/40",
                         )}
                         aria-pressed={on}
                       >
@@ -488,7 +488,7 @@ export default function InvestorProfilePage() {
                   />
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  Profile URL: <span className="text-white">something.to/{handle}</span>
+                  Profile URL: <span className="text-foreground font-medium">something.to/{handle}</span>
                 </div>
               </div>
               <div className="grid gap-2">

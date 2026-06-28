@@ -74,6 +74,64 @@ const STAGE_CONFIG = [
   { key: "mobilize", label: "Mobilize", desc: "Capital moving"   },
 ] as const
 
+// ─── Count-up helper ──────────────────────────────────────────────────────────
+function useCountUp(target: number, duration = 900) {
+  const [count, setCount] = useState(0)
+  useEffect(() => {
+    if (target === 0) { setCount(0); return }
+    let cur = 0
+    const inc = target / 36
+    const t = setInterval(() => {
+      cur += inc
+      if (cur >= target) { setCount(target); clearInterval(t) }
+      else setCount(Math.floor(cur))
+    }, duration / 36)
+    return () => clearInterval(t)
+  }, [target, duration])
+  return count
+}
+
+// ── Section Label ────────────────────────────────────────────────────────────
+function SectionLabel({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <p className={cn("text-[9px] font-mono uppercase tracking-[0.18em] text-muted-foreground", className)}>
+      {children}
+    </p>
+  )
+}
+
+// ── Kpi Stat Component ───────────────────────────────────────────────────────
+function KpiStat({ label, rawValue, isCurrency, icon: Icon, loading }: {
+  label: string; rawValue: string | number; isCurrency?: boolean; icon: React.ComponentType<{ className?: string }>; loading: boolean
+}) {
+  const isNumber = typeof rawValue === "number" || (!isNaN(Number(rawValue.toString().replace(/[^0-9.-]+/g, ""))));
+  const numericVal = isNumber ? Number(rawValue.toString().replace(/[^0-9.-]+/g, "")) : 0;
+  const count = useCountUp(numericVal);
+  
+  let display = rawValue.toString();
+  if (isNumber && !loading) {
+    display = isCurrency ? `$${count.toLocaleString()}` : count.toLocaleString();
+  }
+
+  return (
+    <div className="group transition-all duration-300">
+      <div className="flex items-center gap-2 mb-2">
+        <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+        <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+          {label}
+        </span>
+      </div>
+      <div className="text-3xl font-serif font-light text-foreground tracking-tight group-hover:scale-[1.01] duration-300 origin-left transition-transform">
+        {loading ? (
+          <span className="inline-block h-7 w-24 bg-foreground/5 rounded animate-pulse" />
+        ) : (
+          display
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─────────────────────────────────────────────────────────────────────────
 export default function InvestorOverviewPage() {
   const [data,    setData]    = useState<InvestorDashboardData>(MOCK_DATA)
@@ -102,25 +160,25 @@ export default function InvestorOverviewPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] pb-16">
-      <div className="flex gap-8">
+    <div className="w-full pt-6 pb-24 px-6 xl:px-10">
+      <div className="flex flex-col lg:flex-row gap-10 xl:gap-14">
         {/* ── Main column ── */}
-        <div className="min-w-0 flex-1 space-y-10">
+        <div className="min-w-0 flex-1 space-y-12">
 
           {/* Page header */}
-          <div className="space-y-1 pt-2">
+          <div className="space-y-1.5 pb-2">
             <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground flex items-center gap-2">
               <span
                 className="inline-block h-1.5 w-1.5 rounded-full"
                 style={{ background: "var(--brand-accent)" }}
               />
-              Investor Dashboard
+              System Overview
             </p>
             <h1 className="text-3xl sm:text-4xl font-serif font-light tracking-tight text-foreground leading-tight">
               Capital Overview
             </h1>
-            <p className="text-sm text-muted-foreground font-sans max-w-lg mt-1">
-              Your capital allocation, active pipeline, and recent activity at a glance.
+            <p className="text-sm text-muted-foreground font-sans max-w-lg mt-1 leading-relaxed">
+              Allocate capital nodes, track dealflow pipeline, and verify cohort evidence logs.
             </p>
           </div>
 
@@ -129,86 +187,77 @@ export default function InvestorOverviewPage() {
             <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-500 font-mono">
               {error}{" "}
               <button onClick={fetchData} className="underline underline-offset-2 ml-2 inline-flex items-center gap-1">
-                <RefreshCw className="h-3 w-3" /> Retry
+                <RefreshCw className="h-3 w-3 animate-spin" /> Retry
               </button>
             </div>
           )}
 
-          {/* ── KPIs ── */}
-          <div>
-            <p className="text-[9px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-4">
-              Capital metrics
-            </p>
-            <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-4 border border-border rounded-xl overflow-hidden">
+          {/* ── KPIs (Clean Minimal Row) ── */}
+          <div className="py-8 border-y border-border/[0.04]">
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {KPI_META.map(({ key, label, icon: Icon }) => {
                 const raw = data.kpis[key as keyof KpiData]
+                const isCurrency = key === "availableBalance" || key === "committedCapital";
                 return (
-                  <div
+                  <KpiStat
                     key={key}
-                    className="bg-background p-5 group hover:bg-accent/30 transition-colors"
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <Icon className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                        {label}
-                      </span>
-                    </div>
-                    <div className="text-2xl font-serif font-light text-foreground tracking-tight">
-                      {loading ? (
-                        <span className="inline-block h-7 w-24 bg-foreground/5 rounded animate-pulse" />
-                      ) : (
-                        raw.toString()
-                      )}
-                    </div>
-                  </div>
+                    label={label}
+                    rawValue={raw}
+                    isCurrency={isCurrency}
+                    icon={Icon}
+                    loading={loading}
+                  />
                 )
               })}
             </div>
           </div>
 
           {/* ── Pipeline ── */}
-          <div>
-            <div className="flex items-baseline justify-between mb-4">
-              <p className="text-[9px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
-                Investment pipeline
-              </p>
+          <div className="space-y-6">
+            <div className="flex items-baseline justify-between border-b border-border/[0.03] pb-4">
+              <div className="space-y-1">
+                <SectionLabel>Investment pipeline</SectionLabel>
+                <p className="text-xs text-muted-foreground">Dealflow status and fit assessments.</p>
+              </div>
               <Link
                 href="/investor/investments"
-                className="text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                className="text-[10px] font-mono uppercase tracking-[0.15em] text-brand-accent hover:text-brand-accent/80 transition-colors flex items-center gap-1 font-semibold"
               >
                 View all <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-3">
               {STAGE_CONFIG.map(({ key, label, desc }) => (
-                <div key={key} className="space-y-2">
-                  <div className="flex items-center gap-2 pb-2 border-b border-border">
-                    <span
-                      className="h-1.5 w-1.5 rounded-full shrink-0"
-                      style={{ background: "var(--brand-accent)" }}
-                    />
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-foreground/70">
-                      {label}
-                    </span>
-                    <span className="text-[9px] text-muted-foreground ml-auto">
+                <div key={key} className="space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-border/10">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="h-1.5 w-1.5 rounded-full shrink-0"
+                        style={{ background: "var(--brand-accent)" }}
+                      />
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-foreground/80 font-semibold">
+                        {label}
+                      </span>
+                    </div>
+                    <span className="text-[9px] font-mono text-muted-foreground uppercase tracking-wider">
                       {desc}
                     </span>
                   </div>
-                  <ul className="space-y-1.5">
+                  <ul className="space-y-2">
                     {byStage[key].map(p => (
                       <li key={p.id}>
                         <Link
                           href={`/investor/search/${p.id}`}
-                          className="block px-3 py-2.5 text-xs text-foreground/70 hover:text-foreground rounded-lg border border-border/60 hover:border-border bg-background hover:bg-accent/20 transition-all duration-150 font-sans"
+                          className="block px-3.5 py-3 text-xs text-foreground/80 hover:text-foreground rounded-lg border border-border/[0.04] hover:border-border/15 hover:bg-foreground/[0.01] transition-all font-sans"
                         >
                           {p.name}
                         </Link>
                       </li>
                     ))}
                     {byStage[key].length === 0 && (
-                      <li className="px-3 py-3 text-xs text-muted-foreground italic font-mono">
-                        Nothing here yet.
+                      <li className="px-3 py-3 text-[10px] text-muted-foreground italic font-mono uppercase tracking-wider">
+                        No submissions.
                       </li>
                     )}
                   </ul>
@@ -218,28 +267,26 @@ export default function InvestorOverviewPage() {
           </div>
 
           {/* ── Activity ── */}
-          <div>
-            <p className="text-[9px] font-mono uppercase tracking-[0.18em] text-muted-foreground mb-4">
-              Recent activity
-            </p>
-            <ul className="space-y-0 border border-border rounded-xl overflow-hidden">
-              {data.recentActivity.map((act, i) => (
+          <div className="space-y-6 pt-4">
+            <div className="border-b border-border/[0.03] pb-4">
+              <SectionLabel>Recent activity log</SectionLabel>
+              <p className="text-xs text-muted-foreground mt-1">Real-time status updates and milestone confirmations.</p>
+            </div>
+            <ul className="divide-y divide-border/[0.03]">
+              {data.recentActivity.map((act) => (
                 <li
                   key={act.id}
-                  className={cn(
-                    "flex items-start gap-4 px-5 py-4 hover:bg-accent/20 transition-colors",
-                    i !== data.recentActivity.length - 1 && "border-b border-border/60"
-                  )}
+                  className="flex items-start gap-4 py-4 hover:px-2 rounded-lg -mx-2 hover:bg-foreground/[0.01] transition-all"
                 >
                   <span
-                    className="mt-2 h-1.5 w-1.5 rounded-full shrink-0"
-                    style={{ background: "var(--brand-accent)", opacity: 0.7 }}
+                    className="mt-[7px] h-1.5 w-1.5 rounded-full shrink-0"
+                    style={{ background: "var(--brand-accent)", opacity: 0.6 }}
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground/80 font-sans leading-snug">
+                    <p className="text-xs sm:text-[13px] text-foreground/80 font-sans leading-relaxed">
                       {act.description}
                     </p>
-                    <span className="text-[10px] font-mono text-muted-foreground mt-0.5 block">
+                    <span className="text-[8.5px] font-mono text-muted-foreground uppercase tracking-wider mt-1 block">
                       {act.timestamp}
                     </span>
                   </div>
