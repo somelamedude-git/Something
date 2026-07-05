@@ -350,8 +350,8 @@ export default function FounderLayout({ children }: { children: React.ReactNode 
                     accentStyles.ring
                   )}
                 />
-                <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 z-10 inline-flex h-4.5 select-none items-center gap-0.5 rounded border border-border bg-foreground/5 px-1.5 font-mono text-[9px] font-medium text-foreground/40">
-                  <span className="text-[10px]">⌘</span>K
+                <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 z-10 inline-flex h-4.5 select-none items-center gap-0.5 rounded border border-border bg-foreground/5 px-1.5 font-mono text-[11px] font-medium text-foreground/40">
+                  <span className="text-[11px]">⌘</span>K
                 </kbd>
               </div>
 
@@ -401,7 +401,7 @@ export default function FounderLayout({ children }: { children: React.ReactNode 
                         )
                       ) : null}
                       <AvatarFallback
-                        className="text-foreground text-[9px] font-bold font-mono uppercase bg-accent"
+                        className="text-foreground text-[11px] font-bold font-mono uppercase bg-accent"
                         style={{ background: avatarUrl && avatarUrl.startsWith("linear-gradient") ? avatarUrl : undefined }}
                       >
                         {getInitials(userName)}
@@ -414,27 +414,27 @@ export default function FounderLayout({ children }: { children: React.ReactNode 
                   <DropdownMenuLabel className="px-2.5 py-2">
                     <div className="flex flex-col space-y-0.5">
                       <span className="text-xs font-semibold text-foreground">{userName}</span>
-                      <span className="text-[10px] text-muted-foreground font-mono leading-none">alex@edgevisionlabs.com</span>
+                      <span className="text-[11px] text-muted-foreground font-mono leading-none">alex@edgevisionlabs.com</span>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-border" />
                   
-                  <DropdownMenuItem onClick={() => router.push("/founder/profile")} className="hover:bg-accent cursor-pointer text-xs rounded-lg py-2 flex items-center gap-2 font-mono uppercase tracking-wider text-[9px] font-semibold text-muted-foreground hover:text-foreground transition">
+                  <DropdownMenuItem onClick={() => router.push("/founder/profile")} className="hover:bg-accent cursor-pointer text-xs rounded-lg py-2 flex items-center gap-2 font-mono uppercase tracking-wider text-[11px] font-semibold text-muted-foreground hover:text-foreground transition">
                     <UserRound className="h-3.5 w-3.5 opacity-60" /> Profile Workspace
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/founder/settings")} className="hover:bg-accent cursor-pointer text-xs rounded-lg py-2 cursor-pointer flex items-center gap-2 font-mono uppercase tracking-wider text-[9px] font-semibold text-muted-foreground hover:text-foreground transition">
+                  <DropdownMenuItem onClick={() => router.push("/founder/settings")} className="hover:bg-accent cursor-pointer text-xs rounded-lg py-2 cursor-pointer flex items-center gap-2 font-mono uppercase tracking-wider text-[11px] font-semibold text-muted-foreground hover:text-foreground transition">
                     <Settings className="h-3.5 w-3.5 opacity-60" /> Settings Panel
                   </DropdownMenuItem>
                   
                   <DropdownMenuSeparator className="bg-border" />
                   
-                  <DropdownMenuItem onClick={() => router.push("/investor")} className="hover:bg-accent cursor-pointer text-xs rounded-lg py-2 cursor-pointer flex items-center gap-2 font-mono uppercase tracking-wider text-[9px] font-semibold text-indigo-400 hover:text-indigo-300 transition">
+                  <DropdownMenuItem onClick={() => router.push("/investor")} className="hover:bg-accent cursor-pointer text-xs rounded-lg py-2 cursor-pointer flex items-center gap-2 font-mono uppercase tracking-wider text-[11px] font-semibold text-indigo-400 hover:text-indigo-300 transition">
                     <RefreshCw className="h-3.5 w-3.5 opacity-60" /> Switch to Investor
                   </DropdownMenuItem>
                   
                   <DropdownMenuSeparator className="bg-border" />
                   
-                  <DropdownMenuItem onClick={() => logout()} className="hover:bg-red-500/10 text-red-400 hover:text-red-300 text-xs rounded-lg py-2 cursor-pointer flex items-center gap-2 font-mono uppercase tracking-wider text-[9px] font-semibold transition">
+                  <DropdownMenuItem onClick={() => logout()} className="hover:bg-red-500/10 text-red-400 hover:text-red-300 text-xs rounded-lg py-2 cursor-pointer flex items-center gap-2 font-mono uppercase tracking-wider text-[11px] font-semibold transition">
                     <LogOut className="h-3.5 w-3.5 opacity-60" /> Log Out Key
                   </DropdownMenuItem>
                 </DropdownMenuContent>
