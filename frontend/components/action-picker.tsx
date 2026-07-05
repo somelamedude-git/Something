@@ -83,7 +83,7 @@ export function ActionPicker({
         <div className="px-6 pt-6 pb-4 border-b border-white/8">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Something</p>
+              <p className="text-[11px] uppercase tracking-widest text-white/40 mb-1">Something</p>
               <h2 className="text-lg font-semibold tracking-tight">How would you like to start?</h2>
             </div>
             <button
