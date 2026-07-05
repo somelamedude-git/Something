@@ -36,11 +36,12 @@ import {
   Camera,
   Palette,
   X,
-  User
+  User,
+  Wallet
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-type Tab = "profile" | "notifications" | "security" | "danger"
+type Tab = "profile" | "notifications" | "security" | "billing" | "danger"
 
 interface ProfileData {
   name: string
@@ -112,6 +113,7 @@ const ACCENTS = {
     btnBg: "bg-[#8EA38E] text-background hover:bg-[#8EA38E]/90",
     toggleBg: "data-[state=checked]:bg-[#8EA38E]",
     color: "#8EA38E",
+    ring: "focus-within:ring-1 focus-within:ring-[#8EA38E]/20 focus-within:border-[#8EA38E]/30",
   },
   indigo: {
     name: "Tactile Chalk",
@@ -124,6 +126,7 @@ const ACCENTS = {
     btnBg: "bg-[#E2DFD5] text-background hover:bg-[#E2DFD5]/90",
     toggleBg: "data-[state=checked]:bg-[#E2DFD5]",
     color: "#E2DFD5",
+    ring: "focus-within:ring-1 focus-within:ring-[#E2DFD5]/20 focus-within:border-[#E2DFD5]/30",
   },
   violet: {
     name: "Anodized Steel",
@@ -136,6 +139,7 @@ const ACCENTS = {
     btnBg: "bg-[#8293A4] text-background hover:bg-[#8293A4]/90",
     toggleBg: "data-[state=checked]:bg-[#8293A4]",
     color: "#8293A4",
+    ring: "focus-within:ring-1 focus-within:ring-[#8293A4]/20 focus-within:border-[#8293A4]/30",
   },
   amber: {
     name: "Earthy Copper",
@@ -148,6 +152,7 @@ const ACCENTS = {
     btnBg: "bg-[#C88E72] text-background hover:bg-[#C88E72]/90",
     toggleBg: "data-[state=checked]:bg-[#C88E72]",
     color: "#C88E72",
+    ring: "focus-within:ring-1 focus-within:ring-[#C88E72]/20 focus-within:border-[#C88E72]/30",
   },
 }
 
@@ -177,6 +182,23 @@ export default function FounderSettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false)
+
+  // Plans & Billing state
+  const [selectedPlan, setSelectedPlan] = useState("free")
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const plan = localStorage.getItem("selected_plan") || "free"
+      setSelectedPlan(plan)
+    }
+  }, [])
+
+  const handlePlanUpgrade = (plan: string) => {
+    setSelectedPlan(plan)
+    localStorage.setItem("selected_plan", plan)
+    window.dispatchEvent(new CustomEvent("selected-plan-change"))
+    addToast("Subscription Updated", `Successfully switched workspace plan to "${plan.toUpperCase()}"`, "success")
+  }
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
 
@@ -423,6 +445,7 @@ export default function FounderSettingsPage() {
     { key: "profile" as const, label: "Profile & Privacy", icon: Shield },
     { key: "notifications" as const, label: "Notifications", icon: Bell },
     { key: "security" as const, label: "Credentials & Key", icon: Key },
+    { key: "billing" as const, label: "Plans & Billing", icon: Wallet },
     { key: "danger" as const, label: "Danger Zone", icon: Trash2 },
   ]
 
@@ -458,7 +481,7 @@ export default function FounderSettingsPage() {
             </div>
             <div className="flex-1 space-y-0.5">
               <h5 className="text-xs font-bold text-foreground font-mono uppercase tracking-wider">{t.title}</h5>
-              {t.description && <p className="text-[10px] text-foreground/50 leading-relaxed font-sans">{t.description}</p>}
+              {t.description && <p className="text-[11px] text-foreground/50 leading-relaxed font-sans">{t.description}</p>}
             </div>
             <button
               onClick={() => setToasts((prev) => prev.filter((item) => item.id !== t.id))}
@@ -509,7 +532,7 @@ export default function FounderSettingsPage() {
           <div className="border-t border-border/5 pt-6 space-y-4">
             <div className="flex items-center gap-2">
               <Palette className="h-4 w-4 text-foreground/40" />
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-foreground/50">Palette Accent</span>
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-foreground/50">Palette Accent</span>
             </div>
             
             <div className="grid grid-cols-4 gap-2">
@@ -526,7 +549,7 @@ export default function FounderSettingsPage() {
                         ? "border-border ring-2 ring-offset-2 ring-offset-background" 
                         : "border-border/20 bg-transparent"
                     )}
-                    style={isSelected ? { ringColor: accent.color } : undefined}
+                    style={isSelected ? { ["--tw-ring-color" as any]: accent.color } : undefined}
                     title={accent.name}
                   >
                     <div className="size-4.5 rounded-full" style={{ backgroundColor: accent.color }} />
@@ -537,7 +560,7 @@ export default function FounderSettingsPage() {
                 )
               })}
             </div>
-            <p className="text-[9px] text-foreground/30 leading-normal font-mono uppercase tracking-wider">
+            <p className="text-[11px] text-foreground/30 leading-normal font-mono uppercase tracking-wider">
               Selected: <span className="text-foreground/70">{activeAccent.name}</span>
             </p>
           </div>
@@ -563,9 +586,9 @@ export default function FounderSettingsPage() {
                   {/* Avatar Upload Selection Grid */}
                   <div className="space-y-3.5">
                     <div className="flex justify-between items-center">
-                      <label className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Avatar Node Image</label>
+                      <label className="text-[11px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Avatar Node Image</label>
                       {savingKeys["avatarUrl"] && (
-                        <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1">
+                        <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1">
                           {savingKeys["avatarUrl"] === "saving" ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Check className="h-2.5 w-2.5" />}
                           {savingKeys["avatarUrl"] === "saving" ? "saving..." : "saved"}
                         </span>
@@ -597,7 +620,7 @@ export default function FounderSettingsPage() {
 
                       {/* Presets List */}
                       <div className="space-y-1.5 flex-1 min-w-[180px]">
-                        <span className="text-[9px] font-mono text-foreground/35 uppercase tracking-wide">Pick Gradient Preset</span>
+                        <span className="text-[11px] font-mono text-foreground/35 uppercase tracking-wide">Pick Gradient Preset</span>
                         <div className="flex gap-2">
                           {PRESET_AVATARS.map((gradient, i) => (
                             <button
@@ -643,9 +666,9 @@ export default function FounderSettingsPage() {
                     {/* Display Name */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <label htmlFor="display-name" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Display Name</label>
+                        <label htmlFor="display-name" className="text-[11px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Display Name</label>
                         {savingKeys["name"] && (
-                          <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1">
+                          <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1">
                             {savingKeys["name"] === "saving" ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Check className="h-2.5 w-2.5" />}
                             {savingKeys["name"] === "saving" ? "saving..." : "saved"}
                           </span>
@@ -657,15 +680,15 @@ export default function FounderSettingsPage() {
                         onChange={(e) => updateProfileField("name", e.target.value)}
                         className={cn("bg-background/40 border-border/5 text-xs text-foreground rounded-lg h-9 focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
                       />
-                      <p className="text-[10px] text-foreground/30 font-sans mt-1">Your display name as it appears on cohort directories.</p>
+                      <p className="text-[11px] text-foreground/30 font-sans mt-1">Your display name as it appears on cohort directories.</p>
                     </div>
 
                     {/* Headline */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <label htmlFor="headline" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Headline Role</label>
+                        <label htmlFor="headline" className="text-[11px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Headline Role</label>
                         {savingKeys["headline"] && (
-                          <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1">
+                          <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1">
                             {savingKeys["headline"] === "saving" ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Check className="h-2.5 w-2.5" />}
                             {savingKeys["headline"] === "saving" ? "saving..." : "saved"}
                           </span>
@@ -677,15 +700,15 @@ export default function FounderSettingsPage() {
                         onChange={(e) => updateProfileField("headline", e.target.value)}
                         className={cn("bg-background/40 border-border/5 text-xs text-foreground rounded-lg h-9 focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
                       />
-                      <p className="text-[10px] text-foreground/30 font-sans mt-1">A one-line description of your project role (e.g. Lead Engineer, AI Architect).</p>
+                      <p className="text-[11px] text-foreground/30 font-sans mt-1">A one-line description of your project role (e.g. Lead Engineer, AI Architect).</p>
                     </div>
 
                     {/* Location */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <label htmlFor="location" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Node Location</label>
+                        <label htmlFor="location" className="text-[11px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Node Location</label>
                         {savingKeys["location"] && (
-                          <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1">
+                          <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1">
                             {savingKeys["location"] === "saving" ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Check className="h-2.5 w-2.5" />}
                             {savingKeys["location"] === "saving" ? "saving..." : "saved"}
                           </span>
@@ -697,15 +720,15 @@ export default function FounderSettingsPage() {
                         onChange={(e) => updateProfileField("location", e.target.value)}
                         className={cn("bg-background/40 border-border/5 text-xs text-foreground rounded-lg h-9 focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
                       />
-                      <p className="text-[10px] text-foreground/30 font-sans mt-1">Your base city or remote status for connection searches.</p>
+                      <p className="text-[11px] text-foreground/30 font-sans mt-1">Your base city or remote status for connection searches.</p>
                     </div>
 
                     {/* Biography */}
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <label htmlFor="biography" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Bio Synopsis</label>
+                        <label htmlFor="biography" className="text-[11px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Bio Synopsis</label>
                         {savingKeys["about"] && (
-                          <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1">
+                          <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1">
                             {savingKeys["about"] === "saving" ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Check className="h-2.5 w-2.5" />}
                             {savingKeys["about"] === "saving" ? "saving..." : "saved"}
                           </span>
@@ -717,7 +740,7 @@ export default function FounderSettingsPage() {
                         onChange={(e) => updateProfileField("about", e.target.value)}
                         className={cn("bg-background/40 border-border/5 text-xs text-foreground rounded-lg min-h-[90px] focus-visible:ring-offset-0 focus-visible:ring-1", activeAccent.ring)}
                       />
-                      <p className="text-[10px] text-foreground/30 font-sans mt-1">A brief background summary introducing yourself to cohort investors.</p>
+                      <p className="text-[11px] text-foreground/30 font-sans mt-1">A brief background summary introducing yourself to cohort investors.</p>
                     </div>
                   </div>
                 </div>
@@ -735,9 +758,9 @@ export default function FounderSettingsPage() {
                   <div className="space-y-4">
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <label className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Index Visibility Rule</label>
+                        <label className="text-[11px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Index Visibility Rule</label>
                         {savingKeys["privacy"] && (
-                          <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1">
+                          <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1">
                             {savingKeys["privacy"] === "saving" ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <Check className="h-2.5 w-2.5" />}
                             {savingKeys["privacy"] === "saving" ? "saving..." : "saved"}
                           </span>
@@ -768,7 +791,7 @@ export default function FounderSettingsPage() {
                                 <div className="absolute top-1.5 right-1.5 size-1.5 rounded-full" style={{ backgroundColor: activeAccent.color }} />
                               )}
                               <OptIcon className="h-4.5 w-4.5 mb-1.5 opacity-60" style={{ color: isSelected ? activeAccent.color : "white" }} />
-                              <span className="text-[10px] font-bold font-mono uppercase tracking-wider text-foreground/80">{opt.label}</span>
+                              <span className="text-[11px] font-bold font-mono uppercase tracking-wider text-foreground/80">{opt.label}</span>
                             </button>
                           )
                         })}
@@ -801,7 +824,7 @@ export default function FounderSettingsPage() {
 
               {/* Dynamic Reactive Live Preview Card (xl:col-span-5) */}
               <div className="xl:col-span-5 xl:sticky xl:top-6 space-y-4 xl:pl-8">
-                <div className="text-[10px] font-mono font-semibold uppercase tracking-widest text-foreground/40 flex items-center gap-1.5 px-1.5">
+                <div className="text-[11px] font-mono font-semibold uppercase tracking-widest text-foreground/40 flex items-center gap-1.5 px-1.5">
                   <Eye className="h-3.5 w-3.5 text-foreground/40" />
                   Live Preview Mockup
                 </div>
@@ -830,18 +853,18 @@ export default function FounderSettingsPage() {
                         <div className="space-y-1 min-w-0">
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <h4 className="font-serif font-light text-sm text-foreground truncate">{profile.name || "Unnamed Node"}</h4>
-                            <Badge className="bg-brand-accent/10 text-brand-accent border-brand-accent/20 text-[8px] tracking-wide rounded-full scale-90 origin-left shrink-0">
+                            <Badge className="bg-brand-accent/10 text-brand-accent border-brand-accent/20 text-[11px] tracking-wide rounded-full scale-90 origin-left shrink-0">
                               Verified
                             </Badge>
                           </div>
                           <p className="text-foreground/70 text-xs truncate leading-normal">{profile.headline || "No Headline Role"}</p>
-                          <p className="text-[9px] text-foreground/35 font-mono truncate">{profile.location || "No Location"}</p>
+                          <p className="text-[11px] text-foreground/35 font-mono truncate">{profile.location || "No Location"}</p>
                         </div>
                       </div>
 
                       {/* Status pill overlay container (aligned inline on top right) */}
                       <div className="shrink-0 sm:pt-1">
-                        <Badge className={cn("text-[9px] font-mono font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full border border-border/5",
+                        <Badge className={cn("text-[11px] font-mono font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full border border-border/5",
                           profileVisibility === "public" ? "bg-brand-accent/10 text-brand-accent" :
                           profileVisibility === "network" ? "bg-indigo-500/10 text-indigo-400" :
                           "bg-pink-500/10 text-pink-400"
@@ -862,11 +885,11 @@ export default function FounderSettingsPage() {
                       {/* Dynamic Badge Features */}
                       <div className="flex flex-wrap gap-1.5 pt-1">
                         {showEmail && (
-                          <div className="flex items-center gap-1 bg-foreground/5 border border-border/5 px-2 py-0.5 rounded text-[8px] font-mono text-foreground/60">
+                          <div className="flex items-center gap-1 bg-foreground/5 border border-border/5 px-2 py-0.5 rounded text-[11px] font-mono text-foreground/60">
                             <Mail className="h-2.5 w-2.5 text-brand-accent" /> {email}
                           </div>
                         )}
-                        <div className="flex items-center gap-1 bg-foreground/5 border border-border/5 px-2 py-0.5 rounded text-[8px] font-mono text-foreground/60">
+                        <div className="flex items-center gap-1 bg-foreground/5 border border-border/5 px-2 py-0.5 rounded text-[11px] font-mono text-foreground/60">
                           <Shield className="h-2.5 w-2.5" style={{ color: activeAccent.color }} /> {allowMessages ? "Open Connections" : "Strict Matching"}
                         </div>
                       </div>
@@ -953,7 +976,7 @@ export default function FounderSettingsPage() {
                     </h3>
                     <p className="text-foreground/40 text-[11px] mt-1 font-mono uppercase tracking-wider">Manage your principal identity login certificate</p>
                   </div>
-                  <Badge className="bg-brand-accent/10 text-brand-accent border-brand-accent/20 flex items-center gap-1.5 py-0.5 px-3 rounded-full font-mono text-[9px]">
+                  <Badge className="bg-brand-accent/10 text-brand-accent border-brand-accent/20 flex items-center gap-1.5 py-0.5 px-3 rounded-full font-mono text-[11px]">
                     <CheckCircle2 className="h-3 w-3" />
                     Verified Principal
                   </Badge>
@@ -961,7 +984,7 @@ export default function FounderSettingsPage() {
 
                 <form onSubmit={handleUpdateEmailSubmit} className="flex gap-3 max-w-md items-end pt-1">
                   <div className="flex-1 space-y-1.5">
-                    <label htmlFor="sec-email" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Registered Email</label>
+                    <label htmlFor="sec-email" className="text-[11px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Registered Email</label>
                     <Input
                       id="sec-email"
                       type="email"
@@ -1000,7 +1023,7 @@ export default function FounderSettingsPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     {/* Current password */}
                     <div className="space-y-1.5">
-                      <label htmlFor="cur-pass" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Current Password</label>
+                      <label htmlFor="cur-pass" className="text-[11px] font-mono font-semibold uppercase tracking-wider text-foreground/50">Current Password</label>
                       <div className="relative">
                         <Input
                           id="cur-pass"
@@ -1024,7 +1047,7 @@ export default function FounderSettingsPage() {
 
                     {/* New password */}
                     <div className="space-y-1.5">
-                      <label htmlFor="new-pass" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">New Password Key</label>
+                      <label htmlFor="new-pass" className="text-[11px] font-mono font-semibold uppercase tracking-wider text-foreground/50">New Password Key</label>
                       <div className="relative">
                         <Input
                           id="new-pass"
@@ -1050,14 +1073,14 @@ export default function FounderSettingsPage() {
                   {/* Password Strength Checklist */}
                   {newPassword && (
                     <div className="bg-background/20 border border-border/5 rounded-xl p-4 space-y-3.5 animate-in slide-in-from-top-2 duration-300">
-                      <div className="flex items-center justify-between text-[10px] font-mono font-semibold uppercase tracking-wider">
+                      <div className="flex items-center justify-between text-[11px] font-mono font-semibold uppercase tracking-wider">
                         <span className="text-foreground/40">Credential Strength</span>
                         <span className="text-foreground">{strengthText}</span>
                       </div>
                       
                       <Progress value={score} className="h-1.5 bg-foreground/5" indicatorClassName={strengthColor} />
                       
-                      <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-foreground/40">
+                      <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-foreground/40">
                         <div className="flex items-center gap-1.5">
                           <div className={cn("size-2 rounded-full", checks.len ? "bg-emerald-500" : "bg-foreground/10")} />
                           <span>8+ Characters</span>
@@ -1123,13 +1146,13 @@ export default function FounderSettingsPage() {
                           <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
                             {s.device}
                             {s.active && (
-                              <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[8px] py-0 px-2 uppercase rounded-full scale-90">
+                              <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[11px] py-0 px-2 uppercase rounded-full scale-90">
                                 Active Node
                               </Badge>
                             )}
                           </div>
-                          <p className="text-[10px] text-foreground/40 font-mono leading-none">{s.browser} • {s.location}</p>
-                          <p className="text-[9px] text-foreground/30 font-sans tracking-wide leading-none">{s.time}</p>
+                          <p className="text-[11px] text-foreground/40 font-mono leading-none">{s.browser} • {s.location}</p>
+                          <p className="text-[11px] text-foreground/30 font-sans tracking-wide leading-none">{s.time}</p>
                         </div>
                       </div>
 
@@ -1139,7 +1162,7 @@ export default function FounderSettingsPage() {
                           variant="ghost"
                           onClick={() => handleRevokeSession(s.id, s.device)}
                           disabled={revokingId === s.id}
-                          className="h-8 rounded-lg text-[10px] font-mono uppercase tracking-wider text-red-400 hover:text-red-300 border border-red-500/10 hover:border-red-500/30 hover:bg-red-500/5 bg-transparent cursor-pointer shrink-0 transition"
+                          className="h-8 rounded-lg text-[11px] font-mono uppercase tracking-wider text-red-400 hover:text-red-300 border border-red-500/10 hover:border-red-500/30 hover:bg-red-500/5 bg-transparent cursor-pointer shrink-0 transition"
                         >
                           {revokingId === s.id ? <Loader2 className="h-3 w-3 animate-spin" /> : "Revoke"}
                         </Button>
@@ -1148,11 +1171,103 @@ export default function FounderSettingsPage() {
                   ))}
                   
                   {sessions.length === 1 && (
-                    <p className="text-[10px] text-foreground/20 font-mono text-center pt-2">No other active login nodes found.</p>
+                    <p className="text-[11px] text-foreground/20 font-mono text-center pt-2">No other active login nodes found.</p>
                   )}
                 </div>
               </div>
 
+            </div>
+          )}
+
+          {/* Plans & Billing */}
+          {activeTab === "billing" && (
+            <div className="space-y-6" id="billing-section">
+              <div className="border-b border-border/[0.03] pb-4">
+                <h3 className="text-sm font-serif font-light text-foreground flex items-center gap-2">
+                  <Wallet className="h-4 w-4 text-muted-foreground" />
+                  Plans & Subscription Billing
+                </h3>
+                <p className="text-muted-foreground text-[11px] mt-1 font-mono uppercase tracking-wider">Configure workspace membership level and resource limits</p>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                {[
+                  {
+                    key: "free",
+                    name: "Free Tier",
+                    price: "$0",
+                    tagline: "Basic workspace & community metrics.",
+                    features: ["Post up to 2 startup ideas", "Problem board access", "Verified identity badge"],
+                    color: "#8EA38E"
+                  },
+                  {
+                    key: "something",
+                    name: "Something Plan",
+                    price: "$49/mo",
+                    tagline: "Standard escrow & matching features.",
+                    features: ["Unlimited idea submissions", "Milestone escrow tool", "Digital NDA signatures", "Chat category filters"],
+                    color: "#E3C27A"
+                  },
+                  {
+                    key: "nothing",
+                    name: "Nothing Plan",
+                    price: "$199/mo",
+                    tagline: "Full AI simulation & priority operator intro.",
+                    features: ["Mutiny AI skeptic stress-testing", "Assume Nothing AI diagnostics", "Unlimited diligence auditing", "Priority investor match list"],
+                    color: "#C88E72"
+                  }
+                ].map((plan) => {
+                  const isCurrent = selectedPlan === plan.key
+                  return (
+                    <div
+                      key={plan.key}
+                      className={cn(
+                        "rounded-xl border p-5 flex flex-col justify-between transition-all duration-300 relative bg-background/25 backdrop-blur-xl",
+                        isCurrent ? "border-foreground/45 shadow" : "border-border/30 hover:border-border/60 hover:bg-accent/10"
+                      )}
+                    >
+                      {isCurrent && (
+                        <div className="absolute -top-2.5 left-4 px-2 py-0.5 rounded bg-foreground text-background text-[11px] uppercase tracking-wider font-mono font-bold">
+                          Active Plan
+                        </div>
+                      )}
+                      <div className="space-y-3">
+                        <div className="flex items-baseline justify-between">
+                          <h4 className="text-xs font-bold" style={{ color: plan.color }}>{plan.name}</h4>
+                          <span className="text-xs font-bold font-mono">{plan.price}</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground leading-normal font-sans">{plan.tagline}</p>
+                        
+                        <div className="border-t border-border/10 pt-3">
+                          <ul className="space-y-1.5 text-[11px] text-foreground/75 leading-relaxed font-sans">
+                            {plan.features.map((f, i) => (
+                              <li key={i} className="flex items-center gap-1.5">
+                                <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: plan.color }} />
+                                <span>{f}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 pt-2">
+                        <Button
+                          disabled={isCurrent}
+                          onClick={() => handlePlanUpgrade(plan.key)}
+                          className={cn(
+                            "w-full text-[11px] font-bold uppercase tracking-wider font-mono h-8 rounded-lg cursor-pointer transition",
+                            isCurrent
+                              ? "bg-accent/40 text-muted-foreground border border-border/40"
+                              : "bg-foreground text-background hover:bg-foreground/90"
+                          )}
+                        >
+                          {isCurrent ? "Current Plan" : `Select ${plan.name.split(" ")[0]}`}
+                        </Button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           )}
 
@@ -1206,10 +1321,10 @@ export default function FounderSettingsPage() {
           {/* Interactive Wipe logs console */}
           {isDeleting ? (
             <div className="space-y-2 pt-2.5">
-              <span className="text-[10px] font-mono text-destructive uppercase tracking-widest flex items-center gap-1.5">
+              <span className="text-[11px] font-mono text-destructive uppercase tracking-widest flex items-center gap-1.5">
                 <Loader2 className="h-3 w-3 animate-spin" /> Destroying Sectors...
               </span>
-              <div className="bg-background/90 p-4 border border-border/5 rounded-lg font-mono text-[10px] text-foreground/70 h-36 overflow-y-auto space-y-1">
+              <div className="bg-background/90 p-4 border border-border/5 rounded-lg font-mono text-[11px] text-foreground/70 h-36 overflow-y-auto space-y-1">
                 {wipeLogs.map((log, index) => (
                   <div key={index} className={cn(log.includes("SUCCESS") ? "text-emerald-400" : log.includes("SYSTEM") ? "text-blue-400" : "text-foreground/60")}>
                     {log}
@@ -1219,12 +1334,12 @@ export default function FounderSettingsPage() {
             </div>
           ) : (
             <form onSubmit={handleDeleteAccountSubmit} className="space-y-4 pt-4">
-              <div className="rounded-lg border border-destructive/20 bg-destructive/[0.02] p-3 text-[10px] text-destructive/80 leading-relaxed font-mono">
+              <div className="rounded-lg border border-destructive/20 bg-destructive/[0.02] p-3 text-[11px] text-destructive/80 leading-relaxed font-mono">
                 WARNING: Cryptographic credentials will be revoked. Pending milestone escrows will be frozen.
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="wipe-confirm" className="text-[10px] font-mono font-semibold uppercase tracking-wider text-foreground/50">
+                <label htmlFor="wipe-confirm" className="text-[11px] font-mono font-semibold uppercase tracking-wider text-foreground/50">
                   Type your email to confirm: <span className="text-foreground font-bold select-all">alex@edgevisionlabs.com</span>
                 </label>
                 <Input
@@ -1290,7 +1405,7 @@ function AutoSaveRow({ id, label, desc, checked, status, onToggle, activeAccent 
         <div className="font-semibold text-xs text-foreground font-mono uppercase tracking-wide flex items-center gap-2">
           {label}
           {status && (
-            <span className="text-[9px] font-mono lowercase font-normal flex items-center gap-1">
+            <span className="text-[11px] font-mono lowercase font-normal flex items-center gap-1">
               {status === "saving" ? (
                 <span className="text-foreground/40 flex items-center gap-1">
                   <Loader2 className="h-2.5 w-2.5 animate-spin" /> saving...
@@ -1303,7 +1418,7 @@ function AutoSaveRow({ id, label, desc, checked, status, onToggle, activeAccent 
             </span>
           )}
         </div>
-        {desc && <p className="text-[10px] text-foreground/40 leading-normal font-sans">{desc}</p>}
+        {desc && <p className="text-[11px] text-foreground/40 leading-normal font-sans">{desc}</p>}
       </div>
       <Switch
         checked={checked}
