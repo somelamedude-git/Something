@@ -19,6 +19,7 @@ type Thread = {
   participants: string[]
   lastActive: string
   isOnline?: boolean
+  isGhostMode?: boolean
 }
 
 type Message = {
@@ -233,11 +234,45 @@ export default function FounderChatsPage() {
   const [loadedThreads, setLoadedThreads] = useState<Set<string>>(new Set())
   const [isLoadingThreads, setIsLoadingThreads] = useState(true)
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
 
-  // Fetch threads on load
+  const changeThreadCategory = (cat: Exclude<Category, "all">) => {
+    if (!activeId) return
+    const updatedThreads = threads.map(t => {
+      if (t.id === activeId) {
+        return { ...t, category: cat }
+      }
+      return t
+    })
+    setThreads(updatedThreads)
+    setStoredThreads(updatedThreads)
+    setShowMenu(false)
+  }
+
+  // Fetch threads on load and sync database updates instantly
   useEffect(() => {
     fetchThreads()
-  }, [])
+    
+    const syncHandler = () => {
+      const cached = getStoredThreads()
+      setThreads(cached)
+      if (activeId) {
+        const cachedAll = getStoredMessages()
+        const cachedMsgs = cachedAll[activeId] ?? []
+        setMessagesByThread((prev) => ({
+          ...prev,
+          [activeId]: cachedMsgs,
+        }))
+      }
+    }
+    
+    window.addEventListener("founder-chat-sync", syncHandler)
+    window.addEventListener("storage", syncHandler)
+    return () => {
+      window.removeEventListener("founder-chat-sync", syncHandler)
+      window.removeEventListener("storage", syncHandler)
+    }
+  }, [activeId])
 
   // API Fetch Threads with Local Fallback
   const fetchThreads = async () => {
@@ -616,7 +651,7 @@ export default function FounderChatsPage() {
                       <div className="relative shrink-0">
                         <div
                           className={cn(
-                            "grid size-9 place-items-center rounded-full text-[10px] font-semibold tracking-wider font-mono",
+                            "grid size-9 place-items-center rounded-full text-[11px] font-semibold tracking-wider font-mono",
                             active
                               ? "bg-brand-accent/10 text-brand-accent"
                               : "bg-foreground/5 text-foreground/60 group-hover:bg-foreground/10"
@@ -631,7 +666,7 @@ export default function FounderChatsPage() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between mb-0.5">
                           <span className="truncate text-xs font-semibold text-foreground/90">{t.name.split("•")[0]?.trim()}</span>
-                          <span className="text-[9px] text-foreground/30 font-mono shrink-0">
+                          <span className="text-[11px] text-foreground/30 font-mono shrink-0">
                             {formatTime(t.lastActive)}
                           </span>
                         </div>
@@ -639,11 +674,11 @@ export default function FounderChatsPage() {
                           {t.preview}
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-[9px] text-foreground/30 uppercase tracking-[0.1em] font-mono">
+                          <span className="text-[11px] text-foreground/30 uppercase tracking-[0.1em] font-mono">
                             #{t.category}
                           </span>
                           {t.unread > 0 && (
-                            <span className="flex items-center justify-center h-4 min-w-[16px] px-1 text-[8.5px] font-bold bg-brand-accent text-background rounded-full">
+                            <span className="flex items-center justify-center h-4 min-w-[16px] px-1 text-[11px] font-bold bg-brand-accent text-background rounded-full">
                               {t.unread}
                             </span>
                           )}
@@ -671,7 +706,7 @@ export default function FounderChatsPage() {
               {activeThread ? (
                 <>
                   <div className="relative">
-                    <div className="grid size-9 place-items-center rounded-full bg-foreground/5 text-foreground/60 text-[10px] font-semibold tracking-wider font-mono">
+                    <div className="grid size-9 place-items-center rounded-full bg-foreground/5 text-foreground/60 text-[11px] font-semibold tracking-wider font-mono">
                       {initials(activeThread.name)}
                     </div>
                     {activeThread.isOnline && (
@@ -696,17 +731,56 @@ export default function FounderChatsPage() {
                       )}
                     </div>
                   </div>
-                  <button
-                    className="inline-flex size-8 items-center justify-center rounded-full hover:bg-foreground/5 text-foreground/30 hover:text-foreground transition-colors cursor-pointer"
-                    aria-label="More options"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </button>
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowMenu(!showMenu)}
+                      className="inline-flex size-8 items-center justify-center rounded-full hover:bg-foreground/5 text-foreground/30 hover:text-foreground transition-colors cursor-pointer"
+                      aria-label="More options"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </button>
+                    {showMenu && (
+                      <div className="absolute right-0 top-9 w-40 rounded-lg border border-border bg-[#101113]/95 backdrop-blur shadow-lg p-1.5 z-50">
+                        <div className="text-[11px] uppercase tracking-wider font-mono text-foreground/45 px-2 py-1 select-none">Move Category</div>
+                        <button
+                          onClick={() => changeThreadCategory("co")}
+                          className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-accent text-foreground/80 hover:text-foreground cursor-pointer"
+                        >
+                          Co-Founders (co)
+                        </button>
+                        <button
+                          onClick={() => changeThreadCategory("requests")}
+                          className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-accent text-foreground/80 hover:text-foreground cursor-pointer"
+                        >
+                          Requests
+                        </button>
+                        <button
+                          onClick={() => changeThreadCategory("general")}
+                          className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-accent text-foreground/80 hover:text-foreground cursor-pointer"
+                        >
+                          General
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </>
               ) : (
-                <div className="text-[10px] text-foreground/30 uppercase tracking-[0.2em] font-mono">Sync Workspace</div>
+                <div className="text-[11px] text-foreground/30 uppercase tracking-[0.2em] font-mono">Sync Workspace</div>
               )}
             </div>
+
+            {/* Ghost Mode Status Banner */}
+            {activeThread && activeThread.isGhostMode && (
+              <div className="bg-amber-500/10 border-b border-amber-500/15 px-4 py-2 flex items-center justify-between text-xs text-amber-400 font-mono shrink-0">
+                <span className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
+                  <span className="truncate">NDA Stealth Mode — This investor is messaging anonymously.</span>
+                </span>
+                <span className="text-[11px] text-amber-500 border border-amber-500/20 px-2 py-0.5 rounded bg-amber-500/5 uppercase tracking-wider shrink-0 font-semibold">
+                  Identity Encrypted
+                </span>
+              </div>
+            )}
 
             {/* Message Thread Scroll view */}
             <div
@@ -717,7 +791,7 @@ export default function FounderChatsPage() {
               {!activeThread && (
                 <div className="grid h-full place-items-center text-center px-4">
                   <div className="space-y-2 max-w-sm">
-                    <div className="text-sm text-foreground/50 font-medium font-serif">Select a synchronization thread</div>
+                    <div className="text-sm text-foreground/50 font-medium font-serif">Select a conversation</div>
                     <div className="text-xs text-foreground/30 leading-relaxed font-sans font-light">
                       Choose from cohort co-founders or review board investors to start sharing project updates.
                     </div>
@@ -752,7 +826,7 @@ export default function FounderChatsPage() {
                         </div>
                         <div
                           className={cn(
-                            "flex items-center gap-1.5 text-[9px] font-mono text-foreground/30",
+                            "flex items-center gap-1.5 text-[11px] font-mono text-foreground/30",
                             isYou ? "justify-end" : "justify-start"
                           )}
                         >
@@ -805,7 +879,7 @@ export default function FounderChatsPage() {
                   }}
                 />
                 <div className="flex items-center justify-between border-t border-border/[0.03] pt-2 px-1">
-                  <span className="text-[9px] text-foreground/30 font-mono tracking-wide">Press Enter to sync</span>
+                  <span className="text-[11px] text-foreground/30 font-mono tracking-wide">Press Enter to sync</span>
                   <Button
                     type="submit"
                     size="icon"
