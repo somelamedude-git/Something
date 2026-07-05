@@ -25,6 +25,7 @@ import {
   SlidersHorizontal,
   ChevronDown,
   PenLine,
+  AlertCircle
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
@@ -32,6 +33,7 @@ import { cn } from "@/lib/utils"
 const NAV = [
   { title: "Overview", url: "/founder", icon: LayoutDashboard },
   { title: "Ideas", url: "/founder/ideas", icon: Zap },
+  { title: "Problems", url: "/founder/problems", icon: AlertCircle },
   { title: "Community funding", url: "/founder/funding", icon: TrendingUp },
   { title: "Chats", url: "/founder/chats", icon: MessageCircle },
   { title: "Nothing & Something", url: "/founder/mutiny", icon: Layers },
@@ -93,7 +95,7 @@ export function AppFounderSidebar() {
                         )
                       ) : null}
                       <AvatarFallback
-                        className="text-sidebar-foreground text-[9px] font-bold font-mono uppercase bg-sidebar-accent"
+                        className="text-sidebar-foreground text-[11px] font-bold font-mono uppercase bg-sidebar-accent"
                         style={{ background: avatarUrl && avatarUrl.startsWith("linear-gradient") ? avatarUrl : undefined }}
                       >
                         {getInitials(userName)}
@@ -101,14 +103,14 @@ export function AppFounderSidebar() {
                     </Avatar>
                     <div className="flex flex-col items-start justify-center group-data-[collapsible=icon]:hidden truncate">
                        <span className="text-[13px] font-semibold tracking-tight text-sidebar-foreground/95 leading-tight truncate max-w-[130px]">{userName}</span>
-                       <span className="text-[9px] font-mono text-sidebar-foreground/40 tracking-widest uppercase leading-tight mt-0.5">Founder Node</span>
+                       <span className="text-[11px] font-mono text-sidebar-foreground/40 tracking-widest uppercase leading-tight mt-0.5">Founder Node</span>
                     </div>
                   </div>
                   <ChevronDown className="h-3.5 w-3.5 opacity-30 group-data-[collapsible=icon]:hidden" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-(--radix-popper-anchor-width) bg-popover border border-border text-popover-foreground shadow-2xl rounded-xl backdrop-blur-xl p-1">
-                <DropdownMenuItem asChild className="hover:bg-accent cursor-pointer text-xs rounded-lg py-2 font-mono uppercase tracking-wider text-[9px] font-semibold text-muted-foreground hover:text-foreground transition">
+                <DropdownMenuItem asChild className="hover:bg-accent cursor-pointer text-xs rounded-lg py-2 font-mono uppercase tracking-wider text-[11px] font-semibold text-muted-foreground hover:text-foreground transition">
                   <Link href="/investor" className="w-full flex items-center">
                     Switch to Investor
                   </Link>
@@ -169,7 +171,7 @@ export function AppFounderSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-3">
-        <div className="rounded-md bg-sidebar-accent/20 px-2 py-2.5 text-[9px] font-mono leading-relaxed text-sidebar-foreground/30 text-center">
+        <div className="rounded-md bg-sidebar-accent/20 pl-14 pr-2 py-2.5 text-[11px] font-mono leading-relaxed text-sidebar-foreground/30 text-left">
           ⌘ + B to toggle sidebar
         </div>
       </SidebarFooter>
