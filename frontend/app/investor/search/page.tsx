@@ -5,7 +5,7 @@ import type React from "react"
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
-import { SearchIcon, SlidersHorizontal } from "lucide-react"
+import { SearchIcon, SlidersHorizontal, Lock, EyeOff, Star } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -108,6 +108,43 @@ const MOCK: Project[] = [
 type WhenKey = "any" | "30d" | "90d" | "1y" | "pre"
 
 export default function InvestorSearchPage() {
+  const [ghostMode, setGhostMode] = useState(false)
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setGhostMode(localStorage.getItem("investor_ghost_mode") === "true")
+      const handleGhost = (e: Event) => {
+        const ce = e as CustomEvent<{ ghost: boolean }>
+        if (ce.detail) setGhostMode(ce.detail.ghost)
+      }
+      window.addEventListener("ghost-mode-change", handleGhost)
+      return () => window.removeEventListener("ghost-mode-change", handleGhost)
+    }
+  }, [])
+
+  const [watchlistedIds, setWatchlistedIds] = useState<string[]>([])
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("investor_watchlisted_ids")
+      if (stored) {
+        try {
+          setWatchlistedIds(JSON.parse(stored))
+        } catch {
+          setWatchlistedIds([])
+        }
+      }
+    }
+  }, [])
+
+  const toggleWatchlist = (id: string) => {
+    const updated = watchlistedIds.includes(id)
+      ? watchlistedIds.filter((x) => x !== id)
+      : [...watchlistedIds, id]
+    setWatchlistedIds(updated)
+    localStorage.setItem("investor_watchlisted_ids", JSON.stringify(updated))
+  }
+
   // Top search
   const [q, setQ] = useState("")
 
@@ -178,6 +215,14 @@ export default function InvestorSearchPage() {
 
   return (
     <div className="w-full pt-6 pb-24 px-6 xl:px-10">
+      {ghostMode && (
+        <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 px-4 py-3 flex items-center gap-3 text-xs text-violet-400 font-mono mb-6">
+          <EyeOff className="h-4 w-4 shrink-0 text-violet-400" />
+          <div>
+            <strong>Ghost Mode Active:</strong> You are browsing startup dealflow stealthily. Founders will not receive view or engagement signals.
+          </div>
+        </div>
+      )}
       <div className="flex flex-col lg:flex-row gap-10 xl:gap-14">
         {/* Main column */}
         <div className="min-w-0 flex-1 space-y-8">
@@ -273,6 +318,9 @@ export default function InvestorSearchPage() {
                         <Badge variant="secondary" className="bg-accent/40 text-foreground border-border/40 text-[9px] font-mono px-2 py-0.5 rounded">
                           {r.stage}
                         </Badge>
+                        <Badge variant="outline" className="border-amber-500/30 text-amber-500 bg-amber-500/5 text-[9px] font-mono flex items-center gap-1 rounded px-1.5 py-0.5">
+                          <Lock className="h-2.5 w-2.5" /> mNDA
+                        </Badge>
                         {r.domains.map((d) => (
                           <Badge key={d} variant="secondary" className="bg-accent/20 text-muted-foreground border-border/10 text-[9px] px-1.5 py-0.5 rounded">
                             {d}
@@ -306,9 +354,24 @@ export default function InvestorSearchPage() {
                           </span>
                         )
                       })()}
-                      <Button asChild size="sm" className="h-8.5 rounded-full bg-foreground text-background hover:bg-foreground/90 text-xs px-4 cursor-pointer">
-                        <Link href={`/investor/search/${r.id}`}>View brief</Link>
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleWatchlist(r.id)}
+                          className={cn(
+                            "size-8 rounded-full border flex items-center justify-center transition-all cursor-pointer",
+                            watchlistedIds.includes(r.id)
+                              ? "bg-amber-500/10 border-amber-500/30 text-amber-500"
+                              : "bg-transparent border-border/40 text-foreground/45 hover:text-foreground hover:bg-accent/40"
+                          )}
+                          title={watchlistedIds.includes(r.id) ? "Remove from Watchlist" : "Add to Watchlist"}
+                          aria-label={watchlistedIds.includes(r.id) ? "Remove from Watchlist" : "Add to Watchlist"}
+                        >
+                          <Star className={cn("h-3.5 w-3.5", watchlistedIds.includes(r.id) ? "fill-amber-500" : "")} />
+                        </button>
+                        <Button asChild size="sm" className="h-8 rounded-full bg-foreground text-background hover:bg-foreground/90 text-xs px-3.5 cursor-pointer">
+                          <Link href={`/investor/search/${r.id}`}>View brief</Link>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
