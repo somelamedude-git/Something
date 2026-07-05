@@ -142,7 +142,7 @@ export function NotificationsDropdown() {
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
             <Badge
-              className="absolute -top-1 -right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-[#34D399] text-black text-[9px] font-bold shadow-[0_0_8px_rgba(52,211,153,0.5)] border-0"
+              className="absolute -top-1 -right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-[#34D399] text-black text-[11px] font-bold shadow-[0_0_8px_rgba(52,211,153,0.5)] border-0"
             >
               {unreadCount}
             </Badge>
@@ -181,7 +181,7 @@ export function NotificationsDropdown() {
                   )}>
                     {notification.text}
                   </p>
-                  <span className="block text-[9px] font-mono text-muted-foreground/60">{notification.timestamp}</span>
+                  <span className="block text-[11px] font-mono text-muted-foreground/60">{notification.timestamp}</span>
                 </div>
               </DropdownMenuItem>
             ))
