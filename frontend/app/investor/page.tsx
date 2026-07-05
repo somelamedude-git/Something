@@ -6,6 +6,7 @@ import Link from "next/link"
 import { TrendingUp, MessageSquare, DollarSign, Layers, ArrowRight, RefreshCw } from "lucide-react"
 import { ConciergeRail } from "@/components/concierge-rail"
 import { cn } from "@/lib/utils"
+import { OnboardingModal } from "@/components/onboarding-modal"
 
 // ── Types ─────────────────────────────────────────────────────────────────
 interface KpiData {
@@ -43,13 +44,13 @@ const MOCK_DATA: InvestorDashboardData = {
     unreadChats:      5,
   },
   pipeline: [
-    { id: "1", name: "Local‑first notes app",     stage: "assess"   },
-    { id: "2", name: "DePIN sensor mesh",          stage: "assess"   },
-    { id: "3", name: "Neurotech IDE",              stage: "assess"   },
-    { id: "4", name: "Edge AI vision kit",         stage: "match"    },
-    { id: "5", name: "Climate hardware v1",        stage: "match"    },
-    { id: "6", name: "Creator infra sync",         stage: "mobilize" },
-    { id: "7", name: "Robotics firmware co‑pilot", stage: "mobilize" },
+    { id: "p3", name: "Local‑first Creator Analytics", stage: "assess"   },
+    { id: "p5", name: "DePIN Sensor Mesh",             stage: "assess"   },
+    { id: "p4", name: "Neurotech IDE",                 stage: "assess"   },
+    { id: "p1", name: "Edge Vision Kit",               stage: "match"    },
+    { id: "p2", name: "Climate Hardware v1",           stage: "match"    },
+    { id: "p3", name: "Local‑first Creator Analytics", stage: "mobilize" },
+    { id: "p1", name: "Edge Vision Kit",               stage: "mobilize" },
   ],
   recentActivity: [
     { id: "1", description: "Milestone #2 accepted — Edge AI vision kit",          timestamp: "2h ago"  },
@@ -138,6 +139,17 @@ export default function InvestorOverviewPage() {
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState<string | null>(null)
 
+  // Onboarding
+  const [onboardingPlan, setOnboardingPlan] = useState("nothing")
+  const [onboardingName, setOnboardingName] = useState("Investor")
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setOnboardingPlan(localStorage.getItem("selected_plan") || "nothing")
+      setOnboardingName(localStorage.getItem("demo_name") || "Investor")
+    }
+  }, [])
+
   useEffect(() => { fetchData() }, [])
 
   const fetchData = async () => {
@@ -161,6 +173,8 @@ export default function InvestorOverviewPage() {
 
   return (
     <div className="w-full pt-6 pb-24 px-6 xl:px-10">
+      {/* Onboarding modal — only shows once for new signups */}
+      <OnboardingModal role="investor" plan={onboardingPlan} userName={onboardingName} />
       <div className="flex flex-col lg:flex-row gap-10 xl:gap-14">
         {/* ── Main column ── */}
         <div className="min-w-0 flex-1 space-y-12">
@@ -266,6 +280,39 @@ export default function InvestorOverviewPage() {
             </div>
           </div>
 
+          {/* ── Cohort Leaderboard ── */}
+          <div className="space-y-6 pt-4">
+            <div className="border-b border-border/[0.03] pb-4">
+              <SectionLabel>Cohort Leaderboard</SectionLabel>
+              <p className="text-xs text-muted-foreground mt-1">Top-ranked projects based on community upvote conviction.</p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {[
+                { name: "Edge Vision Kit",       upvotes: 24, rank: 1, stage: "Seed" },
+                { name: "DePIN Sensor Mesh",      upvotes: 18, rank: 2, stage: "Pre-seed" },
+                { name: "Local‑first Analytics",  upvotes: 12, rank: 3, stage: "Prototype" },
+                { name: "Neurotech IDE",          upvotes: 8,  rank: 4, stage: "Pre-seed" },
+              ].map((project) => (
+                <div
+                  key={project.name}
+                  className="flex items-center justify-between p-3.5 rounded-xl border border-border/[0.03] bg-background hover:bg-accent/20 hover:border-border/10 transition-all"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono font-bold text-foreground/35">#{project.rank}</span>
+                      <span className="text-xs font-semibold text-foreground/90">{project.name}</span>
+                    </div>
+                    <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground">{project.stage}</span>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+                    <span className="text-xs font-mono font-bold text-foreground">{project.upvotes}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* ── Activity ── */}
           <div className="space-y-6 pt-4">
             <div className="border-b border-border/[0.03] pb-4">
@@ -273,25 +320,36 @@ export default function InvestorOverviewPage() {
               <p className="text-xs text-muted-foreground mt-1">Real-time status updates and milestone confirmations.</p>
             </div>
             <ul className="divide-y divide-border/[0.03]">
-              {data.recentActivity.map((act) => (
-                <li
-                  key={act.id}
-                  className="flex items-start gap-4 py-4 hover:px-2 rounded-lg -mx-2 hover:bg-foreground/[0.01] transition-all"
-                >
-                  <span
-                    className="mt-[7px] h-1.5 w-1.5 rounded-full shrink-0"
-                    style={{ background: "var(--brand-accent)", opacity: 0.6 }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs sm:text-[13px] text-foreground/80 font-sans leading-relaxed">
-                      {act.description}
-                    </p>
-                    <span className="text-[8.5px] font-mono text-muted-foreground uppercase tracking-wider mt-1 block">
-                      {act.timestamp}
-                    </span>
-                  </div>
-                </li>
-              ))}
+              {data.recentActivity.map((act) => {
+                const getActivityHref = (desc: string) => {
+                  const lower = desc.toLowerCase()
+                  if (lower.includes("message") || lower.includes("sent")) return "/investor/chats"
+                  if (lower.includes("milestone") || lower.includes("funds released")) return "/investor/investments"
+                  if (lower.includes("suggested") || lower.includes("climate")) return "/investor/search/p2"
+                  if (lower.includes("nda") || lower.includes("neurotech")) return "/investor/search/p4"
+                  return "/investor/search"
+                }
+                return (
+                  <Link
+                    key={act.id}
+                    href={getActivityHref(act.description)}
+                    className="flex items-start gap-4 py-4 hover:px-2 rounded-lg -mx-2 hover:bg-foreground/[0.01] transition-all cursor-pointer block border border-transparent"
+                  >
+                    <span
+                      className="mt-[7px] h-1.5 w-1.5 rounded-full shrink-0"
+                      style={{ background: "var(--brand-accent)", opacity: 0.6 }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs sm:text-[13px] text-foreground/80 font-sans leading-relaxed hover:text-foreground/90">
+                        {act.description}
+                      </p>
+                      <span className="text-[8.5px] font-mono text-muted-foreground uppercase tracking-wider mt-1 block">
+                        {act.timestamp}
+                      </span>
+                    </div>
+                  </Link>
+                )
+              })}
             </ul>
           </div>
 
