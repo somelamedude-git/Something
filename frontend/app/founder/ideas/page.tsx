@@ -441,17 +441,17 @@ export default function FounderIdeasPage() {
                   {idea.title}
                 </h3>
                 {idea.isDraft && (
-                  <Badge className="bg-[#C88E72]/5 text-[#C88E72] border-[#C88E72]/10 text-[9px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full border">
+                  <Badge className="bg-[#C88E72]/5 text-[#C88E72] border-[#C88E72]/10 text-[11px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full border">
                     Draft
                   </Badge>
                 )}
               </div>
-              <p className="text-[10px] font-mono text-foreground/30 tracking-wide">by {idea.author}</p>
+              <p className="text-[11px] font-mono text-foreground/30 tracking-wide">by {idea.author}</p>
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
               <Badge
                 className={cn(
-                  "text-[9px] font-semibold tracking-wider uppercase px-2.5 py-0.5 rounded-full border",
+                  "text-[11px] font-semibold tracking-wider uppercase px-2.5 py-0.5 rounded-full border",
                   stageColors.text, stageColors.bg, stageColors.border
                 )}
               >
@@ -474,7 +474,7 @@ export default function FounderIdeasPage() {
 
           <div className="flex flex-wrap gap-1.5 pt-1">
             {idea.tags.map((tag) => (
-              <Badge key={tag} className="bg-foreground/[0.01] text-foreground/35 border-border/[0.03] text-[9px] font-mono rounded-md py-0.5 px-2">
+              <Badge key={tag} className="bg-foreground/[0.01] text-foreground/35 border-border/[0.03] text-[11px] font-mono rounded-md py-0.5 px-2">
                 #{tag}
               </Badge>
             ))}
@@ -482,7 +482,7 @@ export default function FounderIdeasPage() {
 
           {idea.lookingFor && idea.lookingFor.length > 0 && (
             <div className="flex items-center gap-2 pt-1.5">
-              <span className="text-[9px] text-foreground/30 font-semibold uppercase tracking-widest font-mono">Looking for:</span>
+              <span className="text-[11px] text-foreground/30 font-semibold uppercase tracking-widest font-mono">Looking for:</span>
               <div className="flex flex-wrap gap-1.5">
                 {idea.lookingFor.map((item) => (
                   <Badge
@@ -518,7 +518,7 @@ export default function FounderIdeasPage() {
           <Button
             variant="outline"
             onClick={() => handleViewClick(idea)}
-            className="h-7 text-[10px] font-semibold rounded-full border-border/10 text-foreground/70 hover:bg-foreground/5 hover:text-foreground transition-all px-4 cursor-pointer bg-transparent"
+            className="h-7 text-[11px] font-semibold rounded-full border-border/10 text-foreground/70 hover:bg-foreground/5 hover:text-foreground transition-all px-4 cursor-pointer bg-transparent"
           >
             {idea.isYours ? "Share" : "Explore"}
           </Button>
@@ -595,7 +595,7 @@ export default function FounderIdeasPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Stage Filter */}
               <div className="space-y-2">
-                <span className="text-[9px] uppercase tracking-[0.15em] text-foreground/30 font-semibold font-mono block">Project Stage</span>
+                <span className="text-[11px] uppercase tracking-[0.15em] text-foreground/30 font-semibold font-mono block">Project Stage</span>
                 <div className="flex flex-wrap gap-1.5">
                   {["all", "concept", "prototype", "mvp", "launched"].map((stageOpt) => (
                     <button
@@ -616,7 +616,7 @@ export default function FounderIdeasPage() {
 
               {/* Sorting Filter */}
               <div className="space-y-2">
-                <span className="text-[9px] uppercase tracking-[0.15em] text-foreground/30 font-semibold font-mono block">Sort Criteria</span>
+                <span className="text-[11px] uppercase tracking-[0.15em] text-foreground/30 font-semibold font-mono block">Sort Criteria</span>
                 <div className="flex flex-wrap gap-1.5">
                   {[
                     { key: "newest", label: "Newest Releases" },
