@@ -319,7 +319,7 @@ export function PostIdeaModal({
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
                   <Label htmlFor="title" className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider font-mono">Title *</Label>
-                  <span className="text-[9px] font-mono text-muted-foreground/50">{formData.title.length}/50</span>
+                  <span className="text-[11px] font-mono text-muted-foreground/50">{formData.title.length}/50</span>
                 </div>
                 <Input
                   id="title"
@@ -341,7 +341,7 @@ export function PostIdeaModal({
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
                   <Label htmlFor="description" className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider font-mono">Description *</Label>
-                  <span className="text-[9px] font-mono text-muted-foreground/50">{formData.description.length}/500</span>
+                  <span className="text-[11px] font-mono text-muted-foreground/50">{formData.description.length}/500</span>
                 </div>
                 <Textarea
                   id="description"
@@ -444,7 +444,7 @@ export function PostIdeaModal({
 
                   {/* Horizontal Roles suggestions */}
                   <div className="space-y-1">
-                    <span className="text-[9px] font-mono text-muted-foreground/40 uppercase tracking-widest">Suggestions</span>
+                    <span className="text-[11px] font-mono text-muted-foreground/40 uppercase tracking-widest">Suggestions</span>
                     <div className="flex flex-nowrap gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden py-0.5">
                       {SUGGESTED_ROLES.map((role) => {
                         const isSelected = formData.lookingFor.includes(role)
@@ -454,7 +454,7 @@ export function PostIdeaModal({
                             key={role}
                             onClick={() => toggleRole(role)}
                             className={cn(
-                              "h-6 px-2.5 rounded border transition-all font-mono text-[9px] shrink-0 cursor-pointer flex items-center gap-1",
+                              "h-6 px-2.5 rounded border transition-all font-mono text-[11px] shrink-0 cursor-pointer flex items-center gap-1",
                               isSelected 
                                 ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-500 font-semibold"
                                 : "border-border/40 bg-accent/10 hover:border-border/60 hover:bg-accent/30 text-muted-foreground hover:text-foreground"
@@ -522,7 +522,7 @@ export function PostIdeaModal({
 
                   {/* Horizontal Tags suggestions */}
                   <div className="space-y-1">
-                    <span className="text-[9px] font-mono text-muted-foreground/40 uppercase tracking-widest">Suggestions</span>
+                    <span className="text-[11px] font-mono text-muted-foreground/40 uppercase tracking-widest">Suggestions</span>
                     <div className="flex flex-nowrap gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden py-0.5">
                       {SUGGESTED_TAGS.map((tag) => {
                         const isSelected = formData.tags.includes(tag)
@@ -532,7 +532,7 @@ export function PostIdeaModal({
                             key={tag}
                             onClick={() => toggleTag(tag)}
                             className={cn(
-                              "h-6 px-2.5 rounded border transition-all font-mono text-[9px] shrink-0 cursor-pointer flex items-center gap-1",
+                              "h-6 px-2.5 rounded border transition-all font-mono text-[11px] shrink-0 cursor-pointer flex items-center gap-1",
                               isSelected 
                                 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500 font-semibold"
                                 : "border-border/40 bg-accent/10 hover:border-border/60 hover:bg-accent/30 text-muted-foreground hover:text-foreground"
