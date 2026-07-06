@@ -7,11 +7,17 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ArrowLeft, MessageSquare, Heart, Loader2, AlertTriangle, ArrowBigUp, ArrowBigDown, Flag, Send, Share2 } from "lucide-react"
+import { ArrowLeft, MessageSquare, Heart, Loader2, AlertTriangle, ArrowBigUp, ArrowBigDown, Flag, Send, Share2, Download, Paperclip, Film, Volume2, FileText, Presentation } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "@/components/ui/use-toast"
 
 type Stage = "concept" | "prototype" | "mvp" | "launched"
+
+export interface Attachment {
+  name: string
+  size: string
+  type: "presentation" | "video" | "audio" | "document"
+}
 
 interface Idea {
   id: string
@@ -28,6 +34,7 @@ interface Idea {
   commentsCount: number
   flagged?: boolean
   flagReason?: string
+  attachments?: Attachment[]
 }
 
 interface Comment {
@@ -51,7 +58,11 @@ const FALLBACK_IDEAS: Record<string, Idea> = {
     lookingFor: ["Hardware engineer", "Go-to-market lead"],
     likes: 24,
     downvotes: 1,
-    commentsCount: 1
+    commentsCount: 1,
+    attachments: [
+      { name: "edge_vision_pitch.mp4", size: "24.2 MB", type: "video" },
+      { name: "edge_vision_deck.pdf", size: "4.8 MB", type: "presentation" }
+    ]
   },
   "d1": {
     id: "d1",
@@ -65,7 +76,12 @@ const FALLBACK_IDEAS: Record<string, Idea> = {
     lookingFor: ["Frontend developer", "Neuroscientist"],
     likes: 42,
     downvotes: 2,
-    commentsCount: 0
+    commentsCount: 0,
+    attachments: [
+      { name: "neurotech_ide_presentation.pptx", size: "8.1 MB", type: "presentation" },
+      { name: "neurotech_podcast_brief.mp3", size: "12.4 MB", type: "audio" },
+      { name: "neurotech_whitepaper.pdf", size: "1.2 MB", type: "document" }
+    ]
   }
 }
 
@@ -398,6 +414,127 @@ export default function IdeaDetailsPage() {
             </div>
           )}
         </div>
+
+        {/* Pitch Materials Section */}
+        {idea.attachments && idea.attachments.length > 0 && (() => {
+          const typeConfig = {
+            presentation: {
+              Icon: Presentation,
+              label: "Presentation Deck",
+              color: "text-blue-400",
+              border: "border-blue-500/20",
+              bg: "bg-blue-500/5",
+              hoverBg: "hover:bg-blue-500/10",
+              dot: "bg-blue-400",
+              badgeBg: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+            },
+            video: {
+              Icon: Film,
+              label: "Pitch Video",
+              color: "text-purple-400",
+              border: "border-purple-500/20",
+              bg: "bg-purple-500/5",
+              hoverBg: "hover:bg-purple-500/10",
+              dot: "bg-purple-400",
+              badgeBg: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+            },
+            audio: {
+              Icon: Volume2,
+              label: "Audio Pitch",
+              color: "text-amber-400",
+              border: "border-amber-500/20",
+              bg: "bg-amber-500/5",
+              hoverBg: "hover:bg-amber-500/10",
+              dot: "bg-amber-400",
+              badgeBg: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+            },
+            document: {
+              Icon: FileText,
+              label: "Document",
+              color: "text-rose-400",
+              border: "border-rose-500/20",
+              bg: "bg-rose-500/5",
+              hoverBg: "hover:bg-rose-500/10",
+              dot: "bg-rose-400",
+              badgeBg: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+            },
+          }
+          return (
+            <div className="rounded-xl border border-border/[0.03] bg-background/10 shadow-md hover:border-border/10 transition-all duration-300">
+              <div className="p-6 pb-4 flex items-center justify-between border-b border-border/[0.03]">
+                <div className="flex items-center gap-2.5">
+                  <Paperclip className="h-4 w-4 text-emerald-400" />
+                  <h3 className="text-[11px] font-mono uppercase tracking-[0.2em] text-foreground/50">
+                    Pitch Materials
+                  </h3>
+                  <span className="text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                    {idea.attachments.length} {idea.attachments.length === 1 ? "file" : "files"}
+                  </span>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {idea.attachments.map((file, idx) => {
+                    const cfg = typeConfig[file.type] ?? typeConfig.document
+                    const { Icon } = cfg
+                    return (
+                      <div
+                        key={idx}
+                        className={cn(
+                          "group relative flex flex-col gap-3 rounded-xl border p-4 transition-all duration-200 cursor-default",
+                          cfg.border, cfg.bg, cfg.hoverBg
+                        )}
+                      >
+                        {/* Header row */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className={cn(
+                            "flex items-center justify-center h-9 w-9 rounded-lg border shrink-0",
+                            cfg.border, cfg.bg
+                          )}>
+                            <Icon className={cn("h-4 w-4", cfg.color)} />
+                          </div>
+                          <span className={cn(
+                            "text-[9px] font-mono font-bold uppercase tracking-widest border rounded-full px-2 py-0.5 mt-0.5",
+                            cfg.badgeBg
+                          )}>
+                            {cfg.label}
+                          </span>
+                        </div>
+
+                        {/* File name */}
+                        <div className="min-w-0">
+                          <p className={cn("text-[12px] font-semibold font-mono truncate", cfg.color)}>
+                            {file.name}
+                          </p>
+                          <p className="text-[10px] text-foreground/35 font-mono mt-0.5">
+                            {file.size}
+                          </p>
+                        </div>
+
+                        {/* Download / Preview button */}
+                        <button
+                          onClick={() =>
+                            toast({
+                              title: "Preview Starting",
+                              description: `Opening ${file.name}…`,
+                            })
+                          }
+                          className={cn(
+                            "flex items-center justify-center gap-1.5 w-full h-8 rounded-lg border text-[10px] font-semibold font-mono uppercase tracking-wider transition-all duration-200 cursor-pointer opacity-0 group-hover:opacity-100",
+                            cfg.color, cfg.border, "hover:bg-foreground/5"
+                          )}
+                        >
+                          <Download className="h-3 w-3" />
+                          Download
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          )
+        })()}
 
         {/* Author & Voting Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
