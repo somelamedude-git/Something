@@ -139,7 +139,7 @@ export default function FounderOverviewPage() {
   const fundsRaw  = parseInt(kpis.fundsRaised.replace(/[^0-9]/g, "")) || 0
 
   return (
-    <div className="w-full py-6 px-1 sm:px-2 md:px-4">
+    <div className="w-full pt-6 pb-24 px-6 xl:px-10 space-y-12">
       {/* Onboarding modal — only shows once for new signups */}
       <OnboardingModal role="founder" plan={onboardingPlan} userName={onboardingName} />
 
@@ -233,7 +233,7 @@ export default function FounderOverviewPage() {
       </div>
 
       {/* ── KPI Stats Cards Grid ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
         <KpiStatCard label="Funds raised" rawValue={fundsRaw} isCurrency sub="+$4,400 this week" icon={Coins} />
         <KpiStatCard label="Active ideas" rawValue={2} sub="2 in progress" icon={Lightbulb} />
         <KpiStatCard label="Team members" rawValue={3} sub="All active" icon={Users} />
@@ -241,13 +241,13 @@ export default function FounderOverviewPage() {
       </div>
 
       {/* ── Grid Layout with Breathing Space ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 xl:gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 xl:gap-14">
 
         {/* ── Left column (3/5): Escrow + Ideas ── */}
-        <div className="lg:col-span-3 space-y-8">
+        <div className="lg:col-span-3 space-y-10">
 
           {/* Milestone Escrow Pool Card */}
-          <div className="rounded-2xl border border-border/40 bg-foreground/[0.01] p-6 hover:border-border/60 hover:bg-foreground/[0.015] transition-all duration-300">
+          <div className="rounded-2xl border border-border/15 bg-card/10 backdrop-blur-xl p-8 hover:border-border/30 hover:bg-card/15 transition-all duration-300 shadow-sm hover:shadow-md">
             <div className="flex items-start justify-between gap-4 border-b border-border/5 pb-4 mb-6">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
@@ -289,14 +289,14 @@ export default function FounderOverviewPage() {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
               {[
                 { label: "Whitepaper & Specs",    amount: "$40K", done: true,  pending: false },
                 { label: "Alpha & Sync Engine",   amount: "$40K", done: false, pending: true  },
                 { label: "Security Audit & Beta", amount: "$40K", done: false, pending: false },
                 { label: "Mainnet Launch",        amount: "$80K", done: false, pending: false },
               ].map((m, i) => (
-                <div key={i} className="space-y-2.5 py-4 px-3.5 rounded-xl border border-border/[0.03] hover:border-border/[0.08] hover:bg-foreground/[0.015] transition-all">
+                <div key={i} className="space-y-3.5 py-5 px-4.5 rounded-xl border border-border/[0.03] hover:border-border/[0.08] hover:bg-foreground/[0.015] transition-all">
                   <div className="flex items-center justify-between">
                     <span className={cn("text-[10px] font-mono font-semibold",
                       m.done ? "text-foreground/75" : m.pending ? "text-[#C88E72]" : "text-foreground/18"
@@ -328,7 +328,7 @@ export default function FounderOverviewPage() {
           </div>
 
           {/* Your Ideas Card */}
-          <div className="rounded-2xl border border-border/40 bg-foreground/[0.01] p-6 hover:border-border/60 hover:bg-foreground/[0.015] transition-all duration-300">
+          <div className="rounded-2xl border border-border/15 bg-card/10 backdrop-blur-xl p-8 hover:border-border/30 hover:bg-card/15 transition-all duration-300 shadow-sm hover:shadow-md">
             <div className="flex items-start justify-between border-b border-border/5 pb-4 mb-6">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
@@ -367,7 +367,7 @@ export default function FounderOverviewPage() {
         <div className="lg:col-span-2 space-y-8">
 
           {/* Cohort Leaderboard Card */}
-          <div className="rounded-2xl border border-border/40 bg-foreground/[0.01] p-6 hover:border-border/60 hover:bg-foreground/[0.015] transition-all duration-300">
+          <div className="rounded-2xl border border-border/15 bg-card/10 backdrop-blur-xl p-8 hover:border-border/30 hover:bg-card/15 transition-all duration-300 shadow-sm hover:shadow-md">
             <div className="border-b border-border/5 pb-3 mb-5">
               <div className="flex items-center gap-2">
                 <SectionLabel>Cohort Leaderboard</SectionLabel>
@@ -423,7 +423,7 @@ export default function FounderOverviewPage() {
           </div>
 
           {/* Team Sync Card */}
-          <div className="rounded-2xl border border-border/40 bg-foreground/[0.01] p-6 hover:border-border/60 hover:bg-foreground/[0.015] transition-all duration-300">
+          <div className="rounded-2xl border border-border/15 bg-card/10 backdrop-blur-xl p-8 hover:border-border/30 hover:bg-card/15 transition-all duration-300 shadow-sm hover:shadow-md">
             <div className="border-b border-border/5 pb-3 mb-5">
               <div className="flex items-center gap-2">
                 <SectionLabel>Team synchronization</SectionLabel>
@@ -461,7 +461,7 @@ export default function FounderOverviewPage() {
           </div>
 
           {/* Recent Activity Card */}
-          <div className="rounded-2xl border border-border/40 bg-foreground/[0.01] p-6 hover:border-border/60 hover:bg-foreground/[0.015] transition-all duration-300">
+          <div className="rounded-2xl border border-border/15 bg-card/10 backdrop-blur-xl p-8 hover:border-border/30 hover:bg-card/15 transition-all duration-300 shadow-sm hover:shadow-md">
             <div className="border-b border-border/5 pb-3 mb-5">
               <div className="flex items-center gap-2">
                 <SectionLabel>Recent activity</SectionLabel>
@@ -536,7 +536,7 @@ function KpiStatCard({ label, rawValue, isCurrency, sub, icon: Icon }: {
   const count   = useCountUp(rawValue)
   const display = isCurrency ? `$${count.toLocaleString()}` : count.toString()
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-border/40 bg-foreground/[0.01] hover:bg-foreground/[0.025] hover:border-border/80 transition-all duration-300 p-5 cursor-default shadow-sm hover:shadow-md">
+    <div className="group relative overflow-hidden rounded-2xl border border-border/15 bg-card/10 backdrop-blur-xl hover:bg-card/15 hover:border-border/40 transition-all duration-300 p-6 cursor-default shadow-sm hover:shadow-md">
       <div className="flex justify-between items-center">
         <span className="text-xs text-foreground/45 font-sans font-light tracking-wide">{label}</span>
         <Icon className="h-4 w-4 text-foreground/30 group-hover:text-brand-accent transition-colors duration-300" />

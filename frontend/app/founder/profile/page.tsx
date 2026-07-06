@@ -571,7 +571,7 @@ export default function FounderProfilePage() {
   }
 
   return (
-    <div className="w-full pt-6 pb-24 px-6 xl:px-10 relative">
+    <div className="w-full pt-6 pb-24 px-6 xl:px-10 space-y-12 relative">
       
       {/* Toast Alert container */}
       <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none">
@@ -626,10 +626,10 @@ export default function FounderProfilePage() {
         </Button>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3 items-start">
+      <div className="grid gap-10 md:gap-12 md:grid-cols-3 items-start">
         
         {/* Profile left blocks (2 cols) */}
-        <div className="space-y-6 md:col-span-2">
+        <div className="space-y-10 md:col-span-2">
           
           {/* 1. Header Profile details Cardless */}
           <div className="py-6 border-b border-border/5">
@@ -801,14 +801,14 @@ export default function FounderProfilePage() {
                 <Plus className="h-3.5 w-3.5" /> Add Role
               </Button>
             </div>
-            <div className="space-y-6 relative pt-2">
+            <div className="space-y-10 relative pt-2">
               {(profile.experience || []).length > 0 ? (
                 <>
                   {/* Visual timeline connector line */}
                   <div className="absolute left-[11px] top-4 bottom-4 w-[1px] bg-foreground/5 pointer-events-none" />
 
                   {(profile.experience || []).map((exp, index) => (
-                    <div key={index} className="flex gap-4 relative group/item">
+                    <div key={index} className="flex gap-6 relative group/item">
                       <div className="size-6 rounded-full bg-background border border-border/15 text-foreground/60 grid place-items-center z-10 text-[11px] shrink-0 mt-1 font-mono font-semibold">
                         {index + 1}
                       </div>

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
@@ -163,7 +164,7 @@ export default function FounderFundingPage() {
   }
 
   return (
-    <div className="w-full pt-6 pb-24 px-6 xl:px-10">
+    <div className="w-full pt-6 pb-24 px-6 xl:px-10 space-y-12">
       {/* Sleek inline header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
         <div className="flex flex-col gap-1">
@@ -425,13 +426,13 @@ export default function FounderFundingPage() {
       </div>
 
       {/* Milestones Road Map and Timelines */}
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-10 sm:gap-12 lg:grid-cols-3">
         {/* Timeline Grid */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-8">
           <div className="border-b border-border/5 pb-3">
             <h3 className="text-sm font-semibold tracking-widest uppercase text-foreground/45 font-mono">Milestone Timeline</h3>
           </div>
-          <div className="space-y-8 relative pt-2">
+          <div className="space-y-12 relative pt-2">
             {/* Center connector line */}
             <div className="absolute left-[15px] top-6 bottom-6 w-[1px] bg-foreground/[0.03] pointer-events-none" />
 
@@ -525,6 +526,20 @@ export default function FounderFundingPage() {
                             >
                               {m.proofLink} <ExternalLink className="h-3 w-3" />
                             </a>
+                          </div>
+                        )}
+                        {isPending && (
+                          <div className="pt-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 text-[10.5px] rounded-lg border-border/40 hover:bg-accent text-foreground/70 hover:text-foreground font-mono font-medium cursor-pointer"
+                              asChild
+                            >
+                              <Link href="/founder/chats">
+                                Inquire Payout Status
+                              </Link>
+                            </Button>
                           </div>
                         )}
                       </div>

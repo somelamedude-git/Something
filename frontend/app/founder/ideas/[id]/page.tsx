@@ -7,8 +7,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ArrowLeft, MessageSquare, Heart, Loader2, AlertTriangle, ArrowBigUp, ArrowBigDown, Flag, Send } from "lucide-react"
+import { ArrowLeft, MessageSquare, Heart, Loader2, AlertTriangle, ArrowBigUp, ArrowBigDown, Flag, Send, Share2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { toast } from "@/components/ui/use-toast"
 
 type Stage = "concept" | "prototype" | "mvp" | "launched"
 
@@ -84,6 +85,16 @@ export default function IdeaDetailsPage() {
   const [commentInput, setCommentInput] = useState("")
   const [flagReasonText, setFlagReasonText] = useState("")
   const [isFlagModalOpen, setIsFlagModalOpen] = useState(false)
+
+  const handleShareClick = () => {
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(window.location.href)
+      toast({
+        title: "Link Copied",
+        description: "Project specification link copied to your clipboard.",
+      })
+    }
+  }
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -313,10 +324,17 @@ export default function IdeaDetailsPage() {
     <div className="w-full pt-6 pb-24 px-6 xl:px-10">
       <div className="max-w-5xl mx-auto space-y-8">
         
-        {/* Back Button */}
-        <div>
+        {/* Back and Share Buttons */}
+        <div className="flex items-center justify-between">
           <Button onClick={() => router.back()} variant="ghost" className="text-foreground/55 hover:text-foreground hover:bg-foreground/[0.03] rounded-full px-4 h-8 text-xs font-semibold cursor-pointer">
             <ArrowLeft className="mr-2 h-3.5 w-3.5" /> Back to workspace
+          </Button>
+          <Button
+            onClick={handleShareClick}
+            variant="outline"
+            className="text-foreground/70 hover:text-foreground border-border/40 hover:bg-foreground/[0.03] rounded-full px-4.5 h-8 text-xs font-semibold cursor-pointer flex items-center gap-1.5"
+          >
+            <Share2 className="h-3.5 w-3.5" /> Share Idea
           </Button>
         </div>
 

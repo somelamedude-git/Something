@@ -432,7 +432,7 @@ export default function FounderIdeasPage() {
     }[idea.stage] ?? { text: "text-foreground/40", bg: "bg-foreground/[0.02]", border: "border-border/[0.05]" }
 
     return (
-      <div className="py-7 transition-colors group flex flex-col justify-between gap-4 border-b border-border/[0.03] last:border-b-0">
+      <div className="py-10 transition-colors group flex flex-col justify-between gap-6 border-b border-border/[0.04] last:border-b-0">
         <div className="space-y-2.5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
@@ -528,7 +528,7 @@ export default function FounderIdeasPage() {
   }
 
   return (
-    <div className="w-full pt-6 pb-24 px-6 xl:px-10">
+    <div className="w-full pt-6 pb-24 px-6 xl:px-10 space-y-12">
       <PageHeader
         category="Ideas Workspace"
         title="Ideas & Drafts"

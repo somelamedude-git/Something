@@ -4,9 +4,17 @@ import type React from "react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, Send, ChevronLeft, MoreHorizontal, Clock, CheckCheck, Loader2 } from "lucide-react"
+import { Search, Send, ChevronLeft, MoreHorizontal, Clock, CheckCheck, Loader2, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import axios from "axios"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 type Category = "all" | "co" | "requests" | "general"
 
@@ -33,6 +41,14 @@ type Message = {
 }
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || ""
+
+const AVAILABLE_PARTICIPANTS = [
+  { name: "Ava Reynolds • Carbon Capital", category: "requests" as const, initial: "AR" },
+  { name: "Riley M. • DePIN Mesh", category: "co" as const, initial: "RM" },
+  { name: "Jane Doe • Edge Vision", category: "co" as const, initial: "JD" },
+  { name: "Mark K. • Market Analyst", category: "general" as const, initial: "MK" },
+  { name: "Copper Ventures", category: "requests" as const, initial: "CV" },
+]
 
 // ---------- Mock Initial Database ----------
 const DEFAULT_THREADS: Thread[] = [
@@ -235,6 +251,53 @@ export default function FounderChatsPage() {
   const [isLoadingThreads, setIsLoadingThreads] = useState(true)
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
+  const [isNewChatOpen, setIsNewChatOpen] = useState(false)
+  const [selectedParticipant, setSelectedParticipant] = useState(AVAILABLE_PARTICIPANTS[0].name)
+
+  const handleCreateThread = () => {
+    const part = AVAILABLE_PARTICIPANTS.find(p => p.name === selectedParticipant)
+    if (!part) return
+
+    const existing = threads.find(t => t.name === part.name)
+    if (existing) {
+      setActiveId(existing.id)
+      setIsNewChatOpen(false)
+      return
+    }
+
+    const newId = `th-new-${Date.now()}`
+    const newThread: Thread = {
+      id: newId,
+      name: part.name,
+      preview: "Conversation started.",
+      unread: 0,
+      category: part.category,
+      participants: [part.name.split("•")[0].trim(), "You"],
+      lastActive: "now",
+      isOnline: Math.random() > 0.4,
+    }
+
+    const updatedThreads = [newThread, ...threads]
+    setThreads(updatedThreads)
+    setStoredThreads(updatedThreads)
+
+    const updatedMessages = getStoredMessages()
+    updatedMessages[newId] = [
+      {
+        id: `m-init-${Date.now()}`,
+        from: "them",
+        text: `Hello! Let's coordinate here.`,
+        when: "now",
+        timestamp: Date.now(),
+        seen: true,
+        delivered: true,
+      }
+    ]
+    setStoredMessages(updatedMessages)
+    setMessagesByThread(prev => ({ ...prev, [newId]: updatedMessages[newId] }))
+    setActiveId(newId)
+    setIsNewChatOpen(false)
+  }
 
   const changeThreadCategory = (cat: Exclude<Category, "all">) => {
     if (!activeId) return
@@ -571,7 +634,14 @@ export default function FounderChatsPage() {
           <h2 className="text-2xl font-serif font-light text-foreground leading-tight">Chats & Synchronization</h2>
           <p className="text-foreground/40 text-xs font-sans font-light leading-relaxed">Coordinate in real-time with team co-founders, advisory boards, and review committee investors.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
+          <Button
+            onClick={() => setIsNewChatOpen(true)}
+            className="rounded-full text-xs font-semibold px-4.5 py-2 bg-foreground text-background hover:bg-brand-accent hover:text-background transition-all duration-300 active:scale-[0.98] cursor-pointer h-8.5 flex items-center gap-1.5 shrink-0"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            New Chat
+          </Button>
           <Button
             variant="outline"
             onClick={() => {
@@ -591,10 +661,10 @@ export default function FounderChatsPage() {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[320px_minmax(0,1fr)] gap-4 lg:gap-6">
+      <div className="grid lg:grid-cols-[320px_minmax(0,1fr)] gap-8 lg:gap-10">
         {/* Left Side: Threads panel */}
         <section className={cn("lg:block", showOnlyChatOnMobile ? "hidden" : "block")}>
-          <div className="rounded-xl border border-border/[0.03] bg-background/10 p-4 flex flex-col h-[600px] lg:h-[700px] shadow-lg">
+          <div className="rounded-2xl border border-border/15 bg-card/10 backdrop-blur-xl p-5 flex flex-col h-[600px] lg:h-[700px] shadow-md">
             <div className="flex flex-col gap-2 mb-4">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-foreground/30" />
@@ -693,7 +763,7 @@ export default function FounderChatsPage() {
 
         {/* Right Side: Message pane */}
         <section className={cn("lg:block", showOnlyListOnMobile ? "hidden" : "block")}>
-          <div className="rounded-xl border border-border/[0.03] bg-background/10 overflow-hidden flex flex-col h-[600px] lg:h-[700px] shadow-lg">
+          <div className="rounded-2xl border border-border/15 bg-card/10 backdrop-blur-xl overflow-hidden flex flex-col h-[600px] lg:h-[700px] shadow-md">
             {/* Thread Header */}
             <div className="flex h-14 items-center gap-3 px-4 border-b border-border/[0.03] bg-background/10">
               <button
@@ -900,6 +970,58 @@ export default function FounderChatsPage() {
           </div>
         </section>
       </div>
+
+      {/* New Chat Dialog */}
+      <Dialog open={isNewChatOpen} onOpenChange={setIsNewChatOpen}>
+        <DialogContent className="bg-popover/95 backdrop-blur-2xl border border-border/[0.08] text-foreground rounded-2xl max-w-md shadow-2xl p-6">
+          <DialogHeader className="border-b border-border/5 pb-3">
+            <DialogTitle className="text-lg font-serif font-light text-foreground">
+              Start a New Chat
+            </DialogTitle>
+            <DialogDescription className="text-foreground/45 text-xs mt-1">
+              Select a participant from the directory to start a new sync conversation thread.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-1.5">
+              <label htmlFor="participant-select" className="text-[11px] text-foreground/50 font-semibold uppercase tracking-wider font-mono block">
+                Select Contact
+              </label>
+              <select
+                id="participant-select"
+                value={selectedParticipant}
+                onChange={(e) => setSelectedParticipant(e.target.value)}
+                className="w-full h-9 rounded-lg bg-background/50 border border-border/20 px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-[var(--brand-accent)] focus:border-[var(--brand-accent)] cursor-pointer font-sans"
+              >
+                {AVAILABLE_PARTICIPANTS.map((p) => (
+                  <option key={p.name} value={p.name} className="bg-[#0c0d0f]">
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <DialogFooter className="pt-3 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsNewChatOpen(false)}
+              className="border-border/10 text-foreground hover:bg-foreground/5 text-xs font-semibold rounded-lg h-8 px-4 bg-transparent cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleCreateThread}
+              className="bg-primary text-primary-foreground hover:opacity-90 text-xs font-semibold h-8 px-4 rounded-lg cursor-pointer"
+            >
+              Start Chat
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

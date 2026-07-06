@@ -255,7 +255,7 @@ export default function FounderProblemsPage() {
   })
 
   return (
-    <div className="w-full pt-6 pb-24 px-6 xl:px-10 max-w-4xl mx-auto space-y-8 relative">
+    <div className="w-full pt-6 pb-24 px-6 xl:px-10 space-y-12 relative">
       
       {/* Background Ambient Glows */}
       <div className="pointer-events-none absolute -top-12 left-1/4 w-[400px] h-[400px] rounded-full bg-[#34D399]/[0.02] blur-[100px] z-0" />
@@ -275,7 +275,7 @@ export default function FounderProblemsPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-10 sm:gap-12 items-start">
         
         {/* Main Feed Column */}
         <div className="md:col-span-8 space-y-6">
@@ -292,7 +292,7 @@ export default function FounderProblemsPage() {
                   placeholder="What technical problem or market friction are you facing?"
                   value={newText}
                   onChange={(e) => setNewText(e.target.value.slice(0, 280))}
-                  className="bg-transparent border-0 focus-visible:ring-0 p-0 text-xs sm:text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/45 resize-none min-h-[80px] font-sans font-light"
+                  className="bg-muted/15 border border-border/20 focus-visible:ring-1 focus-visible:ring-[var(--brand-accent)]/20 focus-visible:border-[var(--brand-accent)]/30 p-3 text-xs sm:text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/45 resize-none min-h-[80px] font-sans font-light rounded-xl"
                 />
                 
                 {/* Character Counter */}
@@ -342,7 +342,7 @@ export default function FounderProblemsPage() {
                 <div
                   key={p.id}
                   className={cn(
-                    "rounded-2xl border border-border/40 bg-card/45 p-6 transition-all duration-300 space-y-4 hover:border-border/60 hover:bg-card/75 hover:shadow-sm relative overflow-hidden",
+                    "rounded-2xl border border-border/15 bg-card/10 backdrop-blur-xl p-8 transition-all duration-300 space-y-6 hover:border-border/35 hover:bg-card/15 hover:shadow-md relative overflow-hidden",
                     p.flagged && "opacity-60 border-rose-500/10 bg-rose-500/[0.005]"
                   )}
                 >

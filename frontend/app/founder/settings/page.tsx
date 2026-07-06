@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/components/auth-provider"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -157,6 +159,8 @@ const ACCENTS = {
 }
 
 export default function FounderSettingsPage() {
+  const router = useRouter()
+  const { logout } = useAuth()
   const [activeTab, setActiveTab] = useState<Tab>("profile")
   const [accentKey, setAccentKey] = useState<keyof typeof ACCENTS>("emerald")
 
@@ -408,6 +412,17 @@ export default function FounderSettingsPage() {
       setIsDeleteOpen(false)
       setConfirmEmail("")
       setWipeLogs([])
+      // Clear local storage keys
+      localStorage.removeItem("founder_profile_data")
+      localStorage.removeItem("founder_settings_accent")
+      localStorage.removeItem("founder_milestones")
+      localStorage.removeItem("problems_list")
+      localStorage.removeItem("founder_your_ideas")
+      localStorage.removeItem("founder_discover_ideas")
+      localStorage.removeItem("token")
+      localStorage.removeItem("user")
+      logout()
+      router.push("/login")
       addToast("Developer Node Destroyed", "All configurations and keys permanently wiped.", "error")
     }, 2800)
   }
@@ -499,7 +514,7 @@ export default function FounderSettingsPage() {
         <p className="text-foreground/40 text-xs font-sans font-light leading-relaxed">Personalize your identity aesthetic, configure visibility nodes, manage credentials, and set notification thresholds.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-12 mt-8 items-start">
         
         {/* Left Side: Sidebar Control & Accent Choice */}
         <div className="lg:col-span-3 space-y-6">
@@ -567,7 +582,7 @@ export default function FounderSettingsPage() {
         </div>
 
         {/* Right Side: Tab Contents Panel */}
-        <div className="lg:col-span-9 lg:border-l lg:border-border/5 lg:pl-8 lg:pt-1 min-h-[500px]">
+        <div className="lg:col-span-9 lg:border-l lg:border-border/10 lg:pl-10 lg:pt-1 min-h-[500px]">
           
           {activeTab === "profile" && (
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 xl:divide-x xl:divide-white/5 items-start">

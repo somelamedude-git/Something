@@ -3,6 +3,7 @@
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Loader2,
@@ -13,6 +14,7 @@ import {
   BrainCircuit,
   Scale,
   FileSearch,
+  RefreshCw,
 } from "lucide-react"
 import MutinyResults from "@/components/mutiny-results"
 import { queryMutiny, type MutinyResponse, type MutinyMode } from "@/lib/mock-mutiny"
@@ -262,22 +264,60 @@ export default function FounderMutinyPage() {
   }
 
   return (
-    <div className="w-full h-[calc(100vh-8rem)] flex flex-col min-h-0 select-none pb-2">
+    <div className="w-full h-[calc(100vh-8rem)] pt-6 pb-24 px-6 xl:px-10 flex flex-col min-h-0 select-none pb-2 relative overflow-hidden">
       
+      {/* Cosmic/Space Starfield & Gravity Grid Backdrop */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-40">
+        <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="8%" cy="12%" r="1" fill="#fff" className="animate-pulse" />
+          <circle cx="18%" cy="32%" r="1.5" fill="#fff" className="animate-ping" style={{ animationDuration: "3s" }} />
+          <circle cx="48%" cy="27%" r="1" fill="#fff" className="animate-pulse" style={{ animationDuration: "2s" }} />
+          <circle cx="88%" cy="17%" r="1.2" fill="#fff" className="animate-pulse" style={{ animationDuration: "4s" }} />
+          <circle cx="98%" cy="47%" r="1.5" fill="#fff" className="animate-ping" style={{ animationDuration: "5s" }} />
+          <circle cx="38%" cy="77%" r="1" fill="#fff" className="animate-pulse" style={{ animationDuration: "2.5s" }} />
+          <circle cx="78%" cy="87%" r="1.3" fill="#fff" className="animate-pulse" style={{ animationDuration: "3.5s" }} />
+          <circle cx="22%" cy="92%" r="1" fill="#fff" className="animate-ping" style={{ animationDuration: "6s" }} />
+          <circle cx="67%" cy="62%" r="1.2" fill="#fff" className="animate-pulse" style={{ animationDuration: "4.5s" }} />
+          
+          {/* Gravitational Field & Trajectory Orbit Lines */}
+          <circle cx="50%" cy="50%" r="220" fill="none" stroke="rgba(255,255,255,0.015)" strokeWidth="1" strokeDasharray="5,5" />
+          <circle cx="50%" cy="50%" r="380" fill="none" stroke="rgba(255,255,255,0.01)" strokeWidth="1" />
+          <path d="M 50% 10% L 50% 90% M 10% 50% L 90% 50%" stroke="rgba(255,255,255,0.008)" strokeWidth="1" strokeDasharray="3,6" />
+        </svg>
+      </div>
+
+      {/* Cosmic Nebulae Glows */}
+      <div className="pointer-events-none absolute top-12 left-1/4 w-[500px] h-[500px] rounded-full bg-violet-600/[0.03] blur-[120px] z-0" />
+      <div className="pointer-events-none absolute bottom-12 right-1/4 w-[600px] h-[600px] rounded-full bg-blue-500/[0.03] blur-[150px] z-0" />
+      <div className="pointer-events-none absolute top-1/3 right-10 w-[400px] h-[400px] rounded-full bg-amber-500/[0.02] blur-[100px] z-0" />
+
       {/* Minimal header title */}
-      <div className="flex flex-col gap-1 pb-3 border-b border-border/[0.03] shrink-0 pt-1">
-        <h2 className="text-xl font-serif font-light tracking-tight text-foreground leading-tight">Nothing & Something</h2>
-        <p className="text-foreground/70 dark:text-foreground/45 text-[11px] font-sans font-light leading-relaxed">Stress-test milestone and conviction nodes against doubt critique rulesets.</p>
+      <div className="flex items-center justify-between pb-3 border-b border-border/[0.03] shrink-0 pt-1 relative z-10">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-xl font-serif font-light tracking-tight text-foreground leading-tight">Nothing & Something</h2>
+          <p className="text-foreground/70 dark:text-foreground/45 text-[11px] font-sans font-light leading-relaxed">Stress-test milestone and conviction nodes against doubt critique rulesets.</p>
+        </div>
+        {messages.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setMessages([])}
+            className="h-8 rounded-lg border-border/40 hover:bg-accent text-xs font-semibold cursor-pointer text-foreground/70 hover:text-foreground transition-all shrink-0 flex items-center gap-1.5"
+          >
+            <RefreshCw className="h-3 w-3" />
+            Reset Session
+          </Button>
+        )}
       </div>
 
       {/* Split Layout Workspace */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 flex-1 min-h-0 mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 sm:gap-12 flex-1 min-h-0 mt-6">
         
         {/* LEFT COLUMN: Reference Sidepanel with 2 distinct cards (2/5 width) */}
-        <div className="lg:col-span-2 flex flex-col min-h-0 border-r border-border/10 pr-6 overflow-y-auto scrollbar-thin space-y-6">
+        <div className="lg:col-span-2 flex flex-col min-h-0 border-r border-border/10 pr-8 overflow-y-auto scrollbar-thin space-y-8">
           
           {/* Card 1: Assume Nothing Report */}
-          <div className="rounded-2xl border border-[#C88E72]/30 dark:border-[#C88E72]/15 bg-[#C88E72]/[0.02] dark:bg-[#C88E72]/[0.01] p-5 space-y-4 shadow-sm shrink-0">
+          <div className="rounded-2xl border border-[#C88E72]/20 dark:border-[#C88E72]/10 bg-[#C88E72]/[0.015] dark:bg-[#C88E72]/[0.005] p-7 space-y-6 shadow-sm shrink-0">
             <div className="flex items-center justify-between border-b border-[#C88E72]/20 dark:border-[#C88E72]/10 pb-3">
               <div className="space-y-1">
                 <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-[#C88E72] flex items-center gap-1.5 font-bold">
@@ -314,7 +354,7 @@ export default function FounderMutinyPage() {
           </div>
 
           {/* Card 2: Conviction Rulesets */}
-          <div className="rounded-2xl border border-border/30 dark:border-border/10 bg-muted/[0.04] dark:bg-foreground/[0.01] p-5 space-y-4 shadow-sm shrink-0">
+          <div className="rounded-2xl border border-border/15 dark:border-border/5 bg-card/10 backdrop-blur-xl p-7 space-y-6 shadow-sm shrink-0">
             <div className="flex items-center justify-between border-b border-border/20 dark:border-border/5 pb-3">
               <div className="space-y-1">
                 <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-brand-accent flex items-center gap-1.5 font-bold">
@@ -356,14 +396,14 @@ export default function FounderMutinyPage() {
             {messages.length === 0 ? (
               
               /* Centered Claude Welcome Screen inside Chat pane */
-              <div className="space-y-8 py-8 max-w-xl mx-auto text-center animate-fade-in">
+              <div className="space-y-8 py-8 max-w-3xl mx-auto text-center animate-fade-in">
                 <div className="flex flex-col items-center justify-center space-y-3">
                   <div className="size-11 rounded-full border border-border/10 dark:border-border/[0.04] bg-foreground/[0.01] flex items-center justify-center shadow-inner">
                     <BrainCircuit className="h-4.5 w-4.5 text-foreground/45 dark:text-foreground/35" />
                   </div>
                   <div className="space-y-1.5">
                     <h3 className="text-lg sm:text-xl font-serif font-light text-foreground tracking-tight">How can I challenge your idea?</h3>
-                    <p className="text-foreground/65 dark:text-foreground/40 text-[11px] max-w-xs mx-auto leading-relaxed font-sans font-light">
+                    <p className="text-foreground/65 dark:text-foreground/40 text-[11px] max-w-md mx-auto leading-relaxed font-sans font-light">
                       Type a concept to audit its co-founder matches, investor alignments, or potential friction points.
                     </p>
                   </div>

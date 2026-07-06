@@ -444,7 +444,7 @@ export default function FounderLayout({ children }: { children: React.ReactNode 
           </header>
         </Suspense>
 
-        <div className="flex-1 p-4 sm:p-6 animate-fade-up">
+        <div className="flex-1 animate-fade-up w-full flex flex-col">
           <RequireAuth>
             {children}
           </RequireAuth>
