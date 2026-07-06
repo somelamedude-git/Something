@@ -19,10 +19,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Plus, X, Trash2, Lightbulb, Cpu, Rocket, Globe, Check } from "lucide-react"
+import { Plus, X, Trash2, Lightbulb, Cpu, Rocket, Globe, Check, Paperclip, Film, Volume2, FileText, Presentation } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type Stage = "concept" | "prototype" | "mvp" | "launched"
+
+export interface Attachment {
+  name: string
+  size: string
+  type: "presentation" | "video" | "audio" | "document"
+}
 
 interface IdeaFormData {
   title: string
@@ -31,6 +37,7 @@ interface IdeaFormData {
   lookingFor: string[]
   tags: string[]
   isDraft: boolean
+  attachments?: Attachment[]
 }
 
 interface Idea {
@@ -42,6 +49,7 @@ interface Idea {
   lookingFor?: string[]
   tags: string[]
   isDraft?: boolean
+  attachments?: Attachment[]
 }
 
 interface PostIdeaModalProps {
@@ -139,6 +147,7 @@ export function PostIdeaModal({
     lookingFor: [],
     tags: [],
     isDraft: false,
+    attachments: [],
   })
   const [newRole, setNewRole] = useState("")
   const [newTag, setNewTag] = useState("")
@@ -155,6 +164,7 @@ export function PostIdeaModal({
         lookingFor: editingIdea.lookingFor || [],
         tags: editingIdea.tags || [],
         isDraft: editingIdea.isDraft || false,
+        attachments: editingIdea.attachments || [],
       })
     } else {
       setFormData({
@@ -164,6 +174,7 @@ export function PostIdeaModal({
         lookingFor: [],
         tags: [],
         isDraft: false,
+        attachments: [],
       })
     }
   }, [editingIdea, isOpen])
@@ -174,6 +185,58 @@ export function PostIdeaModal({
     } else {
       setInternalOpen(open)
     }
+  }
+
+  const handleFileUpload = (
+    type: "presentation" | "video" | "audio" | "document",
+    files: FileList | null
+  ) => {
+    if (!files) return
+    const fileList = Array.from(files)
+    
+    // Check for ZIP files
+    const hasZip = fileList.some(
+      (file) =>
+        file.name.toLowerCase().endsWith(".zip") ||
+        file.type === "application/zip" ||
+        file.type === "application/x-zip-compressed"
+    )
+    if (hasZip) {
+      alert("ZIP files are not allowed for pitch materials.")
+      return
+    }
+
+    const newAttachments = [...(formData.attachments || [])]
+
+    fileList.forEach((file) => {
+      // Format file size
+      let sizeStr = "0 KB"
+      if (file.size > 1024 * 1024) {
+        sizeStr = `${(file.size / (1024 * 1024)).toFixed(1)} MB`
+      } else if (file.size > 1024) {
+        sizeStr = `${(file.size / 1024).toFixed(0)} KB`
+      } else {
+        sizeStr = `${file.size} B`
+      }
+
+      newAttachments.push({
+        name: file.name,
+        size: sizeStr,
+        type,
+      })
+    })
+
+    setFormData((prev) => ({
+      ...prev,
+      attachments: newAttachments,
+    }))
+  }
+
+  const removeAttachment = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      attachments: prev.attachments?.filter((_, i) => i !== index) || [],
+    }))
   }
 
   const handleSubmit = (isDraft: boolean): void => {
@@ -192,6 +255,7 @@ export function PostIdeaModal({
       lookingFor: [],
       tags: [],
       isDraft: false,
+      attachments: [],
     })
 
     handleOpenChange(false)
@@ -565,7 +629,114 @@ export function PostIdeaModal({
                   )}
                 </div>
               </div>
+            </div>
 
+            {/* Pitch & Supporting Materials Section */}
+            <div className="space-y-3 pt-4 border-t border-border/10">
+              <div className="flex items-center gap-2">
+                <Paperclip className="h-4 w-4 text-emerald-400" />
+                <Label className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider font-mono">Pitch Materials (No ZIP allowed)</Label>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {/* 1. Presentation Deck */}
+                <div className="relative border border-border/40 bg-accent/5 hover:bg-accent/10 rounded-xl p-3 flex flex-col items-center justify-center text-center transition-all min-h-[90px]">
+                  <input
+                    type="file"
+                    accept=".pdf,.ppt,.pptx"
+                    multiple
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    onChange={(e) => handleFileUpload("presentation", e.target.files)}
+                  />
+                  <Presentation className="h-5 w-5 text-blue-400 mb-1.5" />
+                  <span className="text-[10px] font-bold text-foreground">Pitch Deck</span>
+                  <span className="text-[8px] text-muted-foreground mt-0.5 font-mono">PDF, PPT, PPTX</span>
+                </div>
+
+                {/* 2. Pitch Video */}
+                <div className="relative border border-border/40 bg-accent/5 hover:bg-accent/10 rounded-xl p-3 flex flex-col items-center justify-center text-center transition-all min-h-[90px]">
+                  <input
+                    type="file"
+                    accept=".mp4,.mov,.webm,video/*"
+                    multiple
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    onChange={(e) => handleFileUpload("video", e.target.files)}
+                  />
+                  <Film className="h-5 w-5 text-purple-400 mb-1.5" />
+                  <span className="text-[10px] font-bold text-foreground">Pitch Video</span>
+                  <span className="text-[8px] text-muted-foreground mt-0.5 font-mono">MP4, MOV, WEBM</span>
+                </div>
+
+                {/* 3. Audio Pitch */}
+                <div className="relative border border-border/40 bg-accent/5 hover:bg-accent/10 rounded-xl p-3 flex flex-col items-center justify-center text-center transition-all min-h-[90px]">
+                  <input
+                    type="file"
+                    accept=".mp3,.wav,.m4a,audio/*"
+                    multiple
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    onChange={(e) => handleFileUpload("audio", e.target.files)}
+                  />
+                  <Volume2 className="h-5 w-5 text-amber-400 mb-1.5" />
+                  <span className="text-[10px] font-bold text-foreground">Audio Pitch</span>
+                  <span className="text-[8px] text-muted-foreground mt-0.5 font-mono">MP3, WAV, M4A</span>
+                </div>
+
+                {/* 4. Supporting Document */}
+                <div className="relative border border-border/40 bg-accent/5 hover:bg-accent/10 rounded-xl p-3 flex flex-col items-center justify-center text-center transition-all min-h-[90px]">
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx,.txt"
+                    multiple
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    onChange={(e) => handleFileUpload("document", e.target.files)}
+                  />
+                  <FileText className="h-5 w-5 text-rose-400 mb-1.5" />
+                  <span className="text-[10px] font-bold text-foreground">One-Pager / Doc</span>
+                  <span className="text-[8px] text-muted-foreground mt-0.5 font-mono">PDF, DOC, DOCX, TXT</span>
+                </div>
+              </div>
+
+              {/* Uploaded Pitches list */}
+              {formData.attachments && formData.attachments.length > 0 && (
+                <div className="space-y-2 pt-2">
+                  <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest block">Uploaded Materials ({formData.attachments.length})</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {formData.attachments.map((file, idx) => {
+                      const AttachmentIcon = {
+                        presentation: Presentation,
+                        video: Film,
+                        audio: Volume2,
+                        document: FileText,
+                      }[file.type] || Paperclip
+
+                      const colorClass = {
+                        presentation: "text-blue-400 border-blue-500/20 bg-blue-500/5",
+                        video: "text-purple-400 border-purple-500/20 bg-purple-500/5",
+                        audio: "text-amber-400 border-amber-500/20 bg-amber-500/5",
+                        document: "text-rose-400 border-rose-500/20 bg-rose-500/5",
+                      }[file.type] || "text-emerald-400 border-emerald-500/20 bg-emerald-500/5"
+
+                      return (
+                        <div key={idx} className={cn("flex items-center justify-between border rounded-lg px-3 py-2 text-xs", colorClass)}>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <AttachmentIcon className="h-3.5 w-3.5 shrink-0" />
+                            <span className="truncate font-mono text-[11px] font-medium">{file.name}</span>
+                            <span className="text-[9px] opacity-60 font-mono">({file.size})</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeAttachment(idx)}
+                            className="p-1 rounded hover:bg-foreground/10 text-inherit cursor-pointer shrink-0"
+                            aria-label={`Remove ${file.name}`}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
           </div>
