@@ -299,7 +299,7 @@ export default function ProjectBriefPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1100px] space-y-8 pb-16">
+    <div className="w-full pt-6 pb-24 px-6 xl:px-10 space-y-12">
 
       {/* Back button */}
       <div className="pt-2">
@@ -660,7 +660,7 @@ export default function ProjectBriefPage() {
 
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
-    <div className="bg-background p-5 hover:bg-accent/30 transition-colors">
+    <div className="bg-card/10 backdrop-blur-xl p-6 hover:bg-card/15 transition-colors">
       <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-1.5">{label}</div>
       <div className="text-lg font-serif font-light text-foreground tracking-tight">
         {value}{hint ? <span className="ml-1 text-xs text-muted-foreground">{hint}</span> : null}

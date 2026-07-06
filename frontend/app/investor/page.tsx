@@ -177,7 +177,7 @@ export default function InvestorOverviewPage() {
       <OnboardingModal role="investor" plan={onboardingPlan} userName={onboardingName} />
       <div className="flex flex-col lg:flex-row gap-10 xl:gap-14">
         {/* ── Main column ── */}
-        <div className="min-w-0 flex-1 space-y-12">
+        <div className="min-w-0 flex-1 space-y-16">
 
           {/* Page header */}
           <div className="space-y-1.5 pb-2">
@@ -227,7 +227,7 @@ export default function InvestorOverviewPage() {
           </div>
 
           {/* ── Pipeline ── */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div className="flex items-baseline justify-between border-b border-border/[0.03] pb-4">
               <div className="space-y-1">
                 <SectionLabel>Investment pipeline</SectionLabel>
@@ -241,9 +241,9 @@ export default function InvestorOverviewPage() {
               </Link>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-3">
+            <div className="grid gap-8 lg:gap-10 sm:grid-cols-3">
               {STAGE_CONFIG.map(({ key, label, desc }) => (
-                <div key={key} className="space-y-4">
+                <div key={key} className="space-y-6">
                   <div className="flex items-center justify-between pb-2 border-b border-border/10">
                     <div className="flex items-center gap-2">
                       <span
@@ -258,12 +258,12 @@ export default function InvestorOverviewPage() {
                       {desc}
                     </span>
                   </div>
-                  <ul className="space-y-2">
+                  <ul className="space-y-3">
                     {byStage[key].map(p => (
                       <li key={p.id}>
                         <Link
                           href={`/investor/search/${p.id}`}
-                          className="block px-3.5 py-3 text-xs text-foreground/80 hover:text-foreground rounded-lg border border-border/[0.04] hover:border-border/15 hover:bg-foreground/[0.01] transition-all font-sans"
+                          className="block px-4.5 py-4 text-xs text-foreground/80 hover:text-foreground rounded-lg border border-border/15 bg-card/10 backdrop-blur-xl hover:bg-card/15 hover:border-border/30 transition-all font-sans shadow-sm"
                         >
                           {p.name}
                         </Link>
@@ -281,12 +281,12 @@ export default function InvestorOverviewPage() {
           </div>
 
           {/* ── Cohort Leaderboard ── */}
-          <div className="space-y-6 pt-4">
+          <div className="space-y-8 pt-6">
             <div className="border-b border-border/[0.03] pb-4">
               <SectionLabel>Cohort Leaderboard</SectionLabel>
               <p className="text-xs text-muted-foreground mt-1">Top-ranked projects based on community upvote conviction.</p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
               {[
                 { name: "Edge Vision Kit",       upvotes: 24, rank: 1, stage: "Seed" },
                 { name: "DePIN Sensor Mesh",      upvotes: 18, rank: 2, stage: "Pre-seed" },
@@ -295,7 +295,7 @@ export default function InvestorOverviewPage() {
               ].map((project) => (
                 <div
                   key={project.name}
-                  className="flex items-center justify-between p-3.5 rounded-xl border border-border/[0.03] bg-background hover:bg-accent/20 hover:border-border/10 transition-all"
+                  className="flex items-center justify-between p-5 rounded-2xl border border-border/15 bg-card/10 backdrop-blur-xl hover:bg-card/15 hover:border-border/30 shadow-sm hover:shadow-md transition-all duration-300"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">

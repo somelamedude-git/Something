@@ -169,7 +169,7 @@ export default function InvestorSettingsPage() {
   const activeAccent = ACCENTS[accentKey] || ACCENTS.emerald
 
   return (
-    <div className="mx-auto max-w-[900px] pb-16">
+    <div className="w-full pt-6 pb-24 px-6 xl:px-10 relative space-y-12">
       {/* Page header */}
       <div className="space-y-1 pt-2 mb-10">
         <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-muted-foreground flex items-center gap-2">
@@ -184,7 +184,7 @@ export default function InvestorSettingsPage() {
         </p>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col md:flex-row gap-10 sm:gap-12 mt-8 items-start">
         {/* Left sidebar tabs */}
         <div className="w-full md:w-48 shrink-0 space-y-6">
           <div className="space-y-1">
@@ -250,7 +250,7 @@ export default function InvestorSettingsPage() {
         </div>
 
         {/* Right content panel */}
-        <div className="flex-1 min-w-0 space-y-8">
+        <div className="flex-1 min-w-0 md:border-l md:border-border/10 md:pl-10 md:pt-1 min-h-[500px] space-y-8">
 
           {/* ── Notifications ── */}
           {activeTab === "notifications" && (

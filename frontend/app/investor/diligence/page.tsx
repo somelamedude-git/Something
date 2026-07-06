@@ -130,7 +130,7 @@ export default function DiligencePage() {
   }[accentKey] || "text-emerald-400 border-emerald-500/20 bg-emerald-500/5"
 
   return (
-    <div className="w-full pt-6 pb-24 px-6 xl:px-10 max-w-6xl mx-auto space-y-8">
+    <div className="w-full pt-6 pb-24 px-6 xl:px-10 space-y-12">
       
       {/* Header */}
       <div className="space-y-1.5 pb-2">
@@ -146,12 +146,12 @@ export default function DiligencePage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-12 items-start">
         
         {/* Left Side — Inputs */}
-        <div className="lg:col-span-5 space-y-6">
-          <Card className="bg-background/20 border-border/[0.03] backdrop-blur-xl">
-            <CardContent className="p-6 space-y-6">
+        <div className="lg:col-span-5 space-y-8">
+          <Card className="bg-card/10 border-border/15 backdrop-blur-xl">
+            <CardContent className="p-8 space-y-8">
               <div className="space-y-3">
                 <label className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground block">
                   Select Project from Dealflow

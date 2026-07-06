@@ -305,9 +305,9 @@ export default function InvestorProfilePage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px]">
+    <div className="w-full pt-6 pb-24 px-6 xl:px-10 space-y-12">
       {/* Header: Avatar • Info • Trust */}
-      <section className="rounded-xl bg-background/25 border border-border/[0.03] backdrop-blur-xl p-5">
+      <section className="rounded-2xl bg-card/10 border border-border/15 backdrop-blur-xl p-8 shadow-sm">
         <div className="grid gap-4 md:grid-cols-[auto_minmax(0,1fr)] lg:grid-cols-[auto_minmax(0,1fr)_360px] md:items-start lg:items-center">
           <div>
             <AvatarUploader
@@ -358,11 +358,11 @@ export default function InvestorProfilePage() {
       </section>
 
       {/* Body: Main left • Right rail */}
-      <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="mt-10 sm:mt-12 grid gap-10 sm:gap-12 lg:grid-cols-[minmax(0,1fr)_380px]">
         {/* Main column */}
-        <div className="min-w-0 space-y-6">
+        <div className="min-w-0 space-y-10 sm:space-y-12">
           {/* Essentials */}
-          <Card className="bg-background/25 border-border/[0.03] backdrop-blur-xl">
+          <Card className="bg-card/10 border-border/15 backdrop-blur-xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2 font-serif font-light text-foreground">
                 <UserRound className="h-4 w-4 text-muted-foreground" />
@@ -437,7 +437,7 @@ export default function InvestorProfilePage() {
           </Card>
 
           {/* Interests */}
-          <Card className="bg-background/25 border-border/[0.03] backdrop-blur-xl">
+          <Card className="bg-card/10 border-border/15 backdrop-blur-xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2 font-serif font-light text-foreground">
                 <Tag className="h-4 w-4 text-muted-foreground" />
@@ -468,7 +468,7 @@ export default function InvestorProfilePage() {
           </Card>
 
           {/* Preferences */}
-          <Card className="bg-background/25 border-border/[0.03] backdrop-blur-xl">
+          <Card className="bg-card/10 border-border/15 backdrop-blur-xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2 font-serif font-light text-foreground">
                 <Wallet className="h-4 w-4 text-muted-foreground" />
@@ -541,9 +541,9 @@ export default function InvestorProfilePage() {
         </div>
 
         {/* Right rail */}
-        <aside className="space-y-6">
+        <aside className="space-y-8">
           {/* Visibility & links */}
-          <Card className="bg-background/25 border-border/[0.03] backdrop-blur-xl">
+          <Card className="bg-card/10 border-border/15 backdrop-blur-xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2 font-serif font-light text-foreground">
                 <Link2 className="h-4 w-4 text-muted-foreground" />
@@ -598,7 +598,7 @@ export default function InvestorProfilePage() {
           </Card>
 
           {/* Portfolio snapshot */}
-          <Card className="bg-background/25 border-border/[0.03] backdrop-blur-xl">
+          <Card className="bg-card/10 border-border/15 backdrop-blur-xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-serif font-light text-foreground">Portfolio snapshot</CardTitle>
             </CardHeader>
@@ -620,7 +620,7 @@ export default function InvestorProfilePage() {
           </Card>
 
           {/* Accreditation Status */}
-          <Card className="bg-background/25 border-border/[0.03] backdrop-blur-xl">
+          <Card className="bg-card/10 border-border/15 backdrop-blur-xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2 font-serif font-light text-foreground">
                 <ShieldCheck className="h-4 w-4 text-muted-foreground" />
@@ -651,7 +651,7 @@ export default function InvestorProfilePage() {
           </Card>
 
           {/* Guidance */}
-          <Card className="bg-background/25 border-border/[0.03] backdrop-blur-xl">
+          <Card className="bg-card/10 border-border/15 backdrop-blur-xl">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-serif font-light text-foreground">Guidance</CardTitle>
             </CardHeader>

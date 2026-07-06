@@ -332,7 +332,7 @@ export default function InvestorLayout({ children }: { children: React.ReactNode
           </div>
         </header>
 
-        <div className="flex-1 p-4 sm:p-6 animate-fade-up">
+        <div className="flex-1 animate-fade-up w-full flex flex-col">
           {children}
         </div>
       </SidebarInset>

@@ -240,10 +240,10 @@ export default function InvestorInvestmentsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] pb-16">
-      <div className="flex gap-8">
+    <div className="w-full pt-6 pb-24 px-6 xl:px-10">
+      <div className="flex gap-10 sm:gap-12">
         {/* Main */}
-        <div className="min-w-0 flex-1 space-y-8">
+        <div className="min-w-0 flex-1 space-y-12">
 
           {/* Page header */}
           <div className="space-y-1 pt-2">
@@ -435,7 +435,7 @@ export default function InvestorInvestmentsPage() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-background/25 p-5 group hover:bg-accent/30 transition-colors">
+    <div className="bg-card/10 backdrop-blur-xl p-6 group hover:bg-card/15 transition-colors">
       <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mb-2">{label}</div>
       <div className="text-2xl font-serif font-light text-foreground tracking-tight">{value}</div>
     </div>

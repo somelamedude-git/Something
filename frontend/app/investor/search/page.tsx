@@ -225,7 +225,7 @@ export default function InvestorSearchPage() {
       )}
       <div className="flex flex-col lg:flex-row gap-10 xl:gap-14">
         {/* Main column */}
-        <div className="min-w-0 flex-1 space-y-8">
+        <div className="min-w-0 flex-1 space-y-12">
           
           {/* Header */}
           <div className="space-y-1.5 pb-2">
@@ -307,7 +307,7 @@ export default function InvestorSearchPage() {
               {results.map((r) => (
                 <div
                   key={r.id}
-                  className="py-5 hover:px-2 rounded-lg -mx-2 hover:bg-foreground/[0.01] transition-all duration-200"
+                  className="py-7 px-4 rounded-xl border border-transparent hover:border-border/15 hover:bg-card/10 backdrop-blur-xl transition-all duration-300"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div className="flex-1 space-y-1.5 min-w-0">

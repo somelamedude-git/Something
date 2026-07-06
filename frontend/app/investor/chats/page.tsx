@@ -5,8 +5,16 @@ import axios from "axios"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Search, Send, ChevronLeft, Clock, CheckCheck, MessageSquare, Loader2 } from "lucide-react"
+import { Search, Send, ChevronLeft, Clock, CheckCheck, MessageSquare, Loader2, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 type User = {
   id: string
@@ -35,6 +43,14 @@ type Message = {
 }
 
 const CURRENT_USER_ID = "user_self_01"
+
+const AVAILABLE_PARTICIPANTS = [
+  { id: "ava-c", name: "Ava Reynolds • Carbon Capital", initials: "AR" },
+  { id: "riley-d", name: "Riley M. • DePIN Mesh", initials: "RM" },
+  { id: "jane-e", name: "Jane Doe • Edge Vision", initials: "JD" },
+  { id: "mark-m", name: "Mark K. • Market Analyst", initials: "MK" },
+  { id: "copper-v", name: "Copper Ventures", initials: "CV" },
+]
 
 // Initial mock conversations database
 const DEFAULT_THREADS: Thread[] = [
@@ -131,6 +147,51 @@ export default function InvestorChatsPage() {
   const [isLoadingThreads, setIsLoadingThreads] = useState(true)
   const [isLoadingMessages, setIsLoadingMessages] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isNewChatOpen, setIsNewChatOpen] = useState(false)
+  const [selectedParticipant, setSelectedParticipant] = useState(AVAILABLE_PARTICIPANTS[0].name)
+
+  const handleCreateThread = () => {
+    const part = AVAILABLE_PARTICIPANTS.find(p => p.name === selectedParticipant)
+    if (!part) return
+
+    const existing = threads.find(t => t.name === part.name)
+    if (existing) {
+      setActiveId(existing.id)
+      setIsNewChatOpen(false)
+      return
+    }
+
+    const newId = `th-new-${Date.now()}`
+    const newThread: Thread = {
+      id: newId,
+      name: part.name,
+      lastMessagePreview: "Conversation started.",
+      unreadCount: 0,
+      participants: [{ id: part.id, name: part.name.split("•")[0].trim(), avatarInitials: part.initials, isOnline: true }],
+      lastActive: new Date().toISOString(),
+      isOnline: true,
+    }
+
+    const updatedThreads = [newThread, ...threads]
+    setThreads(updatedThreads)
+    localStorage.setItem("investor_threads", JSON.stringify(updatedThreads))
+
+    const storedMessagesStr = localStorage.getItem("investor_chat_messages")
+    const storedMessages = storedMessagesStr ? JSON.parse(storedMessagesStr) : {}
+    storedMessages[newId] = [
+      {
+        id: `m-init-${Date.now()}`,
+        sender: { id: part.id, name: part.name.split("•")[0].trim() },
+        text: `Hello! Let's coordinate here.`,
+        createdAt: new Date().toISOString(),
+        deliveryStatus: "seen" as const,
+      }
+    ]
+    localStorage.setItem("investor_chat_messages", JSON.stringify(storedMessages))
+    setMessagesByThread(prev => ({ ...prev, [newId]: storedMessages[newId] }))
+    setActiveId(newId)
+    setIsNewChatOpen(false)
+  }
 
   const listRef = useRef<HTMLDivElement | null>(null)
   const inputRef = useRef<HTMLTextAreaElement | null>(null)
@@ -383,11 +444,11 @@ export default function InvestorChatsPage() {
   const showOnlyChatOnMobile = !!activeThread
 
   return (
-    <div className="mx-auto w-full max-w-[1200px]">
-      <div className="grid lg:grid-cols-[320px_minmax(0,1fr)] gap-4 lg:gap-6">
+    <div className="w-full pt-6 pb-24 px-6 xl:px-10 space-y-12">
+      <div className="grid lg:grid-cols-[320px_minmax(0,1fr)] gap-8 lg:gap-10">
         {/* Threads list */}
         <section className={cn("lg:block", showOnlyChatOnMobile ? "hidden" : "block")}>
-          <div className="rounded-xl bg-background/25 border border-border/[0.03] backdrop-blur-xl p-3 sm:p-4">
+          <div className="rounded-2xl border border-border/15 bg-card/10 backdrop-blur-xl p-5 flex flex-col h-[600px] lg:h-[700px] shadow-md">
             <div className="flex items-center gap-2 mb-4">
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/40" />
@@ -398,6 +459,15 @@ export default function InvestorChatsPage() {
                   className="h-9 w-full pl-8 bg-accent/30 border-transparent text-foreground placeholder:text-foreground/40 focus:ring-1 focus:ring-[var(--brand-accent)]/30 text-xs rounded-lg"
                 />
               </div>
+              <Button
+                type="button"
+                size="icon"
+                onClick={() => setIsNewChatOpen(true)}
+                className="h-9 w-9 rounded-lg bg-foreground text-background hover:bg-[var(--brand-accent)] hover:text-background shrink-0 cursor-pointer flex items-center justify-center"
+                title="New Chat"
+              >
+                <Plus className="h-4 w-4 text-inherit" />
+              </Button>
             </div>
 
             <div className="space-y-0.5">
@@ -446,7 +516,7 @@ export default function InvestorChatsPage() {
 
         {/* Chat view */}
         <section className={cn("lg:block", showOnlyListOnMobile ? "hidden" : "block")}>
-          <div className="rounded-xl bg-background/25 border border-border/[0.03] backdrop-blur-xl overflow-hidden flex flex-col h-[600px] lg:h-[700px]">
+          <div className="rounded-2xl border border-border/15 bg-card/10 backdrop-blur-xl overflow-hidden flex flex-col h-[600px] lg:h-[700px] shadow-md">
             {/* Header */}
             <div className="flex h-14 items-center gap-3 px-3 sm:px-4 border-b border-border/40 bg-sidebar/10">
               <button className="lg:hidden" onClick={() => setActiveId(null)}><ChevronLeft className="h-5 w-5" /></button>
@@ -533,6 +603,58 @@ export default function InvestorChatsPage() {
           </div>
         </section>
       </div>
+
+      {/* New Chat Dialog */}
+      <Dialog open={isNewChatOpen} onOpenChange={setIsNewChatOpen}>
+        <DialogContent className="bg-popover/95 backdrop-blur-2xl border border-border/[0.08] text-foreground rounded-2xl max-w-md shadow-2xl p-6">
+          <DialogHeader className="border-b border-border/5 pb-3">
+            <DialogTitle className="text-lg font-serif font-light text-foreground">
+              Start a New Chat
+            </DialogTitle>
+            <DialogDescription className="text-foreground/45 text-xs mt-1">
+              Select a participant from the directory to start a new sync conversation thread.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-1.5">
+              <label htmlFor="participant-select" className="text-[11px] text-foreground/50 font-semibold uppercase tracking-wider font-mono block">
+                Select Contact
+              </label>
+              <select
+                id="participant-select"
+                value={selectedParticipant}
+                onChange={(e) => setSelectedParticipant(e.target.value)}
+                className="w-full h-9 rounded-lg bg-background/50 border border-border/20 px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-[var(--brand-accent)] focus:border-[var(--brand-accent)] cursor-pointer font-sans"
+              >
+                {AVAILABLE_PARTICIPANTS.map((p) => (
+                  <option key={p.name} value={p.name} className="bg-[#0c0d0f]">
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <DialogFooter className="pt-3 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsNewChatOpen(false)}
+              className="border-border/10 text-foreground hover:bg-foreground/5 text-xs font-semibold rounded-lg h-8 px-4 bg-transparent cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleCreateThread}
+              className="bg-primary text-primary-foreground hover:opacity-90 text-xs font-semibold h-8 px-4 rounded-lg cursor-pointer"
+            >
+              Start Chat
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
