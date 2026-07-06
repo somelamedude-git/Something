@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Search, Plus, Filter, Eye, MessageSquare, Heart, Edit, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { PostIdeaModal } from "@/components/post-idea-modal"
+import { PostIdeaModal, type Attachment } from "@/components/post-idea-modal"
 import { PageHeader } from "@/components/page-header"
 
 
@@ -34,6 +34,7 @@ interface Idea {
   description?: string
   isDraft?: boolean
   createdAt?: string
+  attachments?: Attachment[]
 }
 
 interface IdeaFormData {
@@ -43,6 +44,7 @@ interface IdeaFormData {
   stage: Stage
   lookingFor: string[]
   isDraft: boolean
+  attachments?: Attachment[]
 }
 
 // ---------- Mock Data for Offline Fallback ----------
@@ -63,6 +65,10 @@ const MOCK_YOUR_IDEAS: Idea[] = [
     lookingFor: ["Hardware engineer", "Go-to-market lead"],
     isDraft: false,
     createdAt: "2026-06-18",
+    attachments: [
+      { name: "edge_vision_pitch.mp4", size: "24.2 MB", type: "video" },
+      { name: "edge_vision_deck.pdf", size: "4.8 MB", type: "presentation" }
+    ],
   },
   {
     id: "y2",
@@ -80,6 +86,7 @@ const MOCK_YOUR_IDEAS: Idea[] = [
     lookingFor: ["Frontend developer", "Marketing advisor"],
     isDraft: false,
     createdAt: "2026-06-15",
+    attachments: [],
   }
 ]
 
@@ -97,6 +104,11 @@ const MOCK_DISCOVER_IDEAS: Idea[] = [
     views: 234,
     lookingFor: ["Frontend developer", "Neuroscientist"],
     createdAt: "2026-06-10",
+    attachments: [
+      { name: "neurotech_ide_presentation.pptx", size: "8.1 MB", type: "presentation" },
+      { name: "neurotech_podcast_brief.mp3", size: "12.4 MB", type: "audio" },
+      { name: "neurotech_whitepaper.pdf", size: "1.2 MB", type: "document" }
+    ],
   },
   {
     id: "d2",
@@ -112,6 +124,7 @@ const MOCK_DISCOVER_IDEAS: Idea[] = [
     views: 445,
     lookingFor: ["Blockchain developer", "Hardware engineer"],
     createdAt: "2026-06-08",
+    attachments: [],
   }
 ]
 
@@ -179,6 +192,7 @@ const ideasAPI = {
         lookingFor: data.lookingFor,
         isDraft: data.isDraft,
         createdAt: new Date().toISOString().split("T")[0],
+        attachments: data.attachments || [],
       }
       setLocalStorageItem("founder_your_ideas", [newIdea, ...list])
       return newIdea
@@ -208,6 +222,7 @@ const ideasAPI = {
             stage: data.stage,
             lookingFor: data.lookingFor,
             isDraft: data.isDraft,
+            attachments: data.attachments || [],
           }
           return updatedIdea
         }
@@ -443,6 +458,11 @@ export default function FounderIdeasPage() {
                 {idea.isDraft && (
                   <Badge className="bg-[#C88E72]/5 text-[#C88E72] border-[#C88E72]/10 text-[11px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full border">
                     Draft
+                  </Badge>
+                )}
+                {idea.attachments && idea.attachments.length > 0 && (
+                  <Badge className="bg-emerald-500/5 text-emerald-400 border-emerald-500/10 text-[11px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full border flex items-center gap-1 font-mono">
+                    📎 {idea.attachments.length} {idea.attachments.length === 1 ? "Pitch" : "Pitches"}
                   </Badge>
                 )}
               </div>
