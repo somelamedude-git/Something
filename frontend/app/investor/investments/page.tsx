@@ -116,6 +116,14 @@ export default function InvestorInvestmentsPage() {
     }
   }, [])
 
+  const [accreditedVerified, setAccreditedVerified] = useState(false)
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setAccreditedVerified(localStorage.getItem("investor_accredited_verified") === "true")
+    }
+  }, [])
+
   const loadMilestones = () => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("founder_milestones")
@@ -181,6 +189,10 @@ export default function InvestorInvestmentsPage() {
   }
 
   const handleApproveMilestone = (milestoneId: string, amountStr: string) => {
+    if (!accreditedVerified) {
+      alert("Accreditation self-certification is required. Please certify your status in your Profile first.")
+      return
+    }
     setApprovingId(milestoneId)
     const numericAmount = parseInt(amountStr.replace(/[^0-9]/g, "")) || 0
 
@@ -273,6 +285,18 @@ export default function InvestorInvestmentsPage() {
                 <AlertCircle className="h-4.5 w-4.5" />
                 <h3 className="text-sm font-semibold uppercase tracking-wider font-mono">Milestone Releases Pending Approval</h3>
               </div>
+
+              {!accreditedVerified && (
+                <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4 text-xs text-amber-500 font-mono flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <strong>Accreditation Certification Required:</strong> You must certify your investor accreditation status in your profile before you can release escrow pool disbursements.
+                  </div>
+                  <Button asChild size="sm" className="bg-amber-500 text-black hover:bg-amber-400 font-semibold h-8 rounded-lg shrink-0 w-full sm:w-auto">
+                    <Link href="/investor/profile">Go to Profile</Link>
+                  </Button>
+                </div>
+              )}
+
               <div className="grid gap-4">
                 {pendingMilestones.map((m) => (
                   <div key={m.id} className="rounded-lg border border-border bg-background p-4 flex flex-col md:flex-row justify-between gap-4">
