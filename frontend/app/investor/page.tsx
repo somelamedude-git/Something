@@ -34,38 +34,57 @@ interface InvestorDashboardData {
   recentActivity: Activity[]
 }
 
-// ── Config ────────────────────────────────────────────────────────────────
-
-const MOCK_DATA: InvestorDashboardData = {
-  kpis: {
-    availableBalance: "$128,400",
-    committedCapital: "$86,200",
-    activeProjects:   9,
-    unreadChats:      5,
-  },
-  pipeline: [
-    { id: "p3", name: "Local‑first Creator Analytics", stage: "assess"   },
-    { id: "p5", name: "DePIN Sensor Mesh",             stage: "assess"   },
-    { id: "p4", name: "Neurotech IDE",                 stage: "assess"   },
-    { id: "p1", name: "Edge Vision Kit",               stage: "match"    },
-    { id: "p2", name: "Climate Hardware v1",           stage: "match"    },
-    { id: "p3", name: "Local‑first Creator Analytics", stage: "mobilize" },
-    { id: "p1", name: "Edge Vision Kit",               stage: "mobilize" },
-  ],
-  recentActivity: [
-    { id: "1", description: "Milestone #2 accepted — Edge AI vision kit",          timestamp: "2h ago"  },
-    { id: "2", description: "New project suggested in Climate Hardware founders",   timestamp: "1d ago"  },
-    { id: "3", description: "Funds released — $4,000 to Engineering",              timestamp: "3d ago"  },
-    { id: "4", description: "Signed mutual NDA — Neurotech IDE",                   timestamp: "5d ago"  },
-  ],
+interface Row {
+  id: string
+  name: string
+  stage: string
+  location: string
+  trustPoints: number
+  committed: number
+  released: number
+  perf: string
+  next: string
 }
+
+interface Milestone {
+  id: string
+  title: string
+  amount: string
+  status: "Released" | "Pending Verification" | "Active" | "Locked"
+  description: string
+}
+
+const DEFAULT_PORTFOLIO: Row[] = [
+  {
+    id: "p1",
+    name: "Edge Vision Kit",
+    stage: "Seed",
+    location: "San Francisco, CA",
+    trustPoints: 85,
+    committed: 200000,
+    released: 40000,
+    perf: "Good",
+    next: "Milestone 2: Alpha Application & Sync Engine"
+  },
+  {
+    id: "p2",
+    name: "Climate Hardware v1",
+    stage: "Pre‑seed",
+    location: "Boston, MA",
+    trustPoints: 76,
+    committed: 100000,
+    released: 20000,
+    perf: "Stable",
+    next: "Milestone 1: Prototype Core Specs"
+  }
+]
 
 // ── KPI metadata ──────────────────────────────────────────────────────────
 const KPI_META = [
-  { key: "availableBalance", label: "Available balance", icon: DollarSign,    suffix: "" },
-  { key: "committedCapital", label: "Committed capital", icon: TrendingUp,    suffix: "" },
-  { key: "activeProjects",   label: "Active projects",   icon: Layers,        suffix: "" },
-  { key: "unreadChats",      label: "Unread messages",   icon: MessageSquare, suffix: "" },
+  { key: "availableBalance", label: "Available balance", icon: DollarSign },
+  { key: "committedCapital", label: "Committed capital", icon: TrendingUp },
+  { key: "activeProjects",   label: "Active projects",   icon: Layers },
+  { key: "unreadChats",      label: "Unread messages",   icon: MessageSquare },
 ]
 
 // ── Pipeline stage config ─────────────────────────────────────────────────
@@ -84,8 +103,12 @@ function useCountUp(target: number, duration = 900) {
     const inc = target / 36
     const t = setInterval(() => {
       cur += inc
-      if (cur >= target) { setCount(target); clearInterval(t) }
-      else setCount(Math.floor(cur))
+      if (cur >= target) {
+        setCount(target)
+        clearInterval(t)
+      } else {
+        setCount(Math.floor(cur))
+      }
     }, duration / 36)
     return () => clearInterval(t)
   }, [target, duration])
@@ -135,9 +158,23 @@ function KpiStat({ label, rawValue, isCurrency, icon: Icon, loading }: {
 
 // ─────────────────────────────────────────────────────────────────────────
 export default function InvestorOverviewPage() {
-  const [data,    setData]    = useState<InvestorDashboardData>(MOCK_DATA)
-  const [loading, setLoading] = useState(false)
-  const [error,   setError]   = useState<string | null>(null)
+  const [data, setData] = useState<InvestorDashboardData>({
+    kpis: {
+      availableBalance: "$1,000,000",
+      committedCapital: "$0",
+      activeProjects: 0,
+      unreadChats: 0
+    },
+    pipeline: [],
+    recentActivity: []
+  })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  
+  // Custom synced lists
+  const [interestsList, setInterestsList] = useState<string[]>([])
+  const [portfolioList, setPortfolioList] = useState<Row[]>([])
+  const [milestonesList, setMilestonesList] = useState<Milestone[]>([])
 
   // Onboarding
   const [onboardingPlan, setOnboardingPlan] = useState("nothing")
@@ -150,15 +187,112 @@ export default function InvestorOverviewPage() {
     }
   }, [])
 
-  useEffect(() => { fetchData() }, [])
+  useEffect(() => {
+    fetchData()
+
+    const syncHandler = () => {
+      fetchData()
+    }
+    window.addEventListener("founder-milestones-updated", syncHandler)
+    window.addEventListener("investor-profile-update", syncHandler)
+    return () => {
+      window.removeEventListener("founder-milestones-updated", syncHandler)
+      window.removeEventListener("investor-profile-update", syncHandler)
+    }
+  }, [])
 
   const fetchData = async () => {
     setLoading(true)
     setError(null)
     try {
-      await new Promise(r => setTimeout(r, 400))
-      setData(MOCK_DATA)
-    } catch {
+      // 1. Get profile data
+      let profileInterests = ["Climate hardware", "Edge AI", "Local‑first"]
+      let totalCapitalPool = 1000000
+      const profileStr = localStorage.getItem("investor_profile_data")
+      if (profileStr) {
+        try {
+          const parsed = JSON.parse(profileStr)
+          if (parsed.interests && parsed.interests.length > 0) {
+            profileInterests = parsed.interests
+          }
+          if (typeof parsed.totalCapitalPool !== "undefined") {
+            totalCapitalPool = Number(parsed.totalCapitalPool) || 1000000
+          }
+        } catch {}
+      }
+      setInterestsList(profileInterests)
+
+      // 2. Get portfolio data
+      let currentPortfolio = DEFAULT_PORTFOLIO
+      const portfolioStr = localStorage.getItem("investor_portfolio")
+      if (portfolioStr) {
+        try {
+          currentPortfolio = JSON.parse(portfolioStr)
+        } catch {}
+      } else {
+        localStorage.setItem("investor_portfolio", JSON.stringify(DEFAULT_PORTFOLIO))
+      }
+      setPortfolioList(currentPortfolio)
+
+      // 3. Get milestones
+      let currentMilestones: Milestone[] = []
+      const milestonesStr = localStorage.getItem("founder_milestones")
+      if (milestonesStr) {
+        try {
+          currentMilestones = JSON.parse(milestonesStr)
+        } catch {}
+      }
+      setMilestonesList(currentMilestones)
+
+      const pending = currentMilestones.filter(m => m.status === "Pending Verification")
+
+      // Calculate KPI sums
+      const totalCommitted = currentPortfolio.reduce((acc, c) => acc + c.committed, 0)
+      const totalReleased = currentPortfolio.reduce((acc, c) => acc + c.released, 0)
+      const remainingBalance = Math.max(0, totalCapitalPool - totalCommitted)
+
+      // Build dynamic pipeline based on allocation status
+      const dynamicPipeline: PipelineProject[] = currentPortfolio.map(p => {
+        let stage: "assess" | "match" | "mobilize" = "assess"
+        if (p.released > 0) {
+          stage = p.released >= p.committed ? "mobilize" : "match"
+        }
+        return {
+          id: p.id,
+          name: p.name,
+          stage
+        }
+      })
+
+      // Build dynamic activity log
+      const dynamicActivity: Activity[] = []
+      pending.forEach((m, idx) => {
+        dynamicActivity.push({
+          id: `pending-${idx}`,
+          description: `Milestone payout requested: ${m.title} — ${m.amount}`,
+          timestamp: "Just now"
+        })
+      })
+      // Add default historical events
+      dynamicActivity.push(
+        { id: "h1", description: "Milestone #2 accepted — Edge AI vision kit", timestamp: "2h ago" },
+        { id: "h2", description: "New project suggested in Climate Hardware founders", timestamp: "1d ago" },
+        { id: "h3", description: "Funds released — $4,000 to Engineering", timestamp: "3d ago" },
+        { id: "h4", description: "Signed mutual NDA — Neurotech IDE", timestamp: "5d ago" }
+      )
+
+      setData({
+        kpis: {
+          availableBalance: `$${remainingBalance.toLocaleString()}`,
+          committedCapital: `$${totalCommitted.toLocaleString()}`,
+          activeProjects: currentPortfolio.length,
+          unreadChats: pending.length > 0 ? pending.length : 3,
+        },
+        pipeline: dynamicPipeline,
+        recentActivity: dynamicActivity
+      })
+    } catch (err) {
+      console.error(err)
       setError("Failed to load dashboard data")
     } finally {
       setLoading(false)
@@ -170,6 +304,9 @@ export default function InvestorOverviewPage() {
     match:    data.pipeline.filter(p => p.stage === "match"),
     mobilize: data.pipeline.filter(p => p.stage === "mobilize"),
   }
+
+  // Filter pending milestones for Concierge passing
+  const pendingMilestonesOnly = milestonesList.filter(m => m.status === "Pending Verification")
 
   return (
     <div className="w-full pt-6 pb-24 px-6 xl:px-10">
@@ -263,7 +400,7 @@ export default function InvestorOverviewPage() {
                       <li key={p.id}>
                         <Link
                           href={`/investor/search/${p.id}`}
-                          className="block px-4.5 py-4 text-xs text-foreground/80 hover:text-foreground rounded-lg border border-border/15 bg-card/10 backdrop-blur-xl hover:bg-card/15 hover:border-border/30 transition-all font-sans shadow-sm"
+                          className="block px-4 py-3.5 text-xs text-foreground/80 hover:text-foreground rounded-lg border border-border/15 bg-card/10 backdrop-blur-xl hover:bg-card/15 hover:border-border/30 transition-all font-sans shadow-sm"
                         >
                           {p.name}
                         </Link>
@@ -356,7 +493,11 @@ export default function InvestorOverviewPage() {
         </div>
 
         {/* ── Concierge rail ── */}
-        <ConciergeRail />
+        <ConciergeRail 
+          interests={interestsList} 
+          pendingMilestones={pendingMilestonesOnly} 
+          portfolio={portfolioList} 
+        />
       </div>
     </div>
   )
